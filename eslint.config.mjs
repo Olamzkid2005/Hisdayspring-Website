@@ -1,7 +1,6 @@
 import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
-import jsxA11y from "eslint-plugin-jsx-a11y";
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -14,14 +13,10 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
   ]),
-  // Add jsx-a11y accessibility rules
+  // Additional strict accessibility rules (jsx-a11y is already included in nextVitals)
   {
-    plugins: {
-      "jsx-a11y": jsxA11y,
-    },
     rules: {
-      ...jsxA11y.configs.recommended.rules,
-      // Additional strict accessibility rules
+      // Override to error level for stricter enforcement
       "jsx-a11y/alt-text": "error",
       "jsx-a11y/anchor-has-content": "error",
       "jsx-a11y/aria-props": "error",

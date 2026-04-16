@@ -43,7 +43,7 @@ export interface PastorInfo {
   education: string[];
   ministries: string[];
   spouse?: string;
-  children?: string[];
+  children?: string;
   mentoringSchool?: string;
 }
 

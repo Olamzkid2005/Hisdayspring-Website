@@ -12,6 +12,10 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Jest files:
+    "jest.setup.ts",
+    "jest.config.ts",
+    "__tests__/**",
   ]),
   // Additional strict accessibility rules (jsx-a11y is already included in nextVitals)
   {

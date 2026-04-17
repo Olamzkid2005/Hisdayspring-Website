@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Radio, Eye, Calendar, Users } from "lucide-react";
+import { Radio, Calendar, Users } from "lucide-react";
 
 export function LiveStreamSection() {
   const ref = useRef<HTMLElement>(null);

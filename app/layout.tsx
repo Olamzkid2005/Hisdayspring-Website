@@ -55,9 +55,40 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Church",
+    name: "Hisdayspring Ministries International",
+    description:
+      "Raising holy, healthy and wealthy people with a sense of dominion and world evangelism by the power of the Holy Spirit.",
+    url: "https://hisdayspring.org",
+    telephone: "+234-906-619-2155",
+    email: "hello@hisdayspring.org",
+    address: [
+      {
+        "@type": "PostalAddress",
+        streetAddress: "20 Road, Close to Police Station",
+        addressLocality: "Ipaja",
+        addressRegion: "Lagos",
+        postalCode: "100278",
+        addressCountry: "NG",
+      },
+    ],
+    worshipTime: "Sundays 8:00am & 10:30am",
+    sameAs: [
+      "https://facebook.com/hisdayspring",
+      "https://instagram.com/hisdayspring",
+      "https://youtube.com/@hisdayspring",
+    ],
+  };
+
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen flex flex-col antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <Navigation />
         <main className="flex-1">{children}</main>
         <Footer />

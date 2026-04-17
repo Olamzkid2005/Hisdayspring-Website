@@ -2,67 +2,12 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Play, ExternalLink } from "lucide-react";
+import { Play, ArrowRight } from "lucide-react";
 import { fetchSermons } from "@/lib/api/youtube";
 import { Modal } from "@/components/ui";
 import type { YouTubeVideo } from "@/types";
 
-function SermonCard({
-  video,
-  index,
-  onClick,
-}: {
-  video: YouTubeVideo;
-  index: number;
-  onClick: () => void;
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      whileHover={{ y: -4 }}
-      className="group cursor-pointer"
-      onClick={onClick}
-    >
-      {/* Thumbnail */}
-      <div className="relative aspect-video rounded-2xl overflow-hidden bg-primary-100 mb-4">
-        <img
-          src={video.thumbnailUrl}
-          alt={video.title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        {/* Play button overlay */}
-        <div className="absolute inset-0 bg-primary-950/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="w-16 h-16 rounded-full bg-accent-500 flex items-center justify-center shadow-lg">
-            <Play className="w-8 h-8 text-primary-900 ml-1" fill="currentColor" />
-          </div>
-        </div>
-        {/* Duration badge */}
-        {video.duration && (
-          <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/80 text-white text-xs rounded-md">
-            {formatDuration(video.duration)}
-          </div>
-        )}
-      </div>
-
-      {/* Info */}
-      <h3 className="font-serif font-bold text-lg text-primary-900 mb-2 line-clamp-2 group-hover:text-accent-600 transition-colors">
-        {video.title}
-      </h3>
-      <p className="text-muted text-sm">
-        {formatDate(video.publishedAt)}
-        {video.viewCount && (
-          <span className="ml-2">• {formatViewCount(video.viewCount)} views</span>
-        )}
-      </p>
-    </motion.div>
-  );
-}
-
 function formatDuration(duration: string): string {
-  // YouTube duration format: PT1H2M3S
   const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!match) return duration;
 
@@ -117,74 +62,137 @@ export function SermonsSection() {
     loadSermons();
   }, []);
 
+  const featured = sermons[0];
+  const others = sermons.slice(1, 4);
+
   return (
-    <section id="sermons" ref={ref} className="py-28 md:py-36 bg-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Section Header */}
+    <section id="sermons" ref={ref} className="bg-surface-container-low py-16 px-4 md:py-24 md:px-8">
+      <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="flex justify-between items-end mb-8 md:mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6">
-            <Play className="w-4 h-4" />
-            Sermons
+          <div>
+            <h2 className="font-headline text-2xl md:text-4xl text-on-surface">Recent Sermons</h2>
+            <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary-container mt-4 rounded-full" />
           </div>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-primary-900 mb-6">
-            Watch Our Sermons
-          </h2>
-          <p className="text-muted text-lg max-w-2xl mx-auto">
-            Experience the power of God&apos;s Word through our Sunday services, midweek
-            studies, and special messages.
-          </p>
-          <div className="w-24 h-1 bg-accent-500 mx-auto rounded-full mt-8" />
-        </motion.div>
-
-        {/* Sermons Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="animate-pulse">
-                <div className="aspect-video rounded-2xl bg-primary-100 mb-4" />
-                <div className="h-6 bg-primary-100 rounded w-3/4 mb-2" />
-                <div className="h-4 bg-primary-100 rounded w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {sermons.map((video, index) => (
-              <SermonCard
-                key={video.id}
-                video={video}
-                index={index}
-                onClick={() => setSelectedVideo(video)}
-              />
-            ))}
-          </div>
-        )}
-
-        {/* View All Link */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="text-center mt-12"
-        >
           <a
             href="https://www.youtube.com/@hisdayspring"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-8 py-4 bg-primary-900 text-white rounded-full font-medium hover:bg-primary-800 transition-colors"
+            className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-medium"
           >
-            View All Sermons on YouTube
-            <ExternalLink className="w-5 h-5" />
+            View All Archives
+            <ArrowRight className="w-4 h-4" />
           </a>
         </motion.div>
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="md:col-span-2 animate-pulse">
+              <div className="h-[250px] md:h-[450px] rounded-xl bg-surface-container-highest" />
+            </div>
+            <div className="space-y-8 animate-pulse">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="bg-surface-container-lowest p-4 rounded-xl">
+                  <div className="aspect-video rounded-lg bg-surface-container-highest mb-3" />
+                  <div className="h-5 bg-surface-container-highest rounded w-3/4 mb-2" />
+                  <div className="h-3 bg-surface-container-highest rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {featured && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="md:col-span-2"
+              >
+                <div
+                  className="relative h-[250px] md:h-[450px] rounded-xl overflow-hidden group cursor-pointer"
+                  onClick={() => setSelectedVideo(featured)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setSelectedVideo(featured);
+                    }
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Play sermon: ${featured.title}`}
+                >
+                  <img
+                    src={featured.thumbnailUrl}
+                    alt={featured.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
+                    <span className="inline-block px-3 py-1 bg-primary text-on-primary rounded-full text-xs font-semibold mb-3">
+                      Latest Message
+                    </span>
+                    <h3 className="font-headline text-xl md:text-3xl text-white mb-2 line-clamp-2">
+                      {featured.title}
+                    </h3>
+                    <p className="text-white/70 text-sm">
+                      {formatDate(featured.publishedAt)}
+                      {featured.viewCount && (
+                        <span className="ml-2">· {formatViewCount(featured.viewCount)} views</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors duration-300 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+                      <Play className="w-7 h-7 text-on-primary ml-1" fill="currentColor" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            <div className="space-y-8">
+              {others.map((video, index) => (
+                <motion.div
+                  key={video.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={isInView ? { opacity: 1, x: 0 } : {}}
+                  transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
+                  className="bg-surface-container-lowest p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+                  onClick={() => setSelectedVideo(video)}
+                >
+                  <div className="aspect-video rounded-lg overflow-hidden mb-3 relative">
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
+                      <Play className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" />
+                    </div>
+                    {video.duration && (
+                      <div className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 bg-black/80 text-white text-xs rounded">
+                        {formatDuration(video.duration)}
+                      </div>
+                    )}
+                  </div>
+                  <h4 className="font-headline text-sm text-on-surface font-semibold line-clamp-2 mb-1 group-hover:text-primary transition-colors">
+                    {video.title}
+                  </h4>
+                  <p className="text-on-surface-variant text-xs">
+                    {formatDate(video.publishedAt)}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Video Modal */}
       <Modal
         isOpen={!!selectedVideo}
         onClose={() => setSelectedVideo(null)}

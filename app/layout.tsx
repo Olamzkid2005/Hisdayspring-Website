@@ -1,14 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Noto_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { CookieConsent } from "@/components/utility/CookieConsent";
 
-const inter = Inter({
+const notoSerif = Noto_Serif({
   subsets: ["latin"],
-  variable: "--font-inter",
+  weight: ["400", "700"],
+  style: ["normal", "italic"],
+  variable: "--font-headline",
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-body",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -83,14 +93,14 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={inter.variable}>
-      <body className="min-h-screen flex flex-col antialiased">
+    <html lang="en" className={`${notoSerif.variable} ${plusJakartaSans.variable}`}>
+      <body className="min-h-screen flex flex-col antialiased font-body">
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Navigation />
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 pt-24">{children}</main>
         <Footer />
         <WhatsAppFloat />
         <CookieConsent />

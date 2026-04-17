@@ -8,14 +8,13 @@ import {
   MinistriesSection,
   EventsSection,
   GiveSection,
-  DonationSection,
-  BooksSection,
   LiveStreamSection,
+  BooksSection,
   TestimonialsSection,
   GallerySection,
+  SocialSection,
   PrayerSection,
   ContactSection,
-  SocialSection,
 } from "@/components/sections";
 
 export default function Home() {
@@ -29,10 +28,9 @@ export default function Home() {
       <RadioSection />
       <MinistriesSection />
       <EventsSection />
-      <GiveSection />
-      <DonationSection />
-      <BooksSection />
       <LiveStreamSection />
+      <GiveSection />
+      <BooksSection />
       <TestimonialsSection />
       <GallerySection />
       <SocialSection />

@@ -1,14 +1,13 @@
 "use client";
 
-import { useRef, useId } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Mail, Phone, MapPin, Clock, Send } from "lucide-react";
+import { MapPin, Phone, Mail } from "lucide-react";
 import { Input, Button } from "@/components/ui";
 import { useFormValidation } from "@/hooks";
-import { contactInfo } from "@/data";
+import { contactInfo } from "@/data/contact";
 
 export function ContactSection() {
-  const messageId = useId();
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
@@ -19,9 +18,11 @@ export function ContactSection() {
     handleChange,
     handleSubmit,
     resetForm,
+    setFieldValue,
   } = useFormValidation({
     fields: {
-      name: { required: true },
+      firstName: { required: true },
+      lastName: { required: true },
       email: { required: true, email: true },
       subject: { required: true },
       message: { required: true, minLength: 10 },
@@ -34,184 +35,174 @@ export function ContactSection() {
     },
   });
 
-  return (
-    <section id="contact" ref={ref} className="py-28 md:py-36 bg-white">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6">
-            <Mail className="w-4 h-4" />
-            Contact Us
-          </div>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-primary-900 mb-6">
-            Get In Touch
-          </h2>
-          <p className="text-muted text-lg max-w-2xl mx-auto">
-            Have questions or need more information? We&apos;d love to hear from you.
-          </p>
-          <div className="w-24 h-1 bg-accent-500 mx-auto rounded-full mt-8" />
-        </motion.div>
+  const firstAddress = contactInfo.addresses[0];
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Info */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="space-y-8"
-          >
-            {/* Contact Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-primary-50 rounded-2xl p-6">
-                <Mail className="w-8 h-8 text-accent-500 mb-4" />
-                <h3 className="font-bold text-primary-900 mb-2">Email</h3>
-                <a
-                  href={`mailto:${contactInfo.email}`}
-                  className="text-muted hover:text-accent-600 transition-colors"
-                >
-                  {contactInfo.email}
-                </a>
+  return (
+    <section id="contact" ref={ref} className="py-16 md:py-24 bg-surface text-on-surface">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
+          <h2 className="font-headline text-3xl md:text-5xl text-primary mb-8 md:mb-12">
+            Get in Touch
+          </h2>
+
+          <div className="space-y-8">
+            <div className="flex gap-6">
+              <span className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
+                <MapPin className="w-6 h-6" />
+              </span>
+              <div>
+                <h3 className="font-headline text-lg font-semibold text-on-surface">Main Sanctuary</h3>
+                <p className="text-on-surface-variant mt-1">
+                  {firstAddress
+                    ? `${firstAddress.address}, ${firstAddress.city}, ${firstAddress.state}, ${firstAddress.country}`
+                    : "Lagos, Nigeria"}
+                </p>
               </div>
-              <div className="bg-primary-50 rounded-2xl p-6">
-                <Phone className="w-8 h-8 text-accent-500 mb-4" />
-                <h3 className="font-bold text-primary-900 mb-2">Phone</h3>
+            </div>
+
+            <div className="flex gap-6">
+              <span className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
+                <Phone className="w-6 h-6" />
+              </span>
+              <div>
+                <h3 className="font-headline text-lg font-semibold text-on-surface">Office Line</h3>
                 <a
                   href={`tel:${contactInfo.phone.replace(/\s/g, "")}`}
-                  className="text-muted hover:text-accent-600 transition-colors"
+                  className="text-on-surface-variant mt-1 block hover:text-primary transition-colors"
                 >
                   {contactInfo.phone}
                 </a>
               </div>
             </div>
 
-            {/* Addresses */}
-            <div className="bg-primary-50 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <MapPin className="w-8 h-8 text-accent-500" />
-                <h3 className="font-bold text-primary-900">Our Locations</h3>
-              </div>
-              <div className="space-y-4">
-                {contactInfo.addresses.map((addr) => (
-                  <div key={addr.branch}>
-                    <span className="font-medium text-accent-600">{addr.branch} Branch</span>
-                    <p className="text-muted">{addr.address}, {addr.city}</p>
-                  </div>
-                ))}
+            <div className="flex gap-6">
+              <span className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
+                <Mail className="w-6 h-6" />
+              </span>
+              <div>
+                <h3 className="font-headline text-lg font-semibold text-on-surface">Email Support</h3>
+                <a
+                  href={`mailto:${contactInfo.email}`}
+                  className="text-on-surface-variant mt-1 block hover:text-primary transition-colors"
+                >
+                  {contactInfo.email}
+                </a>
               </div>
             </div>
+          </div>
 
-            {/* Office Hours */}
-            <div className="bg-primary-50 rounded-2xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <Clock className="w-8 h-8 text-accent-500" />
-                <h3 className="font-bold text-primary-900">Office Hours</h3>
-              </div>
-              <p className="text-muted">{contactInfo.officeHours || "Monday - Friday: 9:00 AM - 5:00 PM"}</p>
-            </div>
+          <div className="mt-12 h-64 w-full bg-surface-container-high rounded-3xl overflow-hidden grayscale">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.3!2d3.3!3d6.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzAnMDAuMCJOIDPCsDE4JzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1600000000000!5m2!1sen!2sng"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Hisdayspring Location"
+            />
+          </div>
+        </motion.div>
 
-            {/* Google Maps Placeholder */}
-            <div className="aspect-video rounded-2xl overflow-hidden bg-primary-100">
-              <iframe
-                src={`https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.3!2d3.3!3d6.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzAnMDAuMCJOIDPCsDE4JzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1600000000000!5m2!1sen!2sng`}
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                title="Hisdayspring Location"
-              />
-            </div>
-          </motion.div>
-
-          {/* Contact Form */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="bg-cream rounded-3xl p-8 md:p-10"
-          >
-            <h3 className="font-serif text-2xl font-bold text-primary-900 mb-6">
-              Send Us a Message
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-6">
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-surface-container-lowest p-8 md:p-12 rounded-3xl border border-outline-variant/10"
+        >
+          <h3 className="font-headline text-2xl text-on-surface mb-8">
+            Send us a Message
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Input
-                label="Your Name"
-                name="name"
-                value={values.name}
+                label="First Name"
+                name="firstName"
+                value={values.firstName}
                 onChange={handleChange}
-                error={errors.name}
+                error={errors.firstName}
                 required
-                placeholder="John Doe"
+                placeholder="John"
               />
               <Input
-                label="Email Address"
-                name="email"
-                type="email"
-                value={values.email}
+                label="Last Name"
+                name="lastName"
+                value={values.lastName}
                 onChange={handleChange}
-                error={errors.email}
+                error={errors.lastName}
                 required
-                placeholder="john@example.com"
+                placeholder="Doe"
               />
-              <Input
-                label="Subject"
+            </div>
+            <Input
+              label="Email Address"
+              name="email"
+              type="email"
+              value={values.email}
+              onChange={handleChange}
+              error={errors.email}
+              required
+              placeholder="john@example.com"
+            />
+            <div>
+              <label htmlFor="contact-subject" className="block text-sm font-medium mb-1.5 text-on-surface">
+                Subject <span className="text-primary">*</span>
+              </label>
+              <select
+                id="contact-subject"
                 name="subject"
                 value={values.subject}
-                onChange={handleChange}
-                error={errors.subject}
+                onChange={(e) => setFieldValue("subject", e.target.value)}
                 required
-                placeholder="How can we help you?"
-              />
-              <div>
-                <label htmlFor={messageId} className="block text-sm font-medium text-foreground mb-1.5">
-                  Message <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                  id={messageId}
-                  name="message"
-                  value={values.message}
-                  onChange={handleChange}
-                  rows={5}
-                  required
-                  minLength={10}
-                  placeholder="Your message..."
-                  className={`
-                    w-full px-4 py-3 rounded-xl border bg-white
-                    text-foreground placeholder:text-muted-foreground
-                    transition-all duration-200
-                    focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
-                    disabled:bg-gray-100 disabled:cursor-not-allowed
-                    ${errors.message
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-primary-200 hover:border-primary-300 focus:border-primary-500"
-                    }
-                  `}
-                />
-                {errors.message && (
-                  <p className="mt-1.5 text-sm text-red-500" role="alert">
-                    {errors.message}
-                  </p>
-                )}
-              </div>
-              <Button
-                type="submit"
-                variant="primary"
-                size="lg"
-                isLoading={isSubmitting}
-                className="w-full"
+                className={`w-full px-4 py-2.5 rounded-xl border bg-surface-container-low text-on-surface transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${errors.subject ? "border-red-500 focus:ring-red-500" : "border-outline-variant hover:border-outline focus:border-primary"}`}
               >
-                <Send className="w-5 h-5 mr-2" />
-                Send Message
-              </Button>
-            </form>
-          </motion.div>
-        </div>
+                <option value="">Inquiry Topic</option>
+                <option value="membership">Membership</option>
+                <option value="ministries">Ministries</option>
+                <option value="technical-support">Technical Support</option>
+                <option value="other">Other</option>
+              </select>
+              {errors.subject && (
+                <p className="mt-1.5 text-sm text-red-500" role="alert">
+                  {errors.subject}
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="contact-message" className="block text-sm font-medium mb-1.5 text-on-surface">
+                Message <span className="text-primary">*</span>
+              </label>
+              <textarea
+                id="contact-message"
+                name="message"
+                value={values.message}
+                onChange={handleChange}
+                rows={5}
+                required
+                minLength={10}
+                placeholder="Your message..."
+                className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${errors.message ? "border-red-500 focus:ring-red-500" : "border-outline-variant hover:border-outline focus:border-primary"}`}
+              />
+              {errors.message && (
+                <p className="mt-1.5 text-sm text-red-500" role="alert">
+                  {errors.message}
+                </p>
+              )}
+            </div>
+            <Button
+              type="submit"
+              isLoading={isSubmitting}
+              className="w-full bg-secondary text-on-secondary py-4 rounded-full font-bold"
+            >
+              Send Message
+            </Button>
+          </form>
+        </motion.div>
       </div>
     </section>
   );

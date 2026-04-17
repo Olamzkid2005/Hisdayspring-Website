@@ -18,11 +18,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         {label && (
           <label
             htmlFor={id}
-            className="block text-sm font-medium text-foreground mb-1.5"
+            className="block text-xs font-bold uppercase tracking-wider text-outline mb-1"
           >
             {label}
             {props.required && (
-              <span className="text-red-500 ml-1" aria-hidden="true">
+              <span className="text-error ml-1" aria-hidden="true">
                 *
               </span>
             )}
@@ -34,21 +34,21 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={error ? "true" : undefined}
           aria-describedby={error ? errorId : undefined}
           className={`
-            w-full px-4 py-2.5 rounded-xl border bg-white
-            text-foreground placeholder:text-muted-foreground
+            w-full bg-surface-container-low border-b-2 border-transparent
+            focus:border-secondary outline-none p-4 rounded-lg
             transition-all duration-200
-            focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
-            disabled:bg-gray-100 disabled:cursor-not-allowed
+            placeholder:text-on-surface-variant/50
+            disabled:bg-surface-container disabled:cursor-not-allowed
             ${error
-              ? "border-red-500 focus:ring-red-500"
-              : "border-primary-200 hover:border-primary-300 focus:border-primary-500"
+              ? "border-error focus:border-error"
+              : ""
             }
             ${className}
           `.trim()}
           {...props}
         />
         {error && (
-          <p id={errorId} className="mt-1.5 text-sm text-red-500" role="alert">
+          <p id={errorId} className="mt-1.5 text-sm text-error" role="alert">
             {error}
           </p>
         )}

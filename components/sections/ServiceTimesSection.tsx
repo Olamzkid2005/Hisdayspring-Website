@@ -2,119 +2,165 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Clock, MapPin, Calendar } from "lucide-react";
+import { Clock, BookOpen, Users, Church } from "lucide-react";
 import { serviceTimes } from "@/data";
-import type { ServiceTime } from "@/types";
-
-function ServiceCard({ service, index }: { service: ServiceTime; index: number }) {
-  const branchColors: Record<string, string> = {
-    Ipaja: "bg-accent-50 text-accent-700",
-    Ikeja: "bg-primary-50 text-primary-700",
-    Both: "bg-purple-50 text-purple-700",
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
-      whileHover={{ y: -4 }}
-      className="bg-white rounded-2xl p-6 shadow-md hover:shadow-lg transition-shadow duration-300"
-    >
-      <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 rounded-xl bg-accent-100 flex items-center justify-center">
-          <Clock className="w-6 h-6 text-accent-600" />
-        </div>
-        <span
-          className={`px-3 py-1 text-xs font-medium rounded-full ${
-            branchColors[service.branch] || branchColors.Both
-          }`}
-        >
-          {service.branch}
-        </span>
-      </div>
-      <h3 className="font-serif text-xl font-bold text-primary-900 mb-2">
-        {service.name}
-      </h3>
-      <div className="space-y-2 text-sm text-muted">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-accent-500" />
-          <span>{service.day}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <Clock className="w-4 h-4 text-accent-500" />
-          <span>{service.time}</span>
-        </div>
-      </div>
-      {service.description && (
-        <p className="mt-4 text-sm text-muted/80 leading-relaxed border-t border-primary-100 pt-4">
-          {service.description}
-        </p>
-      )}
-    </motion.div>
-  );
-}
 
 export function ServiceTimesSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
+  const sundayServices = serviceTimes.filter((s) => s.day === "Sunday");
+  const midweekServices = serviceTimes.filter((s) => s.day === "Wednesday");
+  const youthServices = serviceTimes.filter((s) => s.day === "Friday");
+  const otherServices = serviceTimes.filter(
+    (s) => !["Sunday", "Wednesday", "Friday"].includes(s.day)
+  );
+
   return (
-    <section id="services" ref={ref} className="py-28 md:py-36 bg-cream">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-100 text-primary-700 text-sm font-medium mb-6">
-            <Clock className="w-4 h-4" />
-            Join Us
-          </div>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-primary-900 mb-6">
-            Service Times
-          </h2>
-          <p className="text-muted text-lg max-w-2xl mx-auto">
-            We would love to worship with you! Join us at any of our services and
-            experience the presence of God.
-          </p>
-          <div className="w-24 h-1 bg-accent-500 mx-auto rounded-full mt-8" />
-        </motion.div>
+    <section id="services" ref={ref} className="py-16 md:py-28 bg-surface relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
+          <motion.div
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6 }}
+            className="md:col-span-5"
+          >
+            <span className="font-label text-secondary font-semibold tracking-widest uppercase text-sm">
+              Fellowship With Us
+            </span>
+            <h2 className="font-headline text-3xl md:text-5xl text-on-surface mt-4 leading-tight">
+              Sacred Gatherings &amp; Service Times
+            </h2>
+            <p className="text-on-surface-variant text-base md:text-lg mt-6 leading-relaxed">
+              We gather throughout the week in various settings — from Sunday worship
+              celebrations to midweek Bible studies and vibrant youth services. Come
+              and experience the presence of God with us.
+            </p>
+          </motion.div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {serviceTimes.map((service, index) => (
-            <ServiceCard key={service.id} service={service} index={index} />
-          ))}
+          <div className="hidden md:flex items-center">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-px h-12 bg-secondary/20" />
+              <div className="w-8 h-8 rounded-full border border-secondary/30 flex items-center justify-center">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-secondary/50">
+                  <rect x="7" y="0" width="2" height="16" fill="currentColor" />
+                  <rect x="0" y="7" width="16" height="2" fill="currentColor" />
+                </svg>
+              </div>
+              <div className="w-px flex-1 bg-secondary/20" />
+            </div>
+          </div>
+
+          <div className="md:col-span-7 relative">
+            <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-secondary/40 via-secondary/20 to-transparent hidden md:block" />
+
+            <div className="grid md:grid-cols-2 gap-4 md:pl-4">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6 }}
+                className="bg-surface-container-low p-4 md:p-8 rounded-xl md:col-span-2 relative overflow-hidden"
+              >
+                <Church className="absolute -right-4 -bottom-4 w-32 h-32 text-primary/[0.04] pointer-events-none" />
+
+                <h3 className="font-headline text-2xl text-primary mb-6">
+                  The Lord&apos;s Day
+                </h3>
+                <div>
+                  {sundayServices.map((service, i) => (
+                    <div
+                      key={service.id}
+                      className={`flex justify-between items-center py-4 ${
+                        i < sundayServices.length - 1
+                          ? "border-b border-outline-variant/30"
+                          : ""
+                      }`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-body font-semibold text-on-surface">
+                          {service.name}
+                        </p>
+                        {service.description && (
+                          <p className="text-sm text-on-surface-variant mt-0.5 line-clamp-1">
+                            {service.description}
+                          </p>
+                        )}
+                      </div>
+                      <span className="bg-secondary/10 text-secondary-fixed-dim rounded-full text-xs font-bold px-3 py-1 whitespace-nowrap ml-4">
+                        {service.time}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+
+              {midweekServices.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="bg-surface-container-highest p-6 rounded-xl flex items-center gap-3 md:gap-6"
+                >
+                  <div className="rounded-lg bg-primary/10 p-3 flex-shrink-0">
+                    <BookOpen className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-label font-bold text-on-surface">
+                      {midweekServices[0].name}
+                    </h4>
+                    <p className="text-sm text-on-surface-variant mt-0.5">
+                      {midweekServices[0].day} · {midweekServices[0].time}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {youthServices.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                  className="bg-surface-container-highest p-6 rounded-xl flex items-center gap-3 md:gap-6"
+                >
+                  <div className="rounded-lg bg-secondary/10 p-3 flex-shrink-0">
+                    <Users className="w-6 h-6 text-secondary" />
+                  </div>
+                  <div>
+                    <h4 className="font-label font-bold text-on-surface">
+                      {youthServices[0].name}
+                    </h4>
+                    <p className="text-sm text-on-surface-variant mt-0.5">
+                      {youthServices[0].day} · {youthServices[0].time}
+                    </p>
+                  </div>
+                </motion.div>
+              )}
+
+              {otherServices.map((service, i) => (
+                <motion.div
+                  key={service.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                  className="bg-surface-container-low p-6 rounded-xl flex items-center gap-6"
+                >
+                  <div className="rounded-lg bg-primary/10 p-3 flex-shrink-0">
+                    <Clock className="w-6 h-6 text-primary" />
+                  </div>
+                  <div>
+                    <h4 className="font-label font-bold text-on-surface">
+                      {service.name}
+                    </h4>
+                    <p className="text-sm text-on-surface-variant mt-0.5">
+                      {service.day} · {service.time}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
-
-        {/* Location Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-16 grid grid-cols-1 md:grid-cols-2 gap-6"
-        >
-          <div className="bg-primary-900 rounded-2xl p-8 text-white">
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin className="w-6 h-6 text-accent-400" />
-              <h3 className="font-serif text-2xl font-bold">Ipaja Branch</h3>
-            </div>
-            <p className="text-white/70 mb-4">Gowon Estate, Ipaja, Lagos State, Nigeria</p>
-            <p className="text-white/50 text-sm">Our main headquarters</p>
-          </div>
-          <div className="bg-primary-800 rounded-2xl p-8 text-white">
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin className="w-6 h-6 text-accent-400" />
-              <h3 className="font-serif text-2xl font-bold">Ikeja Branch</h3>
-            </div>
-            <p className="text-white/70 mb-4">Ikeja, Lagos State, Nigeria</p>
-            <p className="text-white/50 text-sm">Our second location serving Ikeja area</p>
-          </div>
-        </motion.div>
       </div>
     </section>
   );

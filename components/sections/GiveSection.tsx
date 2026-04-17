@@ -1,136 +1,125 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { Heart, Banknote, CreditCard, Smartphone } from "lucide-react";
-import { bankAccount, scriptureReferences } from "@/data/donations";
+import { HandCoins, Heart, Globe, Building, Landmark, Users, Copy, Check } from "lucide-react";
+import { bankAccount, donationPurposes } from "@/data/donations";
+import type { DonationPurpose } from "@/types";
+
+const purposeIcons: Record<DonationPurpose, React.ElementType> = {
+  tithes: HandCoins,
+  offerings: Heart,
+  missions: Globe,
+  "special-projects": Building,
+  "building-fund": Landmark,
+  "youth-ministry": Users,
+};
 
 export function GiveSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [selected, setSelected] = useState<DonationPurpose>("tithes");
+  const [copied, setCopied] = useState(false);
+
+  const copyAccountNumber = () => {
+    navigator.clipboard.writeText(bankAccount.accountNumber);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <section id="give" ref={ref} className="py-28 md:py-36 bg-cream">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Section Header */}
+    <section id="give" ref={ref} className="bg-surface-container-low py-16 md:py-24">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-8 md:gap-16">
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          initial={{ opacity: 0, x: -30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.1 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-100 text-accent-700 text-sm font-medium mb-6">
-            <Heart className="w-4 h-4" />
-            Give
-          </div>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-primary-900 mb-6">
-            Partner With Us in Ministry
-          </h2>
-          <p className="text-muted text-lg max-w-2xl mx-auto">
-            &ldquo;Give, and it will be given to you. A good measure, pressed down, shaken
-            together and running over, will be poured into your lap.&rdquo; — Luke 6:38
+          <h2 className="font-headline text-2xl md:text-4xl font-bold text-primary mb-4">Support the Mission</h2>
+          <p className="text-on-surface-variant text-base md:text-lg mb-6 md:mb-10">
+            Your generosity fuels the work of God and transforms lives across our communities.
           </p>
-          <div className="w-24 h-1 bg-accent-500 mx-auto rounded-full mt-8" />
+
+          <div className="space-y-3">
+            {donationPurposes.map((purpose) => {
+              const Icon = purposeIcons[purpose.id];
+              return (
+                <label
+                  key={purpose.id}
+                  className={`group cursor-pointer flex items-center justify-between p-4 md:p-6 bg-surface-container-lowest rounded-xl border-l-4 transition-colors ${
+                    selected === purpose.id ? "border-secondary" : "border-transparent hover:border-secondary"
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <Icon className="w-6 h-6 text-primary" />
+                    <div>
+                      <h4 className="font-bold text-lg text-on-surface">{purpose.label}</h4>
+                      {purpose.description && (
+                        <p className="text-sm text-zinc-500">{purpose.description}</p>
+                      )}
+                    </div>
+                  </div>
+                  <input
+                    type="radio"
+                    name="donation-purpose"
+                    value={purpose.id}
+                    checked={selected === purpose.id}
+                    onChange={() => setSelected(purpose.id)}
+                    className="accent-primary w-5 h-5"
+                  />
+                </label>
+              );
+            })}
+          </div>
         </motion.div>
 
-        {/* Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-          {/* Bank Details */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="bg-white rounded-3xl p-8 md:p-10 shadow-lg"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-accent-100 flex items-center justify-center">
-                <Banknote className="w-6 h-6 text-accent-600" />
-              </div>
-              <h3 className="font-serif text-2xl font-bold text-primary-900">
-                Bank Transfer
-              </h3>
-            </div>
-
-            <div className="space-y-4">
-              <div className="p-4 bg-primary-50 rounded-xl">
-                <div className="text-sm text-muted mb-1">Bank Name</div>
-                <div className="font-bold text-primary-900">{bankAccount.bankName}</div>
-              </div>
-              <div className="p-4 bg-primary-50 rounded-xl">
-                <div className="text-sm text-muted mb-1">Account Number</div>
-                <div className="font-bold text-primary-900 text-2xl tracking-wider">
-                  {bankAccount.accountNumber}
-                </div>
-              </div>
-              <div className="p-4 bg-primary-50 rounded-xl">
-                <div className="text-sm text-muted mb-1">Account Name</div>
-                <div className="font-bold text-primary-900">{bankAccount.accountName}</div>
-              </div>
-            </div>
-
-            <p className="mt-6 text-sm text-muted">
-              Please use your name as payment reference when making transfers.
-            </p>
-          </motion.div>
-
-          {/* Online Payment Info */}
-          <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="bg-primary-900 rounded-3xl p-8 md:p-10 text-white"
-          >
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-accent-500 flex items-center justify-center">
-                <CreditCard className="w-6 h-6 text-primary-900" />
-              </div>
-              <h3 className="font-serif text-2xl font-bold">Online Giving</h3>
-            </div>
-
-            <p className="text-white/70 mb-6">
-              Online payment options coming soon. In the meantime, please use bank transfer
-              or contact us for mobile money options.
-            </p>
-
-            <div className="space-y-4 mb-8">
-              <div className="flex items-center gap-3 p-4 bg-white/10 rounded-xl">
-                <CreditCard className="w-5 h-5 text-accent-400" />
-                <span>Card Payments (Paystack)</span>
-              </div>
-              <div className="flex items-center gap-3 p-4 bg-white/10 rounded-xl">
-                <Smartphone className="w-5 h-5 text-accent-400" />
-                <span>Mobile Money</span>
-              </div>
-            </div>
-
-            <p className="text-sm text-white/50">
-              For online giving setup, please contact us at{" "}
-              <a href="mailto:hello@hisdayspring.org" className="text-accent-400">
-                hello@hisdayspring.org
-              </a>
-            </p>
-          </motion.div>
-        </div>
-
-        {/* Scripture References */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.4 }}
-          className="mt-16"
+          initial={{ opacity: 0, x: 30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="bg-surface-container-lowest p-6 md:p-10"
         >
-          <h3 className="font-serif text-2xl font-bold text-primary-900 text-center mb-8">
-            Scripture on Giving
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {scriptureReferences.map((verse, index) => (
-              <div
-                key={index}
-                className="p-4 bg-white rounded-xl border border-primary-100 text-sm text-muted italic"
-              >
-                &ldquo;{verse}&rdquo;
+          <h3 className="font-headline text-2xl font-bold text-on-surface mb-8">Secure Ways to Give</h3>
+
+          <div className="p-6 rounded-xl bg-surface-container-low mb-8">
+            <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Bank Details</p>
+            <div className="flex justify-between border-b border-outline-variant pb-3 mb-3">
+              <span className="text-on-surface-variant text-sm">Bank</span>
+              <span className="font-bold text-on-surface">{bankAccount.bankName}</span>
+            </div>
+            <div className="flex justify-between border-b border-outline-variant pb-3 mb-3">
+              <span className="text-on-surface-variant text-sm">Account Name</span>
+              <span className="font-bold text-on-surface">{bankAccount.accountName}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-on-surface-variant text-sm">Account Number</span>
+              <div className="flex items-center gap-3">
+                <span className="font-bold text-lg md:text-xl text-primary">{bankAccount.accountNumber}</span>
+                <button
+                  type="button"
+                  onClick={copyAccountNumber}
+                  className="p-2.5 rounded hover:bg-surface-container transition-colors min-w-[44px] min-h-[44px]"
+                  aria-label="Copy account number"
+                >
+                  {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4 text-on-surface-variant" />}
+                </button>
               </div>
-            ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              className="w-full py-4 rounded-full font-bold text-white bg-[#09a5db] hover:opacity-90 transition-opacity"
+            >
+              Give with Paystack
+            </button>
+            <button
+              type="button"
+              className="w-full py-4 rounded-full font-bold text-white bg-[#f5a623] hover:opacity-90 transition-opacity"
+            >
+              Give with Flutterwave
+            </button>
           </div>
         </motion.div>
       </div>

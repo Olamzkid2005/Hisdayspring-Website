@@ -1,152 +1,147 @@
 @import "tailwindcss";
 
-/* =============================================================================
-   Hisdayspring Ministries International - Design System
-   ============================================================================= */
-
 :root {
-  /* -------------------------------------------------------------------------
-     Brand Colors
-     ------------------------------------------------------------------------- */
+  --color-primary: #b80035;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #e11d48;
+  --color-on-primary-container: #fffaf9;
+  --color-primary-fixed: #ffdada;
+  --color-primary-fixed-dim: #ffb3b6;
+  --color-on-primary-fixed: #40000c;
+  --color-on-primary-fixed-variant: #920028;
 
-  /* Primary: Deep Navy/Royal Purple - Represents royalty and spirituality */
-  --color-primary-50: #f5f3ff;
-  --color-primary-100: #ede9fe;
-  --color-primary-200: #ddd6fe;
-  --color-primary-300: #c4b5fd;
-  --color-primary-400: #a78bfa;
-  --color-primary-500: #8b5cf6;
-  --color-primary-600: #7c3aed;
-  --color-primary-700: #6d28d9;
-  --color-primary-800: #5b21b6;
-  --color-primary-900: #4c1d95;
-  --color-primary-950: #2e1065;
+  --color-secondary: #735c00;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #fed65b;
+  --color-on-secondary-container: #745c00;
+  --color-secondary-fixed: #ffe088;
+  --color-secondary-fixed-dim: #e9c349;
+  --color-on-secondary-fixed: #241a00;
+  --color-on-secondary-fixed-variant: #574500;
 
-  /* Accent: Gold - Represents divinity and excellence */
-  --color-accent-50: #fffbeb;
-  --color-accent-100: #fef3c7;
-  --color-accent-200: #fde68a;
-  --color-accent-300: #fcd34d;
-  --color-accent-400: #fbbf24;
-  --color-accent-500: #f59e0b;
-  --color-accent-600: #d97706;
-  --color-accent-700: #b45309;
-  --color-accent-800: #92400e;
-  --color-accent-900: #78350f;
+  --color-tertiary: #815100;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #a36700;
+  --color-on-tertiary-container: #fffaf9;
+  --color-tertiary-fixed: #ffddb8;
+  --color-tertiary-fixed-dim: #ffb95f;
+  --color-on-tertiary-fixed: #2a1700;
+  --color-on-tertiary-fixed-variant: #653e00;
 
-  /* Neutral: Cream/White backgrounds */
-  --color-cream: #fdfcf7;
-  --color-cream-dark: #f5f3eb;
-  --color-white: #ffffff;
-  --color-off-white: #fafaf9;
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
 
-  /* -------------------------------------------------------------------------
-     Semantic Colors
-     ------------------------------------------------------------------------- */
-  --color-background: var(--color-cream);
-  --color-foreground: #1a1a2e;
-  --color-muted: #64748b;
-  --color-muted-foreground: #94a3b8;
+  --color-background: #f9f9f9;
+  --color-on-background: #1a1c1c;
+  --color-surface: #f9f9f9;
+  --color-on-surface: #1a1c1c;
+  --color-surface-variant: #e2e2e2;
+  --color-on-surface-variant: #5c3f40;
+  --color-surface-tint: #be0037;
+  --color-surface-dim: #dadada;
+  --color-surface-bright: #f9f9f9;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f3f4;
+  --color-surface-container: #eeeeee;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-container-highest: #e2e2e2;
+  --color-outline: #906f70;
+  --color-outline-variant: #e5bdbe;
 
-  /* -------------------------------------------------------------------------
-     Focus Indicator (Accessibility)
-     ------------------------------------------------------------------------- */
-  --focus-ring: 2px solid var(--color-primary-500);
+  --color-inverse-surface: #2f3131;
+  --color-inverse-on-surface: #f0f1f1;
+  --color-inverse-primary: #ffb3b6;
+
+  --color-cream: #f9f9f9;
+  --color-cream-dark: #f3f3f4;
+
+  --focus-ring: 2px solid var(--color-primary);
   --focus-ring-offset: 2px;
 
-  /* -------------------------------------------------------------------------
-     Animation Timing Functions
-     ------------------------------------------------------------------------- */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out-expo: cubic-bezier(0.87, 0, 0.13, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-  /* -------------------------------------------------------------------------
-     Spacing Scale (extends Tailwind)
-     ------------------------------------------------------------------------- */
-  --spacing-xs: 0.25rem;  /* 4px */
-  --spacing-sm: 0.5rem;   /* 8px */
-  --spacing-md: 1rem;     /* 16px */
-  --spacing-lg: 1.5rem;    /* 24px */
-  --spacing-xl: 2rem;      /* 32px */
-  --spacing-2xl: 3rem;    /* 48px */
-  --spacing-3xl: 4rem;    /* 64px */
-  --spacing-4xl: 6rem;    /* 96px */
-
-  /* -------------------------------------------------------------------------
-     Border Radius
-     ------------------------------------------------------------------------- */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.5rem;
-  --radius-full: 9999px;
-
-  /* -------------------------------------------------------------------------
-     Shadows
-     ------------------------------------------------------------------------- */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-editorial: 0 24px 48px -12px rgba(184, 0, 53, 0.06);
   --shadow-gold: 0 4px 14px 0 rgb(245 158 11 / 0.25);
 }
 
-/* =============================================================================
-   @theme directive - Tailwind CSS v4 Theme Configuration
-   ============================================================================= */
 @theme inline {
-  /* Colors */
-  --color-primary-50: var(--color-primary-50);
-  --color-primary-100: var(--color-primary-100);
-  --color-primary-200: var(--color-primary-200);
-  --color-primary-300: var(--color-primary-300);
-  --color-primary-400: var(--color-primary-400);
-  --color-primary-500: var(--color-primary-500);
-  --color-primary-600: var(--color-primary-600);
-  --color-primary-700: var(--color-primary-700);
-  --color-primary-800: var(--color-primary-800);
-  --color-primary-900: var(--color-primary-900);
-  --color-primary-950: var(--color-primary-950);
+  --color-primary: var(--color-primary);
+  --color-on-primary: var(--color-on-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary-container: var(--color-on-primary-container);
+  --color-primary-fixed: var(--color-primary-fixed);
+  --color-primary-fixed-dim: var(--color-primary-fixed-dim);
+  --color-on-primary-fixed: var(--color-on-primary-fixed);
+  --color-on-primary-fixed-variant: var(--color-on-primary-fixed-variant);
 
-  --color-accent-50: var(--color-accent-50);
-  --color-accent-100: var(--color-accent-100);
-  --color-accent-200: var(--color-accent-200);
-  --color-accent-300: var(--color-accent-300);
-  --color-accent-400: var(--color-accent-400);
-  --color-accent-500: var(--color-accent-500);
-  --color-accent-600: var(--color-accent-600);
-  --color-accent-700: var(--color-accent-700);
-  --color-accent-800: var(--color-accent-800);
-  --color-accent-900: var(--color-accent-900);
+  --color-secondary: var(--color-secondary);
+  --color-on-secondary: var(--color-on-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+  --color-secondary-fixed: var(--color-secondary-fixed);
+  --color-secondary-fixed-dim: var(--color-secondary-fixed-dim);
+  --color-on-secondary-fixed: var(--color-on-secondary-fixed);
+  --color-on-secondary-fixed-variant: var(--color-on-secondary-fixed-variant);
+
+  --color-tertiary: var(--color-tertiary);
+  --color-on-tertiary: var(--color-on-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+  --color-on-tertiary-container: var(--color-on-tertiary-container);
+  --color-tertiary-fixed: var(--color-tertiary-fixed);
+  --color-tertiary-fixed-dim: var(--color-tertiary-fixed-dim);
+
+  --color-error: var(--color-error);
+  --color-on-error: var(--color-on-error);
+  --color-error-container: var(--color-error-container);
+  --color-on-error-container: var(--color-on-error-container);
+
+  --color-background: var(--color-background);
+  --color-on-background: var(--color-on-background);
+  --color-surface: var(--color-surface);
+  --color-on-surface: var(--color-on-surface);
+  --color-surface-variant: var(--color-surface-variant);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-bright: var(--color-surface-bright);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+
+  --color-inverse-surface: var(--color-inverse-surface);
+  --color-inverse-on-surface: var(--color-inverse-on-surface);
+  --color-inverse-primary: var(--color-inverse-primary);
 
   --color-cream: var(--color-cream);
   --color-cream-dark: var(--color-cream-dark);
 
-  /* Typography */
-  --font-serif: Georgia, "Times New Roman", serif;
-  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-headline: "Noto Serif", serif;
+  --font-body: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-label: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-serif: "Noto Serif", serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, sans-serif;
 
-  /* Border Radius */
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --radius-2xl: var(--radius-2xl);
-  --radius-full: var(--radius-full);
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  --shadow-editorial: var(--shadow-editorial);
   --shadow-gold: var(--shadow-gold);
 }
-
-/* =============================================================================
-   Base Styles
-   ============================================================================= */
 
 * {
   box-sizing: border-box;
@@ -160,44 +155,30 @@ html {
 
 body {
   background: var(--color-background);
-  color: var(--color-foreground);
-  font-family: var(--font-sans);
+  color: var(--color-on-surface);
+  font-family: var(--font-body);
   line-height: 1.6;
 }
 
-/* Headings use serif font for elegance */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-serif);
+  font-family: var(--font-headline);
   font-weight: 700;
   line-height: 1.2;
 }
-
-/* =============================================================================
-   Focus Indicators (Accessibility - 2px solid outline)
-   ============================================================================= */
 
 :focus-visible {
   outline: var(--focus-ring);
   outline-offset: var(--focus-ring-offset);
 }
 
-/* Remove default focus for mouse users */
 :focus:not(:focus-visible) {
   outline: none;
 }
 
-/* =============================================================================
-   Selection Styling
-   ============================================================================= */
-
 ::selection {
-  background: var(--color-primary-200);
-  color: var(--color-primary-950);
+  background: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
 }
-
-/* =============================================================================
-   Scrollbar Styling
-   ============================================================================= */
 
 ::-webkit-scrollbar {
   width: 10px;
@@ -205,21 +186,26 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-cream-dark);
+  background: var(--color-surface-container-low);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-primary-300);
+  background: var(--color-outline-variant);
   border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-primary-400);
+  background: var(--color-outline);
 }
 
-/* =============================================================================
-   Reduced Motion Support
-   ============================================================================= */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,

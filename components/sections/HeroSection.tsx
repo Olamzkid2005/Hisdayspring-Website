@@ -1,8 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Play, MapPin } from "lucide-react";
-import { Button } from "@/components/ui";
+import { PlayCircle, ChevronDown } from "lucide-react";
 
 export function HeroSection() {
   const scrollToSection = (id: string) => {
@@ -14,7 +13,6 @@ export function HeroSection() {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Background Image */}
       <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
@@ -22,100 +20,85 @@ export function HeroSection() {
             "url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80')",
         }}
       >
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-primary-950/70 via-primary-950/60 to-primary-950/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(26,28,28,0.4)] to-[rgba(26,28,28,0.8)]" />
+        <div className="absolute inset-0" style={{
+          background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)",
+        }} />
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 md:px-8 py-32 text-center">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          {/* Church Name */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-6"
+            className="mb-8"
           >
-            <div className="inline-flex items-center gap-3 px-5 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20">
-              <div className="w-8 h-8 rounded-full bg-accent-500 flex items-center justify-center">
-                <span className="text-primary-900 font-bold">H</span>
-              </div>
-              <span className="text-white/90 text-sm font-medium tracking-wider">
-                HISDAYSPRING EVANGELICAL MINISTRIES INTERNATIONAL
-              </span>
-            </div>
+            <span className="inline-block px-6 py-2.5 rounded-full bg-secondary-container text-on-secondary-container uppercase tracking-widest text-xs font-bold">
+              Welcome to Hisdayspring Ministries
+            </span>
           </motion.div>
 
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight"
+            className="font-headline text-4xl md:text-[5rem] leading-tight text-white mb-6"
           >
-            Raising Holy, Healthy &<br className="hidden sm:block" />
-            <span className="text-accent-400">Wealthy People</span>
+            Raising holy, healthy and{" "}
+            <em className="text-secondary-container">Wealthy People</em>
           </motion.h1>
 
-          <motion.p
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+            className="flex justify-center mb-6 md:mb-10"
+          >
+            <div className="h-px w-32 bg-secondary origin-center" />
+          </motion.div>
+
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-white/80 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed"
-          >
-            A Spirit-filled, word-grounded church that transforms lives, families and
-            communities across Nigeria and beyond for the glory of God.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.7 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Button
-              variant="primary"
-              size="lg"
+            <button
               onClick={() => scrollToSection("sermons")}
-              className="w-full sm:w-auto group"
+              className="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full bg-secondary-container text-on-secondary-container font-bold text-sm uppercase tracking-wide transition-transform hover:scale-105"
             >
-              <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+              <PlayCircle className="w-5 h-5" />
               Watch Live Service
-            </Button>
-            <Button
-              variant="outline"
-              size="lg"
+            </button>
+            <button
               onClick={() => scrollToSection("services")}
-              className="w-full sm:w-auto border-white text-white hover:bg-white/10 hover:border-white/50"
+              className="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-white/30 text-white font-bold text-sm uppercase tracking-wide backdrop-blur-sm transition-colors hover:bg-white/10"
             >
-              <MapPin className="w-5 h-5 mr-2" />
               Plan Your Visit
-            </Button>
-          </motion.div>
-        </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.5 }}
-          className="absolute bottom-10 left-1/2 -translate-x-1/2"
-        >
-          <motion.div
-            animate={{ y: [0, 10, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-            className="w-6 h-10 rounded-full border-2 border-white/30 flex items-start justify-center p-2"
-          >
-            <motion.div className="w-1.5 h-1.5 rounded-full bg-white/50" />
+            </button>
           </motion.div>
         </motion.div>
       </div>
 
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-primary-50 to-transparent" />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.5, duration: 0.5 }}
+        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+      >
+        <motion.div
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2.4, ease: "easeInOut" }}
+        >
+          <ChevronDown className="w-6 h-6 text-white/40" />
+        </motion.div>
+        <span className="text-white/30 text-[10px] font-label uppercase tracking-widest">Scroll</span>
+      </motion.div>
     </section>
   );
 }

@@ -1,103 +1,89 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Radio, Volume2, Headphones } from "lucide-react";
+import { Radio, ExternalLink } from "lucide-react";
 
 export function RadioSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [isPlaying] = useState(false);
 
   return (
-    <section id="radio" ref={ref} className="py-28 md:py-36 bg-primary-900">
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16"
-        >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-500/20 text-accent-400 text-sm font-medium mb-6">
-            <Radio className="w-4 h-4" />
-            Hisdayspring Radio
-          </div>
-          <h2 className="font-serif text-4xl md:text-5xl font-bold text-white mb-6">
-            Listen Live 24/7
-          </h2>
-          <p className="text-white/70 text-lg max-w-2xl mx-auto">
-            Tune in to Hisdayspring Radio for spirit-filled music, worship, and ministry
-            broadcasts around the clock.
-          </p>
-          <div className="w-24 h-1 bg-accent-500 mx-auto rounded-full mt-8" />
-        </motion.div>
+    <section ref={ref} className="relative py-16 px-4 md:py-24 md:px-8">
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80')" }}
+      />
+      <div className="absolute inset-0 bg-primary/70" />
 
-        {/* Radio Player */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="max-w-3xl mx-auto"
-        >
-          <div className="bg-primary-800 rounded-3xl p-8 md:p-12">
-            {/* Station Info */}
-            <div className="flex items-center justify-center gap-4 mb-8">
-              <div className="w-16 h-16 rounded-full bg-accent-500 flex items-center justify-center">
-                <Volume2 className="w-8 h-8 text-primary-900" />
-              </div>
-              <div>
-                <h3 className="font-serif text-2xl font-bold text-white">
-                  Hisdayspring Radio
-                </h3>
-                <p className="text-white/60">Streaming 24/7 from Lagos, Nigeria</p>
-              </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6 }}
+        className="relative z-10 max-w-2xl mx-auto"
+      >
+        <div className="bg-white/10 backdrop-blur-md rounded-3xl border border-white/20 shadow-2xl overflow-hidden">
+          <div className="p-8 md:p-10 text-center">
+            <div className="inline-flex items-center gap-2 mb-4">
+              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+              <span className="uppercase tracking-widest text-xs font-bold text-white/90">
+                Live Broadcast
+              </span>
             </div>
 
-            {/* Now Playing */}
-            <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-500/20 text-accent-400 text-sm">
-                <Headphones className="w-4 h-4" />
-                {isPlaying ? "Now Playing" : "Click Play to Start"}
+            <h2 className="font-headline text-2xl md:text-4xl text-white mb-2">
+              Hisdayspring Radio
+            </h2>
+
+            <p className="text-white/80 mb-6">
+              Broadcasting Life and Hope to the Ends of the Earth
+            </p>
+
+            <div className="inline-flex items-center gap-3">
+              <div className="w-10 h-10 bg-secondary rounded-full flex items-center justify-center">
+                <Radio className="w-5 h-5 text-on-primary" />
               </div>
-            </div>
-
-            {/* Zeno.fm Embed */}
-            <div className="rounded-2xl overflow-hidden bg-black/50">
-              <iframe
-                src="https://zeno.fm/radio/hisdayspringradio"
-                width="100%"
-                height="250"
-                frameBorder="0"
-                scrolling="no"
-                allow="autoplay"
-                title="Hisdayspring Radio"
-                className="w-full"
-              />
-            </div>
-
-            {/* Listen on other platforms */}
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
-              <a
-                href="https://zeno.fm/radio/hisdayspringradio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm font-medium transition-colors"
-              >
-                Open in Zeno.fm
-              </a>
-              <a
-                href="https://www.facebook.com/hisdayspring"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm font-medium transition-colors"
-              >
-                Follow on Facebook
-              </a>
+              <div className="text-left">
+                <p className="text-white font-semibold text-sm">Hisdayspring Radio</p>
+                <p className="text-white/60 text-xs">Streaming 24/7</p>
+              </div>
             </div>
           </div>
-        </motion.div>
-      </div>
+
+          <div className="border-t border-white/10">
+            <iframe
+              src="https://zeno.fm/radio/hisdayspringradio"
+              width="100%"
+              height="150"
+              scrolling="no"
+              allow="autoplay"
+              title="Hisdayspring Radio"
+              className="w-full border-0"
+            />
+          </div>
+        </div>
+
+        <div className="flex gap-3 md:gap-6 mt-6">
+          <a
+            href="https://zeno.fm/radio/hisdayspringradio"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Open in Zeno.fm
+          </a>
+          <a
+            href="https://www.facebook.com/hisdayspring"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-white/80 hover:text-white text-sm font-medium transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            Follow on Facebook
+          </a>
+        </div>
+      </motion.div>
     </section>
   );
 }

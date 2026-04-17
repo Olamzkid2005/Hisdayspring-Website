@@ -3,6 +3,17 @@ import {
   AboutSection,
   PastorSection,
   ServiceTimesSection,
+  SermonsSection,
+  RadioSection,
+  MinistriesSection,
+  EventsSection,
+  GiveSection,
+  BooksSection,
+  LiveStreamSection,
+  TestimonialsSection,
+  GallerySection,
+  PrayerSection,
+  ContactSection,
 } from "@/components/sections";
 
 export default function Home() {
@@ -12,6 +23,17 @@ export default function Home() {
       <AboutSection />
       <PastorSection />
       <ServiceTimesSection />
+      <SermonsSection />
+      <RadioSection />
+      <MinistriesSection />
+      <EventsSection />
+      <GiveSection />
+      <BooksSection />
+      <LiveStreamSection />
+      <TestimonialsSection />
+      <GallerySection />
+      <PrayerSection />
+      <ContactSection />
     </>
   );
 }

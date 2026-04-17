@@ -51,7 +51,7 @@ export const ministries: Ministry[] = [
     name: "Upper Room Prayer Link",
     description:
       "A dedicated prayer programme for deep spiritual connection and intercession for the needs of the church and community.",
-    icon: "Pray",
+    icon: "Heart",
     imageUrl: "/images/ministries/upper-room.jpg",
   },
   {

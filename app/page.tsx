@@ -15,6 +15,7 @@ import {
   GallerySection,
   PrayerSection,
   ContactSection,
+  SocialSection,
 } from "@/components/sections";
 
 export default function Home() {
@@ -34,6 +35,7 @@ export default function Home() {
       <LiveStreamSection />
       <TestimonialsSection />
       <GallerySection />
+      <SocialSection />
       <PrayerSection />
       <ContactSection />
     </>

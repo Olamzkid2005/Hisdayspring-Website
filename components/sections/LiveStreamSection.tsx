@@ -1,16 +1,38 @@
 "use client";
 
-import { useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Radio, Calendar, Users } from "lucide-react";
+import { Radio, Calendar, Users, Loader2 } from "lucide-react";
+import type { LiveStreamStatus } from "@/types";
 
 export function LiveStreamSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  // In production, this would be fetched from /api/livestream
-  // For now, always show offline state
-  const isLive = false;
+  const [liveStatus, setLiveStatus] = useState<LiveStreamStatus | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchLiveStatus() {
+      try {
+        const response = await fetch("/api/livestream");
+        if (response.ok) {
+          const data = await response.json();
+          setLiveStatus(data);
+        }
+      } catch (error) {
+        console.error("Error fetching live status:", error);
+        setLiveStatus({ isLive: false });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLiveStatus();
+    // Refresh every 60 seconds
+    const interval = setInterval(fetchLiveStatus, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Get next service time
   const getNextService = () => {
@@ -34,6 +56,7 @@ export function LiveStreamSection() {
   };
 
   const nextService = getNextService();
+  const isLive = liveStatus?.isLive ?? false;
 
   return (
     <section id="livestream" ref={ref} className="py-28 md:py-36 bg-primary-950">
@@ -69,13 +92,23 @@ export function LiveStreamSection() {
             {/* Live Status Bar */}
             <div className="flex items-center justify-between px-6 py-4 bg-primary-800">
               <div className="flex items-center gap-3">
-                {isLive ? (
+                {isLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 text-white/60 animate-spin" />
+                    <span className="text-white/60">Checking...</span>
+                  </>
+                ) : isLive ? (
                   <>
                     <span className="relative flex h-3 w-3">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
                     </span>
                     <span className="text-red-400 font-medium">LIVE</span>
+                    {liveStatus?.viewerCount && (
+                      <span className="text-white/60 text-sm">
+                        {liveStatus.viewerCount.toLocaleString()} watching
+                      </span>
+                    )}
                   </>
                 ) : (
                   <>
@@ -97,10 +130,15 @@ export function LiveStreamSection() {
 
             {/* Video Area */}
             <div className="aspect-video bg-black flex items-center justify-center">
-              {isLive ? (
+              {isLoading ? (
+                <div className="text-center">
+                  <Loader2 className="w-12 h-12 text-primary-500 animate-spin mx-auto mb-4" />
+                  <p className="text-white/60">Connecting to stream...</p>
+                </div>
+              ) : isLive && liveStatus ? (
                 <iframe
-                  src="https://www.youtube.com/embed/@hisdayspring?autoplay=1"
-                  title="Hisdayspring Live Stream"
+                  src={`https://www.youtube.com/embed/${liveStatus.videoId}?autoplay=1`}
+                  title={liveStatus.title || "Hisdayspring Live Stream"}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="w-full h-full"
@@ -116,12 +154,21 @@ export function LiveStreamSection() {
                   <p className="text-white/60 mb-6">
                     Our next service will be broadcast live on YouTube
                   </p>
+                  <a
+                    href="https://www.youtube.com/@hisdayspring?sub_confirmation=1"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-medium transition-colors"
+                  >
+                    <YouTubeIcon className="w-5 h-5" />
+                    Subscribe for Notifications
+                  </a>
                 </div>
               )}
             </div>
 
             {/* Next Service Info */}
-            {!isLive && (
+            {!isLive && !isLoading && (
               <div className="p-6 bg-primary-800/50">
                 <div className="flex items-center justify-center gap-8 text-center">
                   <div>
@@ -163,5 +210,18 @@ export function LiveStreamSection() {
         </motion.div>
       </div>
     </section>
+  );
+}
+
+// YouTube icon component
+function YouTubeIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+    </svg>
   );
 }

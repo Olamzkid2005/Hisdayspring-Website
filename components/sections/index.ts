@@ -7,6 +7,7 @@ export { RadioSection } from "./RadioSection";
 export { MinistriesSection } from "./MinistriesSection";
 export { EventsSection } from "./EventsSection";
 export { GiveSection } from "./GiveSection";
+export { DonationSection } from "./DonationSection";
 export { BooksSection } from "./BooksSection";
 export { LiveStreamSection } from "./LiveStreamSection";
 export { TestimonialsSection } from "./TestimonialsSection";

@@ -8,6 +8,7 @@ import {
   MinistriesSection,
   EventsSection,
   GiveSection,
+  DonationSection,
   BooksSection,
   LiveStreamSection,
   TestimonialsSection,
@@ -28,6 +29,7 @@ export default function Home() {
       <MinistriesSection />
       <EventsSection />
       <GiveSection />
+      <DonationSection />
       <BooksSection />
       <LiveStreamSection />
       <TestimonialsSection />

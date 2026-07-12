@@ -69,13 +69,21 @@ export function ContactSection() {
                 <Phone className="w-6 h-6" />
               </span>
               <div>
-                <h3 className="font-headline text-lg font-semibold text-on-surface">Office Line</h3>
+                <h3 className="font-headline text-lg font-semibold text-on-surface">Office Lines</h3>
                 <a
                   href={`tel:${contactInfo.phone.replace(/\s/g, "")}`}
                   className="text-on-surface-variant mt-1 block hover:text-primary transition-colors"
                 >
                   {contactInfo.phone}
                 </a>
+                {contactInfo.phoneAlt && (
+                  <a
+                    href={`tel:${contactInfo.phoneAlt.replace(/\s/g, "")}`}
+                    className="text-on-surface-variant mt-1 block hover:text-primary transition-colors"
+                  >
+                    {contactInfo.phoneAlt}
+                  </a>
+                )}
               </div>
             </div>
 

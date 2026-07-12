@@ -2,19 +2,39 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { GraduationCap, BookOpen } from "lucide-react";
-import { pastorInfo, spouseInfo } from "@/data";
+import { Heart, Users, Home } from "lucide-react";
+
+const leadMessage = {
+  name: "Pastor Blessing Olamijulo",
+  title: "General Overseer and Lead Pastor",
+  greeting:
+    "Welcome home! We are delighted that you have found your way to Hisdayspring Evangelical Ministries International. Whether you are visiting for the first time or taking a step of faith to make this your church family, we want you to know — you are not just welcome here, you belong here.",
+  message:
+    "Hisdayspring is more than a church; it is a spiritual home where lives are transformed, destinies are fulfilled, and families are built on the solid foundation of God's Word. Our commission is to raise holy, healthy, and wealthy people who will impact their world with the love and power of Christ. As you journey with us, expect to encounter the presence of God, experience genuine community, and discover your purpose in the Kingdom. This is your house. This is your family. We are honoured to walk with you.",
+};
+
+const residentMessage = {
+  name: "Pastor (Mrs) Adebamigbe Olamijulo",
+  title: "Resident Pastor",
+  greeting:
+    "It is with great joy that I welcome you to Hisdayspring — a place where you will find love, warmth, and a community that truly cares. From the moment you walk through our doors, you are family. We believe that every person matters to God and to us.",
+  message:
+    "Whether you are taking your first step in faith or looking for a place to grow and serve, you have found your spiritual home. Here, we raise sons and daughters who know their God and walk in their purpose. I personally assure you that you will be loved, nurtured, and supported every step of the way. Welcome to a family where your story meets God's grace.",
+};
 
 export function PastorSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const pastorParagraphs = pastorInfo.biography.split("\n\n");
-  const spouseParagraphs = spouseInfo.biography.split("\n\n");
-
   return (
-    <section ref={ref} className="py-16 md:py-32 px-6 md:px-12 bg-surface-container-low">
+    <section
+      id="welcome"
+      ref={ref}
+      className="py-16 md:py-32 px-6 md:px-12 bg-surface-container-low"
+      aria-labelledby="welcome-heading"
+    >
       <div className="max-w-7xl mx-auto">
+        {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -22,91 +42,95 @@ export function PastorSection() {
           className="flex items-end gap-4 md:gap-8 mb-12 md:mb-24"
         >
           <div className="max-w-2xl">
-            <h2 className="font-headline text-4xl md:text-5xl text-on-surface">
-              Spiritual Guidance & <em className="text-secondary">Leadership</em>
+            <h2
+              id="welcome-heading"
+              className="font-headline text-4xl md:text-5xl text-on-surface"
+            >
+              Welcome to <em className="text-secondary">Hisdayspring</em>
             </h2>
           </div>
           <div className="hidden md:block flex-1 h-px bg-outline-variant" />
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-16 md:gap-24">
+        {/* Content — image + messages */}
+        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+          {/* Left — welcoming image */}
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.15 }}
+            initial={{ opacity: 0, x: -30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.7, delay: 0.15 }}
             className="relative"
           >
-            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
+            <div className="relative aspect-[4/3] md:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
               <img
-                src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2b?w=600&q=80"
-                alt={pastorInfo.name}
+                src="/images/pastors/Main Pastors.jpg"
+                alt="Hisdayspring Ministries family gathering"
                 className="w-full h-full object-cover"
               />
-            </div>
-            <div className="mt-8">
-              <h3 className="font-headline text-2xl md:text-3xl text-on-surface">{pastorInfo.name}</h3>
-              <p className="font-label text-secondary font-bold tracking-widest uppercase text-sm mt-1">
-                {pastorInfo.title}
-              </p>
-            </div>
-            <div className="mt-6 space-y-4">
-              {pastorParagraphs.map((p, i) => (
-                <p key={i} className="text-on-surface-variant leading-relaxed">{p}</p>
-              ))}
-            </div>
-            <div className="mt-6">
-              <div className="flex items-center gap-2 mb-3">
-                <GraduationCap className="w-4 h-4 text-secondary" />
-                <span className="font-label text-secondary font-bold tracking-widest uppercase text-xs">Education</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {pastorInfo.education.map((edu) => (
-                  <span key={edu} className="px-3 py-1 bg-primary/10 text-on-surface-variant rounded-full text-xs font-medium">
-                    {edu}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="mt-4">
-              <div className="flex items-center gap-2 mb-3">
-                <BookOpen className="w-4 h-4 text-secondary" />
-                <span className="font-label text-secondary font-bold tracking-widest uppercase text-xs">Ministries</span>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {pastorInfo.ministries.map((ministry) => (
-                  <span key={ministry} className="px-3 py-1 bg-secondary/10 text-on-secondary-container rounded-full text-xs font-medium">
-                    {ministry}
-                  </span>
-                ))}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/90 text-on-primary rounded-full text-sm font-medium backdrop-blur-sm">
+                  <Heart className="w-4 h-4" fill="currentColor" />
+                  Your New Spiritual Home
+                </div>
               </div>
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="relative md:mt-24"
-          >
-            <div className="relative aspect-[4/5] rounded-2xl overflow-hidden">
-              <img
-                src="https://images.unsplash.com/photo-1580489944761-15a07f5216ba?w=600&q=80"
-                alt={spouseInfo.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="mt-8">
-              <h3 className="font-headline text-2xl md:text-3xl text-on-surface">{spouseInfo.name}</h3>
-              <p className="font-label text-secondary font-bold tracking-widest uppercase text-sm mt-1">
-                {spouseInfo.title}
+          {/* Right — welcoming messages */}
+          <div className="space-y-10 md:space-y-16">
+            {/* Lead Pastor */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.7, delay: 0.25 }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Home className="w-4 h-4 text-primary" />
+                <span className="font-label text-primary font-bold tracking-widest uppercase text-xs">
+                  From the Lead Pastor
+                </span>
+              </div>
+              <h3 className="font-headline text-xl md:text-2xl text-on-surface mb-1">
+                {leadMessage.name}
+              </h3>
+              <p className="font-label text-secondary font-bold tracking-widest uppercase text-xs mb-4">
+                {leadMessage.title}
               </p>
-            </div>
-            <div className="mt-6 space-y-4">
-              {spouseParagraphs.map((p, i) => (
-                <p key={i} className="text-on-surface-variant leading-relaxed">{p}</p>
-              ))}
-            </div>
-          </motion.div>
+              <p className="text-on-surface-variant leading-relaxed mb-4">
+                {leadMessage.greeting}
+              </p>
+              <p className="text-on-surface-variant leading-relaxed">
+                {leadMessage.message}
+              </p>
+            </motion.div>
+
+            {/* Resident Pastor */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              transition={{ duration: 0.7, delay: 0.4 }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="w-4 h-4 text-secondary" />
+                <span className="font-label text-secondary font-bold tracking-widest uppercase text-xs">
+                  From the Resident Pastor
+                </span>
+              </div>
+              <h3 className="font-headline text-xl md:text-2xl text-on-surface mb-1">
+                {residentMessage.name}
+              </h3>
+              <p className="font-label text-secondary font-bold tracking-widest uppercase text-xs mb-4">
+                {residentMessage.title}
+              </p>
+              <p className="text-on-surface-variant leading-relaxed mb-4">
+                {residentMessage.greeting}
+              </p>
+              <p className="text-on-surface-variant leading-relaxed">
+                {residentMessage.message}
+              </p>
+            </motion.div>
+          </div>
         </div>
       </div>
     </section>

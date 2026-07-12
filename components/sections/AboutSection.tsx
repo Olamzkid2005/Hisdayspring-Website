@@ -43,12 +43,13 @@ export function AboutSection() {
         }}
       />
 
-      <span
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-primary/5 font-headline select-none pointer-events-none"
-        style={{ fontSize: "clamp(20rem, 40vw, 50rem)", lineHeight: 1 }}
-      >
-        H
-      </span>
+      <img
+        src="/images/logo/logo crop.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 select-none pointer-events-none"
+        style={{ width: "clamp(20rem, 40vw, 50rem)", height: "auto", maxWidth: "70vw" }}
+      />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 relative">
         <div className="md:col-span-7 flex flex-col gap-16 relative">

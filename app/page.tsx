@@ -2,6 +2,7 @@ import {
   HeroSection,
   AboutSection,
   PastorSection,
+  WorkforceSection,
   ServiceTimesSection,
   SermonsSection,
   RadioSection,
@@ -23,6 +24,7 @@ export default function Home() {
       <HeroSection />
       <AboutSection />
       <PastorSection />
+      <WorkforceSection />
       <ServiceTimesSection />
       <SermonsSection />
       <RadioSection />

@@ -11,7 +11,9 @@ export function Navigation() {
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = navigationLinks.map((link) => link.id);
+      const sections = navigationLinks
+        .map((link) => link.id)
+        .filter((id) => id !== "giving");
       const scrollPosition = window.scrollY + 100;
 
       for (const sectionId of sections.reverse()) {
@@ -29,7 +31,7 @@ export function Navigation() {
 
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth >= 768) {
+      if (window.innerWidth >= 1024) {
         setIsMobileMenuOpen(false);
       }
     };
@@ -48,8 +50,16 @@ export function Navigation() {
     };
   }, [isMobileMenuOpen]);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
+  const navigateTo = (linkId: string) => {
+    const link = navigationLinks.find((l) => l.id === linkId);
+    // If the href is a page path (starts with / but not /#), navigate to page
+    if (link && link.href.startsWith("/") && !link.href.startsWith("/#")) {
+      window.location.href = link.href;
+      setIsMobileMenuOpen(false);
+      return;
+    }
+    // Otherwise, scroll to the section on the current page
+    const element = document.getElementById(linkId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
     }
@@ -61,18 +71,22 @@ export function Navigation() {
       <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md">
         <div className="flex justify-between items-center px-4 md:px-8 py-4 max-w-screen-2xl mx-auto">
           <button
-            onClick={() => scrollToSection("home")}
-            className="text-2xl font-bold tracking-tight text-rose-700 font-headline"
+            onClick={() => navigateTo("home")}
+            className="flex items-center gap-2"
           >
-            Hisdayspring
+            <img
+              src="/images/logo/Logo-Website.png"
+              alt="Hisdayspring"
+              className="h-10 w-auto"
+            />
           </button>
 
-          <div className="hidden md:flex gap-8 items-center font-headline text-lg font-medium">
+          <div className="hidden lg:flex gap-6 xl:gap-8 items-center font-headline text-base xl:text-lg font-medium">
             {navigationLinks.slice(0, 8).map((link) => (
               <button
                 key={link.id}
-                onClick={() => scrollToSection(link.id)}
-                className={`transition-colors ${
+                onClick={() => navigateTo(link.id)}
+                className={`transition-colors whitespace-nowrap ${
                   activeSection === link.id
                     ? "text-rose-700 font-bold border-b-2 border-amber-500 pb-1"
                     : "text-zinc-600 hover:text-rose-600"
@@ -83,10 +97,10 @@ export function Navigation() {
             ))}
           </div>
 
-          <div className="hidden md:block">
+          <div className="hidden lg:block">
             <button
-              onClick={() => scrollToSection("give")}
-              className="bg-primary text-on-primary px-6 py-2 rounded-full font-medium hover:brightness-110 transition-all min-h-[44px]"
+              onClick={() => navigateTo("giving")}
+              className="bg-primary text-on-primary px-6 py-2 rounded-full font-medium hover:brightness-110 transition-all min-h-[44px] whitespace-nowrap"
             >
               Give Online
             </button>
@@ -94,7 +108,7 @@ export function Navigation() {
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-3 text-zinc-600 hover:text-rose-600 transition-colors relative z-50 pointer-events-auto touch-manipulation"
+            className="lg:hidden p-3 text-zinc-600 hover:text-rose-600 transition-colors relative z-50 pointer-events-auto touch-manipulation"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
           >
@@ -114,7 +128,7 @@ export function Navigation() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-zinc-950/60 backdrop-blur-sm md:hidden"
+            className="fixed inset-0 z-40 bg-zinc-950/60 backdrop-blur-sm lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <motion.div
@@ -127,9 +141,11 @@ export function Navigation() {
             >
               <div className="flex flex-col h-full">
                 <div className="flex items-center justify-between p-6 border-b border-zinc-100">
-                  <span className="text-xl font-bold tracking-tight text-rose-700 font-headline">
-                    Hisdayspring
-                  </span>
+                  <img
+                    src="/images/logo/Logo-Website.png"
+                    alt="Hisdayspring"
+                    className="h-8 w-auto"
+                  />
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
                     className="p-2 text-zinc-600 hover:text-rose-600 transition-colors"
@@ -143,7 +159,7 @@ export function Navigation() {
                   {navigationLinks.map((link, index) => (
                     <motion.button
                       key={link.id}
-                      onClick={() => scrollToSection(link.id)}
+                onClick={() => navigateTo(link.id)}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.05 }}
@@ -160,7 +176,7 @@ export function Navigation() {
 
                 <div className="p-6 border-t border-zinc-100">
                   <button
-                    onClick={() => scrollToSection("give")}
+              onClick={() => navigateTo("giving")}
                     className="block w-full bg-primary text-on-primary px-6 py-3 rounded-full font-medium text-center hover:brightness-110 transition-all min-h-[44px]"
                   >
                     Give Online

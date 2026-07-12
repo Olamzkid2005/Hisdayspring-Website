@@ -40,13 +40,13 @@ export function LiveStreamSection() {
     nextSunday.setDate(now.getDate() + daysUntilSunday);
 
     return {
-      name: "Sunday Glory Service",
+      name: "Sunday Service",
       date: nextSunday.toLocaleDateString("en-US", {
         weekday: "long",
         month: "long",
         day: "numeric",
       }),
-      time: "9:30 AM",
+      time: "8:00 AM",
     };
   };
 
@@ -95,8 +95,8 @@ export function LiveStreamSection() {
                 </a>
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-gradient-to-t from-black/80 to-transparent">
-                <h2 className="font-headline text-xl md:text-3xl text-white">Sunday Glory Service</h2>
-                <p className="text-zinc-300">Join us live every Sunday for powerful worship and the Word</p>
+                <h2 className="font-headline text-xl md:text-3xl text-white">Sunday Service</h2>
+                <p className="text-zinc-300">Join us live every Sunday at 8am, 10am, or 12noon</p>
               </div>
             </>
           )}

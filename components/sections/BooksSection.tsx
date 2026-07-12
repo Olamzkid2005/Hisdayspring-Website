@@ -5,26 +5,6 @@ import { motion, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { books } from "@/data/books";
 
-const coverGradients = [
-  "from-primary to-primary-container",
-  "from-secondary to-secondary-container",
-  "from-primary-container to-primary",
-];
-
-function BookCover({ title, index }: { title: string; index: number }) {
-  const gradient = coverGradients[index % coverGradients.length];
-
-  return (
-    <div className={`w-full h-full bg-gradient-to-br ${gradient} flex flex-col items-center justify-center p-6 relative overflow-hidden`}>
-      <div className="w-3/4 h-px bg-white/20 mb-6" />
-      <h4 className="font-serif text-white text-center text-lg leading-snug drop-shadow-lg relative z-10">
-        {title}
-      </h4>
-      <div className="w-3/4 h-px bg-white/20 mt-6" />
-    </div>
-  );
-}
-
 export function BooksSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -66,9 +46,12 @@ export function BooksSection() {
             className="group"
           >
             <div className="aspect-[3/4] bg-surface-container rounded-xl overflow-hidden mb-6 relative">
-              <div className="w-full h-full group-hover:scale-105 transition-transform duration-500">
-                <BookCover title={book.title} index={index} />
-              </div>
+              <img
+                src={book.imageUrl}
+                alt={book.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                loading={index < 4 ? "eager" : "lazy"}
+              />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <a
                   href={book.purchaseUrl}

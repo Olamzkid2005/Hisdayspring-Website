@@ -1,50 +1,80 @@
 /**
  * Service times data
- * PLACEHOLDER - Church to confirm actual times
+ * Real content provided by the church
  */
 
 import type { ServiceTime } from "@/types";
 
 export const serviceTimes: ServiceTime[] = [
+  // ── Sunday Services ──
+  // 1st Sunday: Thanksgiving | 3rd Sunday: Friends & Family | Last Sunday: SuperSunday/Communion
   {
-    id: "sunday-first",
-    name: "Sunday First Service",
+    id: "sunday-8am",
+    name: "Sunday Service",
     day: "Sunday",
-    time: "7:00 AM – 9:00 AM",
+    time: "8:00 AM",
     branch: "Both",
-    description: "Our first Sunday worship service where we gather to praise and worship God.",
+    description:
+      "1st Sunday: Thanksgiving Service | 3rd Sunday: Friends & Family Sunday | Last Sunday: SuperSunday / Communion Service",
   },
   {
-    id: "sunday-second",
-    name: "Sunday Second Service",
+    id: "sunday-10am",
+    name: "Sunday Service",
     day: "Sunday",
-    time: "9:30 AM – 11:30 AM",
+    time: "10:00 AM",
     branch: "Both",
-    description: "Our second Sunday worship service with powerful worship and impactful preaching.",
+    description:
+      "1st Sunday: Thanksgiving Service | 3rd Sunday: Friends & Family Sunday | Last Sunday: SuperSunday / Communion Service",
   },
   {
-    id: "midweek",
-    name: "Midweek Service",
+    id: "sunday-12noon",
+    name: "Sunday Service",
+    day: "Sunday",
+    time: "12:00 PM",
+    branch: "Both",
+    description:
+      "1st Sunday: Thanksgiving Service | 3rd Sunday: Friends & Family Sunday | Last Sunday: SuperSunday / Communion Service",
+  },
+
+  // ── Tuesday ──
+  {
+    id: "tuesday",
+    name: "Hour of Revelation",
+    day: "Tuesday",
+    time: "8:00 AM",
+    branch: "Both",
+    description: "Morning prayer and revelation hour to start your day with the Word.",
+  },
+
+  // ── Wednesday ──
+  {
+    id: "wednesday",
+    name: "Word Study",
     day: "Wednesday",
-    time: "6:00 PM – 8:00 PM",
+    time: "5:30 PM",
     branch: "Both",
-    description: "Midweek Bible study and prayer meeting for spiritual growth and empowerment.",
+    description: "Midweek Bible study and word study session for spiritual growth.",
   },
+
+  // ── 2nd Saturday ──
   {
-    id: "yofic",
-    name: "YOFIC Youth Service",
-    day: "Friday",
-    time: "5:00 PM – 7:00 PM",
-    branch: "Ipaja",
-    description: "Youth of Faith in Christ - Our vibrant youth service for young people.",
-  },
-  {
-    id: "women",
-    name: "The Jewels Women's Program",
-    day: "Monthly",
-    time: "Varies",
+    id: "mens-breakfast",
+    name: "Men's Breakfast Club",
+    day: "Saturday",
+    time: "8:00 AM",
     branch: "Both",
-    description: "Monthly breakfast meeting for women focused on fulfilling destinies and maximizing potentials.",
+    description: "Every 2nd Saturday of the month — a breakfast meeting for men.",
+  },
+
+  // ── 4th Saturday ──
+  {
+    id: "jewels",
+    name: "The Jewels & Winning Women Breakfast Meeting",
+    day: "Saturday",
+    time: "8:00 AM",
+    branch: "Both",
+    description:
+      "Every 4th Saturday of the month — a breakfast meeting for women (ages 18–45, single & married).",
   },
 ];
 

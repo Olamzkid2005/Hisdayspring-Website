@@ -39,9 +39,9 @@ export const donationPurposes: DonationPurposeOption[] = [
 ];
 
 export const bankAccount: BankAccount = {
-  bankName: "First Bank of Nigeria",
-  accountNumber: "1234567890",
-  accountName: "Hisdayspring Evangelical Ministries Intl",
+  bankName: "Access Bank",
+  accountNumber: "0054510585",
+  accountName: "Hisdayspring Evangelical International",
 };
 
 export const scriptureReferences = [

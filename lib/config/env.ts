@@ -51,7 +51,7 @@ export const config: EnvConfig = {
   googleMapsApiKey: getOptionalEnv("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"),
 
   // WhatsApp number for floating button
-  whatsappNumber: getEnv("NEXT_PUBLIC_WHATSAPP_NUMBER", "+2349066192155"),
+  whatsappNumber: getEnv("NEXT_PUBLIC_WHATSAPP_NUMBER", "+2348077829444"),
 };
 
 // Validate on module load (server-side only)

@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Clock, BookOpen, Users, Church } from "lucide-react";
+import { Clock, BookOpen, Sunrise, Church } from "lucide-react";
 import { serviceTimes } from "@/data";
 
 export function ServiceTimesSection() {
@@ -11,9 +11,9 @@ export function ServiceTimesSection() {
 
   const sundayServices = serviceTimes.filter((s) => s.day === "Sunday");
   const midweekServices = serviceTimes.filter((s) => s.day === "Wednesday");
-  const youthServices = serviceTimes.filter((s) => s.day === "Friday");
+  const tuesdayServices = serviceTimes.filter((s) => s.day === "Tuesday");
   const otherServices = serviceTimes.filter(
-    (s) => !["Sunday", "Wednesday", "Friday"].includes(s.day)
+    (s) => !["Sunday", "Wednesday", "Tuesday", "Friday"].includes(s.day)
   );
 
   return (
@@ -34,7 +34,7 @@ export function ServiceTimesSection() {
             </h2>
             <p className="text-on-surface-variant text-base md:text-lg mt-6 leading-relaxed">
               We gather throughout the week in various settings — from Sunday worship
-              celebrations to midweek Bible studies and vibrant youth services. Come
+              celebrations to Tuesday revelation hours and Wednesday word studies. Come
               and experience the presence of God with us.
             </p>
           </motion.div>
@@ -116,22 +116,22 @@ export function ServiceTimesSection() {
                 </motion.div>
               )}
 
-              {youthServices.length > 0 && (
+              {tuesdayServices.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.3 }}
+                  transition={{ duration: 0.5, delay: 0.25 }}
                   className="bg-surface-container-highest p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
                   <div className="rounded-lg bg-secondary/10 p-3 flex-shrink-0">
-                    <Users className="w-6 h-6 text-secondary" />
+                    <Sunrise className="w-6 h-6 text-secondary" />
                   </div>
                   <div>
                     <h4 className="font-label font-bold text-on-surface">
-                      {youthServices[0].name}
+                      {tuesdayServices[0].name}
                     </h4>
                     <p className="text-sm text-on-surface-variant mt-0.5">
-                      {youthServices[0].day} · {youthServices[0].time}
+                      {tuesdayServices[0].day} · {tuesdayServices[0].time}
                     </p>
                   </div>
                 </motion.div>

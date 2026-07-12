@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { Heart } from "lucide-react";
 import { Input, Button } from "@/components/ui";
 import { useFormValidation } from "@/hooks";
+import { config } from "@/lib/config";
 
 export function PrayerSection() {
   const ref = useRef<HTMLElement>(null);
@@ -24,17 +25,25 @@ export function PrayerSection() {
       prayerRequest: { required: true, minLength: 10 },
     },
     onSubmit: async (values) => {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Prayer request submitted:", values);
-      alert("Thank you for your prayer request. Our prayer team will pray for you.");
+      const phone = config.whatsappNumber.replace(/\s/g, "").replace("+", "");
+      const message = `Prayer Request from ${values.name} (${values.email}):%0A%0A${encodeURIComponent(values.prayerRequest)}`;
+      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
       resetForm();
     },
   });
 
   return (
     <section id="prayer" ref={ref} className="py-16 md:py-24 px-6">
-      <div className="max-w-4xl mx-auto bg-surface-container-lowest rounded-3xl p-8 md:p-16 relative overflow-hidden" style={{ boxShadow: "0 24px 48px -12px rgba(184, 0, 53, 0.06)" }}>
-
+      <div className="max-w-4xl mx-auto rounded-3xl p-8 md:p-16 relative overflow-hidden" style={{ boxShadow: "0 24px 48px -12px rgba(184, 0, 53, 0.06)" }}>
+        {/* Background image — subtle watermark style */}
+        <div className="absolute inset-0 -z-10">
+          <img
+            src="/images/gallery/DSC_5073.jpg"
+            alt=""
+            className="w-full h-full object-cover opacity-50"
+            aria-hidden="true"
+          />
+        </div>
 
         <motion.div
           initial={{ opacity: 0, y: 30 }}

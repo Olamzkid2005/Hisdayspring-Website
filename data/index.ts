@@ -15,3 +15,4 @@ export * from "./social";
 export * from "./navigation";
 export * from "./donations";
 export * from "./privacy";
+export * from "./workforce";

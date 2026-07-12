@@ -97,7 +97,7 @@ export function MinistriesSection() {
         className="text-center mt-8"
       >
         <a
-          href="https://wa.me/2349066192155?text=Hello, I would like to join one of the ministries at Hisdayspring"
+          href="https://wa.me/2348077829444?text=Hello, I would like to join one of the ministries at Hisdayspring"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-on-primary rounded-full font-medium hover:bg-primary-container hover:text-on-primary transition-colors"

@@ -9,7 +9,7 @@ export function RadioSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section ref={ref} className="relative py-16 px-4 md:py-24 md:px-8">
+    <section id="radio" ref={ref} className="relative py-16 px-4 md:py-24 md:px-8">
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: "url('https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80')" }}
@@ -50,16 +50,10 @@ export function RadioSection() {
             </div>
           </div>
 
-          <div className="border-t border-white/10">
-            <iframe
-              src="https://zeno.fm/radio/hisdayspringradio"
-              width="100%"
-              height="150"
-              scrolling="no"
-              allow="autoplay"
-              title="Hisdayspring Radio"
-              className="w-full border-0"
-            />
+          <div className="border-t border-white/10 p-6 bg-black/20">
+            <p className="text-white/70 text-center text-sm">
+              Click "Open in Zeno.fm" below to listen to the live stream
+            </p>
           </div>
         </div>
 

@@ -1,6 +1,6 @@
 /**
  * Books and resources data
- * Real content from pastorblessing.com/shop
+ * Matched to actual book cover images in /public/images/books/
  */
 
 import type { Book } from "@/types";
@@ -8,72 +8,96 @@ import type { Book } from "@/types";
 export const books: Book[] = [
   {
     id: "100-days-devotional",
-    title: "100 Days Devotional Prayer Book",
+    title: "100 Days Effective Devotional Prayer Manual",
     author: "Pastor Blessing Olamijulo",
     description:
       "A powerful 100-day devotional to strengthen your prayer life and deepen your relationship with God.",
     price: 500,
-    imageUrl: "/images/books/100-days-devotional.jpg",
+    imageUrl: "/images/books/100 Days Effective Devotional Prayer Manual.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/100-days-devotional-prayer-book/",
   },
   {
-    id: "entrepreneurs-handbook",
-    title: "Entrepreneurs Handbook",
+    id: "100-insights-relationship",
+    title: "100 Insights In Relationship",
     author: "Pastor Blessing Olamijulo",
     description:
-      "Essential guide for business owners and aspiring entrepreneurs seeking to build successful businesses God's way.",
-    price: 1200,
-    imageUrl: "/images/books/entrepreneurs-handbook.jpg",
+      "Practical wisdom and biblical insights for building godly relationships that stand the test of time.",
+    price: 1000,
+    imageUrl: "/images/books/100 Insights In Relationship.jpg",
     format: "both",
     availability: "in-stock",
-    purchaseUrl: "https://pastorblessing.com/product/entrepreneurs-handbook/",
+    purchaseUrl: "https://pastorblessing.com/shop/",
+  },
+  {
+    id: "hundred-lights",
+    title: "A Hundred Lights",
+    author: "Pastor Blessing Olamijulo",
+    description:
+      "Illuminating truths and spiritual insights to guide your walk with God and brighten your path.",
+    price: 1000,
+    imageUrl: "/images/books/A Hundred Lights.jpg",
+    format: "both",
+    availability: "in-stock",
+    purchaseUrl: "https://pastorblessing.com/shop/",
+  },
+  {
+    id: "be-youtiful",
+    title: "Be-Youtiful",
+    author: "Pastor Blessing Olamijulo",
+    description:
+      "Discover your true beauty and identity in Christ — a message for every young woman walking in purpose.",
+    price: 1000,
+    imageUrl: "/images/books/Be-Youtiful.jpg",
+    format: "both",
+    availability: "in-stock",
+    purchaseUrl: "https://pastorblessing.com/shop/",
   },
   {
     id: "made-to-be-whole",
-    title: "Made to Be Whole: How to Live A Healthy & Prosperous Life",
+    title: "Made To Be Whole",
     author: "Pastor Blessing Olamijulo",
     description:
       "Discover biblical principles for health, wealth, and prosperity in every area of your life.",
     price: 2000,
-    imageUrl: "/images/books/made-to-be-whole.jpg",
+    imageUrl: "/images/books/Made To Be Whole.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/made-to-be-whole/",
   },
   {
     id: "ministry-leadership",
-    title: "Ministry Leadership Building According To God's Pattern",
+    title: "Ministry Leadership",
     author: "Pastor Blessing Olamijulo",
     description:
       "A comprehensive guide for church leaders and ministers on building ministry according to God's divine pattern.",
     price: 2000,
-    imageUrl: "/images/books/ministry-leadership.jpg",
+    imageUrl: "/images/books/Ministry Leadership.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/ministry-leadership-building-according-to-gods-pattern/",
   },
   {
     id: "relationship-marriage",
-    title: "Relationship And Marriage",
+    title: "Relationship and Marriage",
     author: "Pastor Blessing Olamijulo",
     description:
       "Building strong, lasting relationships and marriages founded on the Rock of God's Word.",
     price: 1000,
-    imageUrl: "/images/books/relationship-marriage.jpg",
+    imageUrl: "/images/books/Relationship and Marriage.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/relationship-and-marriage/",
   },
   {
     id: "study-of-spirits",
-    title: "STUDY OF THE SPIRITS – Operating in the Supernatural",
+    title: "Study Of The Spirits",
     author: "Pastor Blessing Olamijulo",
     description:
       "Understanding spiritual forces and learning to operate in the supernatural power of God.",
     price: 2000,
-    imageUrl: "/images/books/study-of-spirits.jpg",
+    imageUrl: "/images/books/Study Of The Spirits.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/study-of-the-spirits/",
@@ -85,7 +109,7 @@ export const books: Book[] = [
     description:
       "The foundational principles of success according to God's Word for every area of life.",
     price: 1000,
-    imageUrl: "/images/books/success-pillars.jpg",
+    imageUrl: "/images/books/Sucess Pillars.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/success-pillars/",
@@ -97,10 +121,22 @@ export const books: Book[] = [
     description:
       "A youth-focused book on rising above challenges and soaring to great heights in God.",
     price: 500,
-    imageUrl: "/images/books/eagle-youth.jpg",
+    imageUrl: "/images/books/The Eagle Youth.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/the-eagle-youth/",
+  },
+  {
+    id: "entrepreneurs-handbook",
+    title: "The Entrepreneurs Handbook",
+    author: "Pastor Blessing Olamijulo",
+    description:
+      "Essential guide for business owners and aspiring entrepreneurs seeking to build successful businesses God's way.",
+    price: 1200,
+    imageUrl: "/images/books/The Entrepreneurs Handbook.jpg",
+    format: "both",
+    availability: "in-stock",
+    purchaseUrl: "https://pastorblessing.com/product/entrepreneurs-handbook/",
   },
   {
     id: "nurtured-star",
@@ -109,7 +145,7 @@ export const books: Book[] = [
     description:
       "For young people destined to shine, learn how to nurture your God-given potential.",
     price: 500,
-    imageUrl: "/images/books/nurtured-star.jpg",
+    imageUrl: "/images/books/The Nurtured Star.jpg",
     format: "both",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/the-nurtured-star/",
@@ -121,7 +157,7 @@ export const books: Book[] = [
     description:
       "Walking in righteousness and divine favor through practical biblical principles.",
     price: 3000,
-    imageUrl: "/images/books/righteous-walk.jpg",
+    imageUrl: "/images/books/The Righteous Walk.jpg",
     format: "physical",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/the-righteous-walk/",
@@ -133,22 +169,10 @@ export const books: Book[] = [
     description:
       "Understanding your role as a steward of God's resources and blessings.",
     price: 3000,
-    imageUrl: "/images/books/stewards-call.jpg",
+    imageUrl: "/images/books/The Stewards Call.jpg",
     format: "physical",
     availability: "in-stock",
     purchaseUrl: "https://pastorblessing.com/product/the-stewards-call/",
-  },
-  {
-    id: "unlocking-kingdom-wealth",
-    title: "Unlocking Kingdom Wealth",
-    author: "Pastor Blessing Olamijulo",
-    description:
-      "Discover the keys to divine prosperity and financial breakthrough in God's kingdom.",
-    price: 2000,
-    imageUrl: "/images/books/unlocking-kingdom-wealth.jpg",
-    format: "both",
-    availability: "in-stock",
-    purchaseUrl: "https://pastorblessing.com/product/unlocking-kingdom-wealth/",
   },
 ];
 

@@ -1,9 +1,49 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, ChevronDown } from "lucide-react";
+import { galleryPhotos } from "@/data/gallery";
+
+/** Fisher-Yates shuffle (client-only, never during SSR) */
+function shuffleArray<T>(arr: T[]): T[] {
+  const shuffled = [...arr];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
+const HERO_COUNT = 12;
 
 export function HeroSection() {
+  // Initialise deterministically with the first gallery photo (same on server & client).
+  // On client-mount, useEffect replaces it with a shuffled subset — no hydration error.
+  const fallbackUrl = galleryPhotos[0]?.imageUrl ?? "";
+  const [heroImages, setHeroImages] = useState<string[]>(
+    galleryPhotos.length > 0 ? [fallbackUrl] : []
+  );
+  const [currentImage, setCurrentImage] = useState(0);
+
+  // Seed random images on client only
+  useEffect(() => {
+    if (galleryPhotos.length > 0) {
+      setHeroImages(
+        shuffleArray(galleryPhotos).slice(0, HERO_COUNT).map((p) => p.imageUrl)
+      );
+    }
+  }, []);
+
+  // Auto-advance to a random image every 8s
+  useEffect(() => {
+    if (heroImages.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentImage(Math.floor(Math.random() * heroImages.length));
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [heroImages.length]);
+
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -13,17 +53,41 @@ export function HeroSection() {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage:
-            "url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80')",
-        }}
-      >
+      <div className="absolute inset-0 bg-zinc-900">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentImage}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="absolute inset-0"
+          >
+            <img
+              src={heroImages[currentImage]}
+              alt="Hisdayspring Ministries"
+              className="w-full h-full object-cover object-center"
+            />
+          </motion.div>
+        </AnimatePresence>
         <div className="absolute inset-0 bg-gradient-to-b from-[rgba(26,28,28,0.4)] to-[rgba(26,28,28,0.8)]" />
         <div className="absolute inset-0" style={{
           background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)",
         }} />
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+          {heroImages.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentImage(index)}
+              className={`w-2 h-2 rounded-full transition-all ${
+                index === currentImage
+                  ? "bg-white w-6"
+                  : "bg-white/40 hover:bg-white/60"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 text-center">
@@ -89,7 +153,7 @@ export function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 0.5 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
       >
         <motion.div
           animate={{ scale: [1, 1.15, 1] }}

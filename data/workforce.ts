@@ -1,0 +1,113 @@
+/**
+ * Workforce data — lead pastors, branch pastors, ministers, and department heads
+ * Real content from hisdayspring.org/meet-our-pastors/
+ */
+
+import type { WorkforceMember } from "@/types";
+
+export const workforce: WorkforceMember[] = [
+  {
+    id: "blessing-olamijulo",
+    name: "Pastor Blessing Olamijulo",
+    title: "General Overseer and Lead Pastor",
+    role: "lead-pastor",
+    biography: "",
+    imageUrl: "/images/gallery/DSC01528.jpg",
+    education: [
+      "CAC Theological Seminary",
+      "Christian Theological Seminary",
+      "WOFBI (Word of Faith Bible Institute)",
+      "DLA (Daystar Leadership Academy)",
+      "Church Growth Institute",
+    ],
+    spouse: "Pastor Adebamigbe Olamijulo",
+    children: "Three children",
+  },
+  {
+    id: "adebamigbe-olamijulo",
+    name: "Pastor Adebamigbe Olamijulo",
+    title: "Resident Pastor",
+    role: "lead-pastor",
+    biography: "",
+    imageUrl: "/images/pastors/pastor mrs.jpeg",
+    spouse: "Pastor Blessing Olamijulo",
+  },
+  {
+    id: "jooda-olaniyi",
+    name: "Pastor Jooda J Olaniyi",
+    title: "Pastor",
+    role: "minister",
+    biography: "",
+    imageUrl: "/images/pastors/Pastor Olaniyi Jooda.jpg",
+    education: [
+      "LAUTECH (B.Tech Chemical Engineering)",
+      "Christ International Divinity College (B.Sc Theology)",
+      "Blessing Ola Mentoring School (BOMS)",
+    ],
+    spouse: "Victoria M Jooda",
+    children: "Two children (Felicity and Favour)",
+  },
+  {
+    id: "soji-ogunlana",
+    name: "Pastor Soji Ogunlana",
+    title: "Pastor of Ikorodu Branch",
+    role: "branch-pastor",
+    biography: "",
+    imageUrl: "/images/pastors/Pastor Soji Ogunlana.jpg",
+    branch: "Ikorodu",
+    education: ["Lagos State University (Marketing)", "Blessing Ola Mentoring School (BOMS)"],
+    spouse: "Abosede Ogunlana",
+    children: "Two sons and a daughter",
+  },
+  {
+    id: "oloye-victor",
+    name: "Pastor Oloye Victor",
+    title: "Pastor of Junior Church & Friendship Care",
+    role: "minister",
+    biography: "",
+    imageUrl: "/images/pastors/Pastor Victor Oloye.jpg",
+    department: "Junior Church & Friendship Care",
+    spouse: "Funmi Oloye",
+    children: "A daughter",
+  },
+  {
+    id: "olusola-daniels",
+    name: "Minister Olusola Daniels",
+    title: "Minister",
+    role: "minister",
+    biography: "",
+    imageUrl: "/images/pastors/Minister Olusola Daniels.jpg",
+  },
+  {
+    id: "johnson-anefiok",
+    name: "Pastor Johnson Anefiok",
+    title: "Pastor",
+    role: "minister",
+    biography: "",
+    imageUrl: "/images/pastors/Pastor Johnson Anefiok.jpg",
+  },
+  {
+    id: "joseph-adewale",
+    name: "Pastor Joseph Adewale",
+    title: "Pastor",
+    role: "minister",
+    biography: "",
+    imageUrl: "/images/pastors/Pastor Joseph Adewale.jpg",
+  },
+  {
+    id: "nnamdi-dominic",
+    name: "Pastor Nnamdi Dominic",
+    title: "Pastor",
+    role: "minister",
+    biography: "",
+    imageUrl: "/images/pastors/Pastor Nnamdi Dominic.jpg",
+  },
+  {
+    id: "stephen-adebayo",
+    name: "Pastor Stephen Adebayo",
+    title: "Pastor",
+    role: "minister",
+    biography: "",
+    imageUrl: "/images/pastors/Pastor Stephen Adebayo.jpg",
+  },
+];

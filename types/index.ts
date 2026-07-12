@@ -48,6 +48,24 @@ export interface PastorInfo {
 }
 
 // =============================================================================
+// Workforce Section Types
+// =============================================================================
+
+export interface WorkforceMember {
+  id: string;
+  name: string;
+  title: string;
+  role: "lead-pastor" | "branch-pastor" | "minister" | "head-of-department";
+  biography: string;
+  imageUrl: string;
+  branch?: string;
+  department?: string;
+  education?: string[];
+  spouse?: string;
+  children?: string;
+}
+
+// =============================================================================
 // Service Times Types
 // =============================================================================
 
@@ -126,7 +144,7 @@ export interface Testimonial {
 // Gallery Types
 // =============================================================================
 
-export type GalleryCategory = "sunday-services" | "youth-events" | "women-program" | "special-events";
+export type GalleryCategory = "sunday-services" | "youth-events" | "women-program" | "special-events" | "prayer-wall";
 
 export interface GalleryPhoto {
   id: string;
@@ -152,6 +170,7 @@ export interface BranchAddress {
 export interface ContactInfo {
   email: string;
   phone: string;
+  phoneAlt?: string;
   whatsapp: string;
   addresses: BranchAddress[];
   officeHours?: string;

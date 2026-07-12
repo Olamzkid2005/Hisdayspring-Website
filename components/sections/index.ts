@@ -14,3 +14,4 @@ export { GallerySection } from "./GallerySection";
 export { PrayerSection } from "./PrayerSection";
 export { ContactSection } from "./ContactSection";
 export { SocialSection } from "./SocialSection";
+export { WorkforceSection } from "./WorkforceSection";

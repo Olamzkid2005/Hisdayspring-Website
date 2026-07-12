@@ -110,15 +110,10 @@ export function GiveSection() {
           <div className="space-y-3">
             <button
               type="button"
-              className="w-full py-4 rounded-full font-bold text-white bg-[#09a5db] hover:opacity-90 transition-opacity"
+              onClick={() => window.location.href = "/giving"}
+              className="w-full py-4 rounded-full font-bold text-white bg-primary hover:brightness-110 transition-all shadow-lg shadow-primary/20"
             >
-              Give with Paystack
-            </button>
-            <button
-              type="button"
-              className="w-full py-4 rounded-full font-bold text-white bg-[#f5a623] hover:opacity-90 transition-opacity"
-            >
-              Give with Flutterwave
+              Give Online
             </button>
           </div>
         </motion.div>

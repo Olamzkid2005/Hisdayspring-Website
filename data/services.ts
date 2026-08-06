@@ -70,7 +70,7 @@ export const serviceTimes: ServiceTime[] = [
   {
     id: "jewels",
     name: "The Jewels & Winning Women Breakfast Meeting",
-    day: "Saturday",
+    day: "Every 4th Saturday of the Month",
     time: "8:00 AM",
     branch: "Both",
     description:

@@ -2,20 +2,10 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Users } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Users } from "lucide-react";
 import { ministries } from "@/data";
 import type { Ministry } from "@/types";
-
-const imageMap: Record<string, string> = {
-  yofic: "https://images.unsplash.com/photo-1529156065178-6eb3e864a1c3?w=800&q=80",
-  discovery: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&q=80",
-  jewels: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80",
-  boms: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
-  friendship: "https://images.unsplash.com/photo-1469533311913-eea0efd8967f?w=800&q=80",
-  "upper-room": "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80",
-  crusade: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
-  welfare: "https://images.unsplash.com/photo-1488521789025-1627b1858a5d?w=800&q=80",
-};
 
 const gradientOverlays = [
   "from-primary/90",
@@ -30,7 +20,7 @@ const gradientOverlays = [
 
 function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }) {
   const stagger = index % 2 === 1;
-  const src = imageMap[ministry.id];
+  const src = ministry.imageUrl;
 
   return (
     <motion.div
@@ -40,7 +30,11 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
       transition={{ duration: 0.5, delay: index * 0.08 }}
       className={`flex-none w-[280px] md:w-80 snap-center ${stagger ? "mt-12" : ""}`}
     >
-      <div className="h-[300px] md:h-[400px] relative rounded-2xl overflow-hidden group">
+      <Link
+        href={`/ministries/${ministry.id}`}
+        aria-label={`Learn more about ${ministry.name}`}
+        className="block h-[300px] md:h-[400px] relative rounded-2xl overflow-hidden group focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+      >
         {src ? (
           <img
             src={src}
@@ -60,8 +54,11 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
           <p className="text-white/80 text-sm line-clamp-3">
             {ministry.description}
           </p>
+          <span className="inline-flex items-center gap-2 mt-4 text-white/90 text-sm font-semibold opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+            Learn More <ArrowRight className="w-4 h-4" />
+          </span>
         </div>
-      </div>
+      </Link>
     </motion.div>
   );
 }

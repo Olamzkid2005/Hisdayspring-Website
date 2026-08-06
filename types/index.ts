@@ -91,6 +91,19 @@ export interface Ministry {
   icon?: string;
   imageUrl?: string;
   branch?: Branch;
+  longDescription?: string;
+  highlights?: string[];
+  schedule?: string;
+  founded?: string;
+  verse?: {
+    text: string;
+    reference: string;
+  };
+  stats?: {
+    value: string;
+    label: string;
+  }[];
+  gallery?: string[];
 }
 
 // =============================================================================
@@ -107,6 +120,10 @@ export interface Event {
   imageUrl?: string;
   category: "youth" | "women" | "general" | "special";
   isFeatured?: boolean;
+  dates?: {
+    date: string;
+    time: string;
+  }[];
 }
 
 // =============================================================================

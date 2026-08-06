@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Clock, BookOpen, Sunrise, Church } from "lucide-react";
+import { Clock, BookOpen, Sunrise, Church, Flower2 } from "lucide-react";
 import { serviceTimes } from "@/data";
 
 export function ServiceTimesSection() {
@@ -146,7 +146,11 @@ export function ServiceTimesSection() {
                   className="bg-surface-container-low p-6 rounded-xl flex items-center gap-6"
                 >
                   <div className="rounded-lg bg-primary/10 p-3 flex-shrink-0">
-                    <Clock className="w-6 h-6 text-primary" />
+                    {service.id === "jewels" ? (
+                      <Flower2 className="w-6 h-6 text-primary" />
+                    ) : (
+                      <Clock className="w-6 h-6 text-primary" />
+                    )}
                   </div>
                   <div>
                     <h4 className="font-label font-bold text-on-surface">

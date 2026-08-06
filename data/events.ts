@@ -20,12 +20,20 @@ export const upcomingEvents: Event[] = [
   {
     id: "jewels-breakfast",
     title: "The Jewels Monthly Breakfast Meeting",
-    date: "2026-05-15",
-    time: "8:00 AM – 11:00 AM",
+    date: "2026-08-15",
+    time: "9:00 AM",
     location: "Hisdayspring Church, Ipaja",
     description:
-      "Monthly gathering for women focused on fulfilling destinies and maximizing potentials.",
+      "A special two-day gathering for women focused on fulfilling destinies and maximizing potentials.",
+    imageUrl: "/images/events/jewels-breakfast.jpg",
     category: "women",
+    dates: [
+      { date: "2026-08-15", time: "9:00 AM" },
+      {
+        date: "2026-08-16",
+        time: "8:00 AM, 10:00 AM & 12:00 PM (Sunday service times)",
+      },
+    ],
   },
   {
     id: "boms-intake",

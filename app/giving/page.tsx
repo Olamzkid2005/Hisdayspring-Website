@@ -14,7 +14,7 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { bankAccount, donationPurposes, scriptureReferences } from "@/data/donations";
+import { bankAccounts, donationPurposes, scriptureReferences } from "@/data/donations";
 import { initializePayment } from "@/lib/api/paystack";
 import { initializeFlutterwavePayment } from "@/lib/api/flutterwave";
 import type { DonationPurpose, PaymentMethod } from "@/types";
@@ -56,8 +56,8 @@ export default function GivingPage() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const copyAccountNumber = () => {
-    navigator.clipboard.writeText(bankAccount.accountNumber);
+  const copyAccountNumber = (accountNumber: string) => {
+    navigator.clipboard.writeText(accountNumber);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -223,21 +223,22 @@ export default function GivingPage() {
 
             {paymentMethod === "bank-transfer" && (
               <div className="bg-surface-container-low rounded-xl p-6 text-left space-y-4 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Bank Name</span>
-                  <span className="font-bold text-on-surface">{bankAccount.bankName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Account Number</span>
-                  <span className="font-bold text-on-surface text-xl tracking-wider">
-                    {bankAccount.accountNumber}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-on-surface-variant">Account Name</span>
-                  <span className="font-bold text-on-surface">{bankAccount.accountName}</span>
-                </div>
-                <div className="flex justify-between">
+                {bankAccounts.map((bank, index) => (
+                  <div key={index} className={index > 0 ? 'mt-4 pt-4 border-t border-outline-variant/30' : ''}>
+                    <div className="font-bold text-on-surface mb-2">{bank.bankName}</div>
+                    <div className="flex justify-between">
+                      <span className="text-on-surface-variant">Account Number</span>
+                      <span className="font-bold text-on-surface text-lg tracking-wider">
+                        {bank.accountNumber}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-on-surface-variant">Account Name</span>
+                      <span className="font-bold text-on-surface text-sm">{bank.accountName}</span>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex justify-between mt-4 pt-4 border-t border-outline-variant/30">
                   <span className="text-on-surface-variant">Purpose</span>
                   <span className="font-bold text-on-surface">{selectedPurpose?.label}</span>
                 </div>
@@ -569,34 +570,35 @@ export default function GivingPage() {
                 Bank Transfer Details
               </h3>
 
-              <div className="space-y-4">
-                <div className="flex justify-between items-center pb-3 border-b border-outline-variant/50">
-                  <span className="text-on-surface-variant text-sm">Bank</span>
-                  <span className="font-bold text-on-surface">{bankAccount.bankName}</span>
-                </div>
-                <div className="flex justify-between items-center pb-3 border-b border-outline-variant/50">
-                  <span className="text-on-surface-variant text-sm">Account Name</span>
-                  <span className="font-bold text-on-surface text-right">{bankAccount.accountName}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant text-sm">Account Number</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-xl text-primary">{bankAccount.accountNumber}</span>
-                    <button
-                      type="button"
-                      onClick={copyAccountNumber}
-                      className="p-2 rounded-lg hover:bg-surface-container transition-colors"
-                      aria-label="Copy account number"
-                    >
-                      {copied ? (
-                        <Check className="w-4 h-4 text-primary" />
-                      ) : (
-                        <Copy className="w-4 h-4 text-on-surface-variant" />
-                      )}
-                    </button>
+              {bankAccounts.map((bank, index) => (
+                <div key={index} className={`${index > 0 ? 'mt-6 pt-6 border-t border-outline-variant/50' : ''}`}>
+                  <h4 className="font-bold text-on-surface mb-4">{bank.bankName}</h4>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-on-surface-variant text-sm">Account Name</span>
+                      <span className="font-bold text-on-surface text-right text-sm">{bank.accountName}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-on-surface-variant text-sm">Account Number</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-lg text-primary">{bank.accountNumber}</span>
+                        <button
+                          type="button"
+                          onClick={() => copyAccountNumber(bank.accountNumber)}
+                          className="p-2 rounded-lg hover:bg-surface-container transition-colors"
+                          aria-label="Copy account number"
+                        >
+                          {copied ? (
+                            <Check className="w-4 h-4 text-primary" />
+                          ) : (
+                            <Copy className="w-4 h-4 text-on-surface-variant" />
+                          )}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
 
             {/* Scripture References */}

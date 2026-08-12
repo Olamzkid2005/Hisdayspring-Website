@@ -17,37 +17,27 @@ export const donationPurposes: DonationPurposeOption[] = [
     description: "Seed offerings for God's work",
   },
   {
-    id: "welfare",
-    label: "Welfare",
-    description: "Support food, clothing, and medical care outreaches",
-  },
-  {
-    id: "crusade",
-    label: "Crusade",
-    description: "Support Healing From Heaven Crusade outreaches",
-  },
-  {
-    id: "prophetic-seed",
-    label: "Prophetic Seed",
-    description: "Plant a seed for prophetic declarations and impartation",
-  },
-  {
-    id: "special-projects",
-    label: "Special Projects & Building Fund",
-    description: "Support church building and expansion projects",
-  },
-  {
-    id: "missions",
-    label: "Missions",
-    description: "Support evangelism and mission work",
+    id: "seeds-and-donations",
+    label: "Seeds and Donations",
+    description: "Plant a seed and support church projects",
   },
 ];
 
-export const bankAccount: BankAccount = {
-  bankName: "Access Bank",
-  accountNumber: "0054510585",
-  accountName: "Hisdayspring Evangelical International",
-};
+export const bankAccounts: BankAccount[] = [
+  {
+    bankName: "GTBank",
+    accountNumber: "0499179248",
+    accountName: "Hisdayspring Evangelical Ministry International",
+  },
+  {
+    bankName: "Access (Diamond Bank)",
+    accountNumber: "0054510585",
+    accountName: "Hisdayspring Evangelical Ministry International",
+  },
+];
+
+// Keep backward compatibility
+export const bankAccount = bankAccounts[0];
 
 export const scriptureReferences = [
   "Malachi 3:10 - Bring the whole tithe into the storehouse...",

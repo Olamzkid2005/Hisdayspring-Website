@@ -6,7 +6,7 @@ import { useRef } from "react";
 import { Heart, Banknote, CreditCard, Check, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { bankAccount, donationPurposes } from "@/data/donations";
+import { bankAccounts, donationPurposes } from "@/data/donations";
 import { initializePayment } from "@/lib/api/paystack";
 import type { DonationPurpose, PaymentMethod } from "@/types";
 
@@ -138,21 +138,22 @@ export function DonationSection() {
 
             {paymentMethod === "bank-transfer" && (
               <div className="bg-primary-50 rounded-xl p-6 text-left space-y-4 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-muted">Bank Name</span>
-                  <span className="font-bold text-primary-900">{bankAccount.bankName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted">Account Number</span>
-                  <span className="font-bold text-primary-900 text-xl tracking-wider">
-                    {bankAccount.accountNumber}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted">Account Name</span>
-                  <span className="font-bold text-primary-900">{bankAccount.accountName}</span>
-                </div>
-                <div className="flex justify-between">
+                {bankAccounts.map((bank, index) => (
+                  <div key={index} className={index > 0 ? 'mt-4 pt-4 border-t border-primary-200' : ''}>
+                    <div className="font-bold text-primary-900 mb-2">{bank.bankName}</div>
+                    <div className="flex justify-between">
+                      <span className="text-muted">Account Number</span>
+                      <span className="font-bold text-primary-900 text-lg tracking-wider">
+                        {bank.accountNumber}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted">Account Name</span>
+                      <span className="font-bold text-primary-900 text-sm">{bank.accountName}</span>
+                    </div>
+                  </div>
+                ))}
+                <div className="flex justify-between mt-4 pt-4 border-t border-primary-200">
                   <span className="text-muted">Purpose</span>
                   <span className="font-bold text-primary-900">
                     {selectedPurpose?.label}

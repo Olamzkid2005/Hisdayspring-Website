@@ -211,11 +211,7 @@ export interface SocialLink {
 export type DonationPurpose =
   | "tithes"
   | "offerings"
-  | "welfare"
-  | "crusade"
-  | "prophetic-seed"
-  | "special-projects"
-  | "missions";
+  | "seeds-and-donations";
 
 export type PaymentMethod = "bank-transfer" | "card-payment" | "mobile-money";
 

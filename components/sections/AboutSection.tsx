@@ -21,7 +21,7 @@ function AnimatedCounter({
 
   return (
     <div ref={ref}>
-      <span className={`text-5xl font-headline ${colorClass}`}>
+      <span className={`text-3xl md:text-4xl font-headline ${colorClass}`}>
         {count}
         {suffix}
       </span>
@@ -34,7 +34,7 @@ export function AboutSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="about" ref={ref} className="py-16 md:py-24 px-6 md:px-12 bg-surface relative overflow-hidden">
+    <section id="about" ref={ref} className="py-10 md:py-14 px-6 md:px-12 bg-surface relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
@@ -51,40 +51,26 @@ export function AboutSection() {
         style={{ width: "clamp(20rem, 40vw, 50rem)", height: "auto", maxWidth: "70vw" }}
       />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 relative">
-        <div className="md:col-span-7 flex flex-col gap-16 relative">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 relative">
+        <div className="md:col-span-7 grid sm:grid-cols-2 gap-6 md:gap-8 relative">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6 }}
           >
-            <h2 className="font-headline text-primary text-2xl md:text-[2.5rem] mb-4">Our Mission</h2>
-            <p className="text-lg md:text-xl text-on-surface-variant font-light leading-relaxed max-w-2xl">
+            <h2 className="font-headline text-primary text-lg md:text-2xl mb-2">Our Mission</h2>
+            <p className="text-sm md:text-base text-on-surface-variant font-light leading-relaxed">
               {aboutContent.mission}
             </p>
           </motion.div>
 
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={isInView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.5, delay: 0.15 }}
-            className="flex items-center justify-center gap-3"
-          >
-            <div className="h-px flex-1 max-w-[80px] bg-secondary/30" />
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" className="text-secondary/50">
-              <rect x="10" y="2" width="4" height="20" rx="1" fill="currentColor" />
-              <rect x="2" y="8" width="20" height="4" rx="1" fill="currentColor" />
-            </svg>
-            <div className="h-px flex-1 max-w-[80px] bg-secondary/30" />
-          </motion.div>
-
-          <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
           >
-            <h2 className="font-headline text-secondary text-2xl md:text-[2.5rem] mb-4">Our Vision</h2>
-            <p className="text-lg md:text-xl text-on-surface-variant font-light leading-relaxed max-w-2xl">
+            <h2 className="font-headline text-secondary text-lg md:text-2xl mb-2">Our Vision</h2>
+            <p className="text-sm md:text-base text-on-surface-variant font-light leading-relaxed">
               {aboutContent.vision}
             </p>
           </motion.div>
@@ -99,14 +85,14 @@ export function AboutSection() {
         </div>
 
         <div className="md:col-span-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {statistics.map((stat, index) => (
               <motion.div
                 key={stat.label}
                 initial={{ opacity: 0, y: 20 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                className="group bg-surface-container-lowest p-4 md:p-8 rounded-xl flex flex-col justify-center items-center text-center border-l-4 border-transparent hover:border-l-secondary transition-all duration-300"
+                className="group bg-surface-container-lowest p-4 md:p-6 rounded-xl flex flex-col justify-center items-center text-center border-l-4 border-transparent hover:border-l-secondary transition-all duration-300"
               >
                 <AnimatedCounter
                   value={stat.value}

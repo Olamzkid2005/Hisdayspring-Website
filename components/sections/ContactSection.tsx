@@ -2,10 +2,11 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { MapPin, Phone, Mail } from "lucide-react";
+import { MapPin, Phone, Mail, Heart } from "lucide-react";
 import { Input, Button } from "@/components/ui";
 import { useFormValidation } from "@/hooks";
 import { contactInfo } from "@/data/contact";
+import { config } from "@/lib/config";
 
 export function ContactSection() {
   const ref = useRef<HTMLElement>(null);
@@ -35,17 +36,38 @@ export function ContactSection() {
     },
   });
 
+  const {
+    values: prayerValues,
+    errors: prayerErrors,
+    isSubmitting: prayerSubmitting,
+    handleChange: handlePrayerChange,
+    handleSubmit: handlePrayerSubmit,
+    resetForm: resetPrayerForm,
+  } = useFormValidation({
+    fields: {
+      name: { required: true },
+      email: { required: true, email: true },
+      prayerRequest: { required: true, minLength: 10 },
+    },
+    onSubmit: async (values) => {
+      const phone = config.whatsappNumber.replace(/\s/g, "").replace("+", "");
+      const message = `Prayer Request from ${values.name} (${values.email}):%0A%0A${encodeURIComponent(values.prayerRequest)}`;
+      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+      resetPrayerForm();
+    },
+  });
+
   const firstAddress = contactInfo.addresses[0];
 
   return (
-    <section id="contact" ref={ref} className="py-16 md:py-24 bg-surface text-on-surface">
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-16">
+    <section id="contact" ref={ref} className="py-12 md:py-16 bg-surface text-on-surface">
+      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-headline text-3xl md:text-5xl text-primary mb-8 md:mb-12">
+          <h2 className="font-headline text-2xl md:text-4xl text-primary mb-6 md:mb-8">
             Get in Touch
           </h2>
 
@@ -103,7 +125,7 @@ export function ContactSection() {
             </div>
           </div>
 
-          <div className="mt-12 h-64 w-full bg-surface-container-high rounded-3xl overflow-hidden grayscale">
+          <div className="mt-8 md:mt-10 h-48 md:h-56 w-full bg-surface-container-high rounded-3xl overflow-hidden grayscale">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.3!2d3.3!3d6.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzAnMDAuMCJOIDPCsDE4JzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1600000000000!5m2!1sen!2sng"
               width="100%"
@@ -121,13 +143,12 @@ export function ContactSection() {
           initial={{ opacity: 0, x: 30 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-surface-container-lowest p-8 md:p-12 rounded-3xl border border-outline-variant/10"
+          className="flex flex-col gap-6"
         >
           <h3 className="font-headline text-2xl text-on-surface mb-8">
             Send us a Message
           </h3>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <form onSubmit={handleSubmit} className="space-y-6">            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <Input
                 label="First Name"
                 name="firstName"
@@ -208,6 +229,78 @@ export function ContactSection() {
               className="w-full bg-secondary text-on-secondary py-4 rounded-full font-bold"
             >
               Send Message
+            </Button>
+          </form>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="bg-surface-container-lowest p-6 md:p-8 rounded-3xl border border-outline-variant/10"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <Heart className="w-5 h-5 text-primary" />
+            </span>
+            <div>
+              <h3 className="font-headline text-xl text-on-surface">
+                How can we pray for you?
+              </h3>
+              <p className="text-sm text-on-surface-variant">
+                Our team will stand with you in faith — all requests are confidential.
+              </p>
+            </div>
+          </div>
+          <form onSubmit={handlePrayerSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Input
+                label="Your Name"
+                name="name"
+                value={prayerValues.name}
+                onChange={handlePrayerChange}
+                error={prayerErrors.name}
+                required
+                placeholder="John Doe"
+              />
+              <Input
+                label="Email Address"
+                name="email"
+                type="email"
+                value={prayerValues.email}
+                onChange={handlePrayerChange}
+                error={prayerErrors.email}
+                required
+                placeholder="john@example.com"
+              />
+            </div>
+            <div>
+              <label htmlFor="prayer-request" className="block text-sm font-medium mb-1.5 text-on-surface">
+                Prayer Request <span className="text-primary">*</span>
+              </label>
+              <textarea
+                id="prayer-request"
+                name="prayerRequest"
+                value={prayerValues.prayerRequest}
+                onChange={handlePrayerChange}
+                rows={3}
+                required
+                minLength={10}
+                placeholder="Share your prayer request with us..."
+                className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${prayerErrors.prayerRequest ? "border-red-500 focus:ring-red-500" : "border-outline-variant hover:border-outline focus:border-primary"}`}
+              />
+              {prayerErrors.prayerRequest && (
+                <p className="mt-1.5 text-sm text-red-500" role="alert">
+                  {prayerErrors.prayerRequest}
+                </p>
+              )}
+            </div>
+            <Button
+              type="submit"
+              isLoading={prayerSubmitting}
+              className="w-full bg-primary text-on-primary py-4 rounded-full font-bold"
+            >
+              Submit Prayer Request
             </Button>
           </form>
         </motion.div>

@@ -12,24 +12,54 @@ export function Footer() {
           Hisdayspring
         </span>
 
-        <div className="flex gap-8 text-sm tracking-wide">
+        <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm tracking-wide">
           <Link
-            href="/#radio"
+            href="/#about"
             className="text-zinc-500 hover:text-amber-600 transition-colors"
           >
-            Statement of Faith
+            About
+          </Link>
+          <Link
+            href="/pastors"
+            className="text-zinc-500 hover:text-amber-600 transition-colors"
+          >
+            Our Pastors
+          </Link>
+          <Link
+            href="/welfare"
+            className="text-zinc-500 hover:text-amber-600 transition-colors"
+          >
+            Welfare Program
+          </Link>
+          <Link
+            href="/crusade"
+            className="text-zinc-500 hover:text-amber-600 transition-colors"
+          >
+            Crusade
+          </Link>
+          <Link
+            href="/books"
+            className="text-zinc-500 hover:text-amber-600 transition-colors"
+          >
+            Books
+          </Link>
+          <Link
+            href="/radio"
+            className="text-zinc-500 hover:text-amber-600 transition-colors"
+          >
+            Radio Ministry
+          </Link>
+          <Link
+            href="/giving"
+            className="text-zinc-500 hover:text-amber-600 transition-colors"
+          >
+            Give Online
           </Link>
           <Link
             href="/privacy"
             className="text-zinc-500 hover:text-amber-600 transition-colors"
           >
             Privacy Policy
-          </Link>
-          <Link
-            href="/#radio"
-            className="text-zinc-500 hover:text-amber-600 transition-colors"
-          >
-            Radio Ministry
           </Link>
         </div>
 

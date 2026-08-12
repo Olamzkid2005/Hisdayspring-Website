@@ -1,6 +1,6 @@
 /**
  * Ministries data
- * Real content from pastorblessing.com where available
+ * Real content provided by the church
  */
 
 import type { Ministry } from "@/types";
@@ -101,8 +101,7 @@ export const ministries: Ministry[] = [
     ],
     schedule: "Every 4th Saturday of the month · 8:00 AM",
     icon: "Heart",
-    imageUrl:
-      "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=1200&q=80",
+    imageUrl: "/images/ministries/jewels.jpg",
     gallery: [
       "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?w=800&q=80",
       "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=800&q=80",
@@ -149,30 +148,26 @@ export const ministries: Ministry[] = [
   },
   {
     id: "friendship",
-    name: "Friendship Care Centres",
+    name: "Friendship Care Program",
     description:
-      "Community care and outreach centers tied to our church branches, providing welfare support and community services to those in need.",
+      "A family-based fellowship that brings the church closer to homes and communities through small groups — every Sunday at 5:00 PM.",
     longDescription:
-      "Friendship Care Centres are community care and outreach centers tied to the branches of Hisdayspring Ministries International. They exist to extend the love of Christ beyond the church walls by providing welfare support, practical assistance, and community services to those in need. From food and relief support to counsel and community engagement, the centres serve as the hands and feet of the church in the neighborhood.",
+      "The Friendship Care Program is a family-based fellowship designed to bring the church closer to homes and communities through small groups. It provides an opportunity for members to connect more deeply, build meaningful relationships, and grow together in the love of Christ. Through regular fellowship, prayer, Bible study, and mutual support, members are encouraged to strengthen one another spiritually while also caring for one another in every area of life. The program fosters unity, genuine love, accountability, and a strong sense of belonging within the church family. Join us every Sunday at 5:00 PM as we gather in various homes to experience Christian fellowship, spiritual growth, and lasting relationships.",
     highlights: [
-      "Welfare and relief support for families",
-      "Community services and outreach programs",
-      "Counsel and practical assistance",
-      "Located across our church branches",
-      "A channel to serve and bless the community",
+      "Family-based fellowship in small groups",
+      "Regular fellowship, prayer, and Bible study",
+      "Mutual support and spiritual strengthening",
+      "Unity, genuine love, and accountability",
+      "A strong sense of belonging in the church family",
     ],
-    verse: {
-      text: "Bear ye one another's burdens, and so fulfil the law of Christ.",
-      reference: "Galatians 6:2",
-    },
     stats: [
-      { value: "Both", label: "Church branches served" },
-      { value: "Welfare", label: "And community services" },
-      { value: "Outreach", label: "Centres in the community" },
+      { value: "5:00 PM", label: "Every Sunday" },
+      { value: "Small Groups", label: "Gathering in various homes" },
+      { value: "Unity", label: "And belonging in Christ" },
     ],
+    schedule: "Every Sunday · 5:00 PM",
     icon: "HandHeart",
-    imageUrl:
-      "https://images.unsplash.com/photo-1469533311913-eea0efd8967f?w=1200&q=80",
+    imageUrl: "/images/ministries/friendship.jpg",
     gallery: [
       "https://images.unsplash.com/photo-1469533311913-eea0efd8967f?w=800&q=80",
       "https://images.unsplash.com/photo-1488521789025-1627b1858a5d?w=800&q=80",
@@ -183,28 +178,110 @@ export const ministries: Ministry[] = [
     ],
   },
   {
-    id: "upper-room",
-    name: "Upper Room Prayer Link",
+    id: "bible-school",
+    name: "Hisdayspring Bible School",
     description:
-      "A dedicated prayer programme for deep spiritual connection and intercession for the needs of the church and community.",
+      "Raising spiritually mature believers through sound biblical teaching, practical Christian living, and leadership development.",
     longDescription:
-      "The Upper Room Prayer Link is a dedicated prayer programme of Hisdayspring Ministries International, focused on deep spiritual connection and intercession. It is a place where believers gather to pray for the needs of the church, the community, and the nations. Modeled after the early disciples who tarried in the upper room, this ministry builds a culture of fervent prayer, spiritual sensitivity, and divine encounter.",
+      "The Hisdayspring Bible School is committed to raising spiritually mature believers through sound biblical teaching, practical Christian living, and leadership development. Our programs are carefully designed to equip every member for spiritual growth, effective service, and the fulfillment of God's purpose. At Hisdayspring Bible School, our mission is to disciple believers, develop leaders, and raise kingdom ambassadors who will reflect Christ in every sphere of life.",
     highlights: [
-      "Fervent corporate prayer sessions",
-      "Intercession for the church and community",
-      "Deep spiritual connection and worship",
-      "Prayer support for personal needs",
-      "Building a lifestyle of prayer and intimacy with God",
+      "Sound biblical teaching for every believer",
+      "Practical Christian living and spiritual growth",
+      "Leadership development and effective service",
+      "Structured programs from membership to ministry",
+      "Kingdom ambassadors who reflect Christ",
     ],
-    verse: {
-      text: "These all continued with one accord in prayer and supplication.",
-      reference: "Acts 1:14",
-    },
     stats: [
-      { value: "1-10th of every month", label: "Prayer and intercession" },
-      { value: "Church & Community", label: "Needs covered in prayer" },
-      { value: "Deep", label: "Spiritual connection" },
+      { value: "4", label: "Programs & classes" },
+      { value: "3 Modules", label: "Membership class" },
+      { value: "Raising", label: "Mature believers and leaders" },
     ],
+    icon: "BookOpen",
+    imageUrl:
+      "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=1200&q=80",
+    gallery: [
+      "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=800&q=80",
+      "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80",
+      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",
+      "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=800&q=80",
+      "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=800&q=80",
+      "https://images.unsplash.com/photo-1544717297-fa95b6ee9643?w=800&q=80",
+    ],
+    programs: [
+      {
+        name: "Membership Class (3 Modules)",
+        description:
+          "The Membership Class is the foundation for every member of Hisdayspring Church. Through three comprehensive modules, participants gain a clear understanding of the vision, mission, beliefs, and culture of the church.",
+        topics: [
+          "The vision, mission, and core values of Hisdayspring Church",
+          "Church culture and integration",
+          "The importance of church membership and commitment",
+          "Joining and serving in the workforce",
+          "The responsibilities, ethics, and expectations of church workers",
+          "The dos and don'ts of church membership and service",
+        ],
+      },
+      {
+        name: "Baptismal Class",
+        description:
+          "The Baptismal Class provides biblical teaching on water baptism and its significance in the life of every believer. Completion of this class is compulsory for everyone who desires to be baptized at Hisdayspring Church.",
+        topics: [
+          "The meaning of baptism",
+          "Why every believer should be baptized",
+          "The biblical foundation for water baptism",
+          "The spiritual importance of identifying with Christ through baptism",
+        ],
+      },
+      {
+        name: "Blessing Ola Mentoring School (BOMS)",
+        description:
+          "The Blessing Ola Mentoring School (BOMS) is designed to equip believers with practical wisdom for victorious Christian living.",
+        topics: [
+          "Developing a Christ-centered lifestyle",
+          "Spiritual growth and maturity",
+          "Marriage and family life",
+          "Career and workplace excellence",
+          "Purpose discovery and personal development",
+          "Character building and godly leadership",
+          "Practical guidance for navigating everyday life as a believer",
+        ],
+      },
+      {
+        name: "Blessing Ola School of Ministry (BOSOM)",
+        description:
+          "The Blessing Ola School of Ministry (BOSOM) is an advanced leadership and ministry training program for church leaders, workers, ministers, and individuals who sense God's call upon their lives.",
+        topics: [
+          "Discovering and developing spiritual gifts",
+          "Understanding and fulfilling God's calling",
+          "Biblical leadership principles",
+          "Ministry ethics and character development",
+          "Effective church service",
+          "Kingdom leadership and excellence",
+          "Practical ministry training and leadership development",
+        ],
+      },
+    ],
+  },
+  {
+    id: "upper-room",
+    name: "Upper Room PrayerLink",
+    description:
+      "The monthly online prayer gathering of Hisdayspring Church, uniting believers to commit each new month into God's hands.",
+    longDescription:
+      "Upper Room PrayerLink is the monthly online prayer gathering of Hisdayspring Church, created to unite believers in seeking God's face and committing each new month into His hands. The meeting holds from the 1st to the 10th of every month, bringing members together for a season of fervent prayer, worship, and prophetic declarations. Each month is centered around a specific theme, providing biblical direction and focused prayers for the season. Through the power of corporate prayer, Upper Room PrayerLink has become a platform where countless testimonies of healing, divine intervention, breakthroughs, restoration, answered prayers, and transformed lives have been recorded. Whether you are trusting God for spiritual growth, direction, healing, open doors, or a fresh encounter with Him, Upper Room PrayerLink provides an atmosphere where faith is strengthened and lives are changed through the power of prayer.",
+    highlights: [
+      "Fervent prayer, worship, and prophetic declarations",
+      "A monthly theme with biblical direction",
+      "Testimonies of healing, breakthrough, and restoration",
+      "Prayer for spiritual growth, direction, and open doors",
+      "Faith strengthened and lives changed through prayer",
+    ],
+    stats: [
+      { value: "1st–10th", label: "of every month" },
+      { value: "YouTube", label: "@pastorblessingo" },
+      { value: "Monthly", label: "Online prayer gathering" },
+    ],
+    schedule: "1st–10th of every month · YouTube @pastorblessingo",
     icon: "Heart",
     imageUrl: "/images/ministries/upper-room.jpg",
     gallery: [
@@ -220,28 +297,28 @@ export const ministries: Ministry[] = [
     id: "crusade",
     name: "Healing From Heaven Crusade",
     description:
-      "An evangelism and crusade programme focused on healing and deliverence, bringing the gospel to communities through the power of God.",
+      "A divine mandate to take the Gospel beyond the four walls of the church, bringing saving, healing, and transforming power to communities.",
     longDescription:
-      "The Healing From Heaven Crusade is the evangelism and crusade arm of Hisdayspring Ministries International. It takes the gospel beyond the four walls of the church into communities, with a focus on healing and deliverance through the power of God. Cities like Ikorodu have experienced the touch of God at these crusades — where the Word is preached with power, the sick are healed, the bound are set free, and lives are eternally transformed.",
+      "The Healing From Heaven Crusade (HFHC) is a divine mandate entrusted to Hisdayspring Church to take the Gospel beyond the four walls of the church and into communities, bringing the saving, healing, and transforming power of Jesus Christ to the people. More than a crusade, HFHC is a mission of compassion and revival, reaching individuals and families with the message of hope, faith, and salvation. Through the preaching of God's Word, fervent prayers, and the demonstration of God's power, countless testimonies of salvation, healing, deliverance, restoration, and life-changing breakthroughs have been recorded. In addition to ministering spiritually, the crusade serves communities through practical acts of love. Medical outreaches, welfare support, and other community care initiatives are organized to meet physical needs while sharing the love of Christ in tangible ways. Healing From Heaven Crusade reflects the heart of Hisdayspring Church—to transform lives, strengthen communities, and make Jesus Christ known through both the proclamation of the Gospel and compassionate service.",
     highlights: [
-      "Community crusades and open-air meetings",
-      "Healing and deliverance services",
-      "Powerful gospel preaching and worship",
-      "Evangelism outreaches across communities",
-      "Prophetic encounters and life transformation",
+      "To take the Gospel to communities and nations",
+      "To lead people into a saving relationship with Jesus Christ",
+      "To demonstrate God's healing and delivering power",
+      "To restore hope through the ministry of the Holy Spirit",
+      "To impact communities through medical, welfare, and humanitarian outreaches",
+      "To raise disciples who will live for Christ and transform their world",
     ],
     verse: {
-      text: "And Jesus went about all the cities and villages, teaching... and healing every sickness and every disease among the people.",
-      reference: "Matthew 9:35",
+      text: "Freely you have received; freely give.",
+      reference: "Matthew 10:8",
     },
     stats: [
-      { value: "Healing", label: "And deliverance services" },
-      { value: "Cities", label: "Reached with the gospel" },
-      { value: "Powerful", label: "Word and worship" },
+      { value: "Gospel", label: "To communities and nations" },
+      { value: "Healing", label: "And delivering power" },
+      { value: "Care", label: "Medical & welfare outreaches" },
     ],
     icon: "Cross",
-    imageUrl:
-      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&q=80",
+    imageUrl: "/images/ministries/crusade.jpg",
     gallery: [
       "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
       "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=800&q=80",
@@ -253,30 +330,29 @@ export const ministries: Ministry[] = [
   },
   {
     id: "welfare",
-    name: "Church Welfare Programs",
+    name: "Hisdayspring Welfare Program",
     description:
-      "Community welfare initiatives that provide practical support and assistance to members and the broader community.",
+      "Demonstrating the love of Christ through compassionate service — food, clothing, medical care, and relief for those in need.",
     longDescription:
-      "The Church Welfare Programs of Hisdayspring Ministries International provide practical support and assistance to members and the broader community. Rooted in the command to care for the needy, these initiatives ensure that no member walks alone in seasons of need. From food and clothing support to financial assistance and visitation, the welfare arm of the church demonstrates the love of God in tangible, life-touching ways.",
+      "The Hisdayspring Welfare Program is one of the core expressions of our commitment to demonstrating the love of Christ through compassionate service. We believe that the Gospel is not only to be preached but also to be lived out by caring for the practical needs of people within our church and the surrounding community. Through this outreach, we provide support to individuals and families by distributing food items and essential groceries, clothing, eyeglasses and vision support, medical care and health assistance, and other welfare and relief materials as needs arise. Our mission is to bring hope, restore dignity, and be a source of encouragement to those facing difficult circumstances, reflecting the compassion and generosity of Jesus Christ. Every act of kindness is an opportunity to share God's love and make a lasting impact in the lives of people and our community. We invite individuals, families, organizations, and partners who share our passion for community transformation to join hands with us. Whether through financial support, donations of relief materials, medical services, volunteering, or other resources, your partnership will enable us to expand this outreach and serve even more people with excellence and compassion. Together, we can make a greater difference—one life, one family, and one community at a time.",
     highlights: [
-      "Food and clothing support for families",
-      "Financial assistance for members in need",
-      "Visitation and care for the sick and aged",
-      "Community outreach and benevolence",
-      "A practical expression of God's love",
+      "Food items and essential groceries",
+      "Clothing, eyeglasses, and vision support",
+      "Medical care and health assistance",
+      "Welfare and relief materials as needs arise",
+      "Bringing hope, dignity, and encouragement",
     ],
     verse: {
-      text: "Inasmuch as ye have done it unto one of the least of these my brethren, ye have done it unto me.",
-      reference: "Matthew 25:40",
+      text: "Whoever is kind to the poor lends to the Lord, and He will reward them for what they have done.",
+      reference: "Proverbs 19:17",
     },
     stats: [
-      { value: "Practical", label: "Support and assistance" },
-      { value: "Families", label: "Cared for in need" },
-      { value: "Love", label: "In action" },
+      { value: "Food", label: "And essential groceries" },
+      { value: "Clothing", label: "And vision support" },
+      { value: "Medical", label: "Care and health assistance" },
     ],
     icon: "Gift",
-    imageUrl:
-      "https://images.unsplash.com/photo-1488521789025-1627b1858a5d?w=1200&q=80",
+    imageUrl: "/images/ministries/welfare.jpg",
     gallery: [
       "https://images.unsplash.com/photo-1488521789025-1627b1858a5d?w=800&q=80",
       "https://images.unsplash.com/photo-1469533311913-eea0efd8967f?w=800&q=80",
@@ -284,6 +360,74 @@ export const ministries: Ministry[] = [
       "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=800&q=80",
       "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=800&q=80",
       "https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=800&q=80",
+    ],
+  },
+  {
+    id: "blessing-conference",
+    name: "The Blessing Conference",
+    description:
+      "The annual flagship conference of Hisdayspring Church, held every June to celebrate God's covenant of THE BLESSING.",
+    longDescription:
+      "The Blessing Conference is the annual flagship conference of Hisdayspring Church, held every June to celebrate, reaffirm, and deepen our understanding of God's covenant of THE BLESSING upon His people. As a church operating under the covenant of THE BLESSING, this conference is a time of spiritual renewal, divine impartation, and prophetic alignment. It is dedicated to emphasizing God's promises, empowering believers to walk in His covenant, and positioning them for greater impact in every area of life. Each year, respected fathers of faith, anointed ministers, and guest speakers join us to minister God's Word, make prophetic declarations, and release blessings over the congregation. Through powerful teachings, worship, and prayer, attendees are strengthened, equipped, and inspired to maximize the opportunities and assignments that lie ahead in the remainder of the year. The conference has become a season of transformation, where many experience fresh encounters with God, renewed faith, supernatural breakthroughs, healing, restoration, and divine direction. The Blessing Conference is more than an annual event—it is a divine appointment that empowers believers to live in the fullness of God's covenant and walk confidently in His purpose.",
+    highlights: [
+      "Powerful biblical teaching on the covenant of THE BLESSING",
+      "Prophetic declarations and impartation",
+      "Ministry from fathers of faith and anointed guest ministers",
+      "Life-transforming worship and prayer",
+      "Spiritual empowerment for the remaining months of the year",
+      "Testimonies of God's faithfulness, favor, and supernatural intervention",
+    ],
+    verse: {
+      text: "The blessing of the Lord makes one rich, and He adds no sorrow with it.",
+      reference: "Proverbs 10:22",
+    },
+    stats: [
+      { value: "June", label: "Every year" },
+      { value: "Fathers of Faith", label: "And anointed guest ministers" },
+      { value: "THE BLESSING", label: "Covenant celebrated" },
+    ],
+    schedule: "Held every June",
+    icon: "Sparkles",
+    imageUrl: "/images/ministries/blessing-conference.jpg",
+    gallery: [
+      "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=800&q=80",
+      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=800&q=80",
+      "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80",
+      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
+      "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=800&q=80",
+      "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=800&q=80",
+    ],
+  },
+  {
+    id: "light-convention",
+    name: "Light Convention",
+    description:
+      "The annual convention and anniversary celebration of Hisdayspring Church, held every December — a sacred season of renewal and fresh direction.",
+    longDescription:
+      "Light Convention is the annual convention and anniversary celebration of Hisdayspring Church, held every December. It is one of the most significant gatherings in the life of the church—a sacred time to celebrate God's faithfulness, reflect on His goodness throughout the year, and receive fresh direction for the future. During the convention, God reveals His heart concerning the coming year, including the prophetic theme and divine direction for the church. It is a season of spiritual renewal where the congregation is strengthened, encouraged, and positioned to walk confidently into God's plans and purposes. Light Convention is marked by an atmosphere of passionate worship, sound biblical teaching, fervent prayer, and prophetic declarations. It is a time when God's Word is reaffirmed, His promises are proclaimed, and believers are equipped for greater impact in the year ahead. As part of the convention, the church also celebrates the ordination and commissioning of new pastors and ministers, recognizing those whom God has called and prepared for leadership and service in His Kingdom. Light Convention is more than an annual gathering—it is a divine appointment that prepares God's people for the next season, strengthens faith, and renews our commitment to fulfilling His purpose.",
+    highlights: [
+      "Celebration of God's faithfulness and the church's anniversary",
+      "Revelation of the prophetic theme and direction for the new year",
+      "Powerful worship and praise",
+      "Life-transforming biblical teachings",
+      "Prophetic declarations and impartation",
+      "Ordination and commissioning of pastors and ministers",
+    ],
+    stats: [
+      { value: "December", label: "Every year" },
+      { value: "Anniversary", label: "Celebration" },
+      { value: "Ordination", label: "Of pastors & ministers" },
+    ],
+    schedule: "Held every December",
+    icon: "Flame",
+    imageUrl: "/images/ministries/light-convention.jpg",
+    gallery: [
+      "https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&q=80",
+      "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=800&q=80",
+      "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=800&q=80",
+      "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=800&q=80",
+      "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80",
+      "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?w=800&q=80",
     ],
   },
 ];

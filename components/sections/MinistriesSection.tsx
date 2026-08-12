@@ -18,6 +18,12 @@ const gradientOverlays = [
   "from-secondary/90",
 ];
 
+const topLevelMinistryIds = ["welfare", "crusade"];
+
+function ministryHref(id: string) {
+  return topLevelMinistryIds.includes(id) ? `/${id}` : `/ministries/${id}`;
+}
+
 function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }) {
   const stagger = index % 2 === 1;
   const src = ministry.imageUrl;
@@ -31,7 +37,7 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
       className={`flex-none w-[280px] md:w-80 snap-center ${stagger ? "mt-12" : ""}`}
     >
       <Link
-        href={`/ministries/${ministry.id}`}
+        href={ministryHref(ministry.id)}
         aria-label={`Learn more about ${ministry.name}`}
         className="block h-[300px] md:h-[400px] relative rounded-2xl overflow-hidden group focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
       >
@@ -73,7 +79,7 @@ export function MinistriesSection() {
         initial={{ opacity: 0, y: 30 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6 }}
-        className="text-center mb-16"
+        className="text-center mb-10"
       >
         <h2 className="font-headline text-3xl md:text-5xl text-on-surface mb-4">Our Ministries</h2>
         <p className="text-on-surface-variant max-w-2xl mx-auto">
@@ -81,7 +87,7 @@ export function MinistriesSection() {
         </p>
       </motion.div>
 
-      <div className="flex gap-4 md:gap-8 overflow-x-auto pb-6 md:pb-12 snap-x hide-scrollbar">
+      <div className="flex gap-4 md:gap-8 overflow-x-auto pb-6 md:pb-8 snap-x hide-scrollbar">
         {ministries.map((ministry, index) => (
           <MinistryCard key={ministry.id} ministry={ministry} index={index} />
         ))}

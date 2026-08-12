@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Play, ArrowRight } from "lucide-react";
+import { Play, ArrowRight, Calendar, Clock } from "lucide-react";
 import { fetchSermons } from "@/lib/api/youtube";
 import { Modal } from "@/components/ui";
-import type { YouTubeVideo } from "@/types";
+import type { YouTubeVideo, LiveStreamStatus } from "@/types";
 
 function formatDuration(duration: string): string {
   const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
@@ -47,6 +47,7 @@ export function SermonsSection() {
   const [sermons, setSermons] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
+  const [liveStatus, setLiveStatus] = useState<LiveStreamStatus | null>(null);
 
   useEffect(() => {
     const loadSermons = async () => {
@@ -62,17 +63,56 @@ export function SermonsSection() {
     loadSermons();
   }, []);
 
+  useEffect(() => {
+    async function fetchLiveStatus() {
+      try {
+        const response = await fetch("/api/livestream");
+        if (response.ok) {
+          const data = await response.json();
+          setLiveStatus(data);
+        }
+      } catch {
+        setLiveStatus({ isLive: false });
+      }
+    }
+
+    fetchLiveStatus();
+    const interval = setInterval(fetchLiveStatus, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getNextService = () => {
+    const now = new Date();
+    const dayOfWeek = now.getDay();
+    const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
+    const nextSunday = new Date(now);
+    nextSunday.setDate(now.getDate() + daysUntilSunday);
+
+    return {
+      name: "Sunday Service",
+      date: nextSunday.toLocaleDateString("en-US", {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+      }),
+      time: "8:00 AM",
+    };
+  };
+
+  const nextService = getNextService();
+  const isLive = liveStatus?.isLive ?? false;
+
   const featured = sermons[0];
   const others = sermons.slice(1, 4);
 
   return (
-    <section id="sermons" ref={ref} className="bg-surface-container-low py-16 px-4 md:py-24 md:px-8">
+    <section id="sermons" ref={ref} className="bg-surface-container-low py-12 md:py-16 px-4 md:px-8">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="flex justify-between items-end mb-8 md:mb-16"
+          className="flex justify-between items-end mb-6 md:mb-8"
         >
           <div>
             <h2 className="font-headline text-2xl md:text-4xl text-on-surface">Recent Sermons</h2>
@@ -87,6 +127,39 @@ export function SermonsSection() {
             View All Archives
             <ArrowRight className="w-4 h-4" />
           </a>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5 }}
+          className="flex flex-wrap items-center gap-4 justify-between bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-5 md:px-8 py-4 md:py-5 mb-8"
+        >
+          <div className="flex items-center gap-3">
+            {isLive ? (
+              <span className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold tracking-widest">
+                <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                LIVE NOW
+              </span>
+            ) : (
+              <span className="flex items-center gap-2 bg-surface-variant px-3 py-1 rounded-full text-xs font-bold tracking-widest text-on-surface-variant">
+                <span className="w-2 h-2 rounded-full bg-primary" />
+                UPCOMING
+              </span>
+            )}
+            <p className="hidden sm:block text-on-surface-variant text-sm font-medium">
+              Next service details on the live page
+            </p>
+          </div>
+          <div className="flex items-center gap-3 md:gap-4">
+            <a
+              href="/live"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-sm transition-colors"
+            >
+              <Play className="w-4 h-4 fill-white" />
+              Watch Live on YouTube
+            </a>
+          </div>
         </motion.div>
 
         {loading ? (

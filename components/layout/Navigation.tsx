@@ -2,21 +2,38 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X } from "lucide-react";
-import { navigationLinks } from "@/data/navigation";
+import { Menu, X, ChevronDown } from "lucide-react";
+import {
+  navigationLinks,
+  dropdownLinks,
+  moreLinks,
+} from "@/data/navigation";
+
+const sectionLinkIds = [
+  ...navigationLinks
+    .map((link) => link.id)
+    .filter(
+      (id) =>
+        id !== "giving" &&
+        id !== "pastors" &&
+        id !== "ministries" &&
+        id !== "welfare" &&
+        id !== "crusade",
+    ),
+  "sermons",
+  "gallery",
+];
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("home");
 
   useEffect(() => {
     const handleScroll = () => {
-      const sections = navigationLinks
-        .map((link) => link.id)
-        .filter((id) => id !== "giving");
       const scrollPosition = window.scrollY + 100;
 
-      for (const sectionId of sections.reverse()) {
+      for (const sectionId of [...sectionLinkIds].reverse()) {
         const element = document.getElementById(sectionId);
         if (element && element.offsetTop <= scrollPosition) {
           setActiveSection(sectionId);
@@ -50,21 +67,43 @@ export function Navigation() {
     };
   }, [isMobileMenuOpen]);
 
+  const closeMenus = () => {
+    setIsMobileMenuOpen(false);
+    setOpenDropdown(null);
+  };
+
   const navigateTo = (linkId: string) => {
     const link = navigationLinks.find((l) => l.id === linkId);
-    // If the href is a page path (starts with / but not /#), navigate to page
     if (link && link.href.startsWith("/") && !link.href.startsWith("/#")) {
       window.location.href = link.href;
-      setIsMobileMenuOpen(false);
+      closeMenus();
       return;
     }
-    // Otherwise, scroll to the section on the current page
     const element = document.getElementById(linkId);
     if (element) {
       element.scrollIntoView({ behavior: "smooth" });
+    } else if (link) {
+      window.location.href = link.href;
     }
-    setIsMobileMenuOpen(false);
+    closeMenus();
   };
+
+  const navigateToHref = (href: string) => {
+    if (href.startsWith("/#")) {
+      const element = document.getElementById(href.replace("/#", ""));
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
+      } else {
+        window.location.href = href;
+      }
+      closeMenus();
+      return;
+    }
+    window.location.href = href;
+    closeMenus();
+  };
+
+  const topLevelLinks = navigationLinks.filter((l) => l.id !== "giving");
 
   return (
     <>
@@ -81,20 +120,128 @@ export function Navigation() {
             />
           </button>
 
-          <div className="hidden lg:flex gap-6 xl:gap-8 items-center font-headline text-base xl:text-lg font-medium">
-            {navigationLinks.slice(0, 8).map((link) => (
+          <div className="hidden lg:flex gap-4 xl:gap-7 items-center font-headline text-sm xl:text-base font-medium">
+            {topLevelLinks.map((link) =>
+              link.id === "ministries" ? (
+                <div
+                  key={link.id}
+                  className="relative"
+                  onMouseEnter={() => setOpenDropdown(link.id)}
+                  onMouseLeave={() => setOpenDropdown(null)}
+                >
+                  <button
+                    onClick={() => navigateTo(link.id)}
+                    className={`flex items-center gap-1 transition-colors whitespace-nowrap ${
+                      activeSection === link.id
+                        ? "text-rose-700 font-bold border-b-2 border-amber-500 pb-1"
+                        : "text-zinc-600 hover:text-rose-600"
+                    }`}
+                  >
+                    {link.label}
+                    <ChevronDown
+                      className={`w-4 h-4 transition-transform ${
+                        openDropdown === link.id ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  <AnimatePresence>
+                    {openDropdown === link.id && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-zinc-100 p-2"
+                      >
+                        {dropdownLinks.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => navigateToHref(item.href)}
+                            className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-zinc-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                        <div className="my-2 h-px bg-zinc-100" />
+                        <button
+                          onClick={() => navigateTo("ministries")}
+                          className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+                        >
+                          View All Ministries →
+                        </button>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ) : (
+                <button
+                  key={link.id}
+                  onClick={() => navigateTo(link.id)}
+                  className={`transition-colors whitespace-nowrap ${
+                    activeSection === link.id
+                      ? "text-rose-700 font-bold border-b-2 border-amber-500 pb-1"
+                      : "text-zinc-600 hover:text-rose-600"
+                  }`}
+                >
+                  {link.label}
+                </button>
+              ),
+            )}
+
+            <div
+              className="relative"
+              onMouseEnter={() => setOpenDropdown("more")}
+              onMouseLeave={() => setOpenDropdown(null)}
+            >
               <button
-                key={link.id}
-                onClick={() => navigateTo(link.id)}
-                className={`transition-colors whitespace-nowrap ${
-                  activeSection === link.id
+                onClick={() => setOpenDropdown("more")}
+                className={`flex items-center gap-1 transition-colors whitespace-nowrap ${
+                  openDropdown === "more" ||
+                  activeSection === "sermons" ||
+                  activeSection === "gallery"
                     ? "text-rose-700 font-bold border-b-2 border-amber-500 pb-1"
                     : "text-zinc-600 hover:text-rose-600"
                 }`}
               >
-                {link.label}
+                More
+                <ChevronDown
+                  className={`w-4 h-4 transition-transform ${
+                    openDropdown === "more" ? "rotate-180" : ""
+                  }`}
+                />
               </button>
-            ))}
+              <AnimatePresence>
+                {openDropdown === "more" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-zinc-100 p-2"
+                  >
+                    {moreLinks.slice(0, 2).map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => navigateToHref(item.href)}
+                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-zinc-700 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                    <div className="my-2 h-px bg-zinc-100" />
+                    {moreLinks.slice(2).map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => navigateToHref(item.href)}
+                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-zinc-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      >
+                        {item.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
 
           <div className="hidden lg:block">
@@ -156,27 +303,69 @@ export function Navigation() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto py-4">
-                  {navigationLinks.map((link, index) => (
-                    <motion.button
-                      key={link.id}
-                onClick={() => navigateTo(link.id)}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-zinc-50 transition-colors font-headline ${
-                        activeSection === link.id
-                          ? "text-rose-700 font-bold bg-rose-50"
-                          : "text-zinc-600 hover:text-rose-600 hover:bg-zinc-50"
-                      }`}
-                    >
-                      {link.label}
-                    </motion.button>
-                  ))}
+                  {topLevelLinks.map((link, index) =>
+                    link.id === "ministries" ? (
+                      <div key={link.id}>
+                        <motion.button
+                          onClick={() => navigateTo(link.id)}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.05 }}
+                          className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-zinc-50 transition-colors font-headline ${
+                            activeSection === link.id
+                              ? "text-rose-700 font-bold bg-rose-50"
+                              : "text-zinc-600 hover:text-rose-600 hover:bg-zinc-50"
+                          }`}
+                        >
+                          {link.label}
+                        </motion.button>
+                        {dropdownLinks.map((item) => (
+                          <button
+                            key={item.id}
+                            onClick={() => navigateToHref(item.href)}
+                            className="block w-full text-left px-10 py-3 text-sm text-zinc-500 hover:text-rose-600 hover:bg-zinc-50 border-b border-zinc-50 transition-colors"
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    ) : (
+                      <motion.button
+                        key={link.id}
+                        onClick={() => navigateTo(link.id)}
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-zinc-50 transition-colors font-headline ${
+                          activeSection === link.id
+                            ? "text-rose-700 font-bold bg-rose-50"
+                            : "text-zinc-600 hover:text-rose-600 hover:bg-zinc-50"
+                        }`}
+                      >
+                        {link.label}
+                      </motion.button>
+                    ),
+                  )}
+
+                  <div>
+                    <div className="block w-full text-left px-6 py-4 text-base font-medium border-b border-zinc-50 font-headline text-zinc-600">
+                      More
+                    </div>
+                    {moreLinks.map((link) => (
+                      <button
+                        key={link.id}
+                        onClick={() => navigateToHref(link.href)}
+                        className="block w-full text-left px-10 py-3 text-sm text-zinc-500 hover:text-rose-600 hover:bg-zinc-50 border-b border-zinc-50 transition-colors"
+                      >
+                        {link.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="p-6 border-t border-zinc-100">
                   <button
-              onClick={() => navigateTo("giving")}
+                    onClick={() => navigateTo("giving")}
                     className="block w-full bg-primary text-on-primary px-6 py-3 rounded-full font-medium text-center hover:brightness-110 transition-all min-h-[44px]"
                   >
                     Give Online

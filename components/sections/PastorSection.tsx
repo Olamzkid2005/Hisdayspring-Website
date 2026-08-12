@@ -30,7 +30,7 @@ export function PastorSection() {
     <section
       id="welcome"
       ref={ref}
-      className="py-16 md:py-32 px-6 md:px-12 bg-surface-container-low"
+      className="py-12 md:py-16 px-6 md:px-12 bg-surface-container-low"
       aria-labelledby="welcome-heading"
     >
       <div className="max-w-7xl mx-auto">

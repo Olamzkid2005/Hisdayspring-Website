@@ -140,12 +140,12 @@ export function EventsSection() {
   }, [lightboxEvent]);
 
   return (
-    <section id="events" ref={ref} className="bg-surface py-16 md:py-24">
+    <section id="events" ref={ref} className="bg-surface py-12 md:py-16">
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.6 }}
-        className="text-center mb-16"
+        className="text-center mb-8 md:mb-10"
       >
         <h2 className="font-headline text-2xl md:text-4xl text-on-surface mb-4">Upcoming Events</h2>
         <p className="text-on-surface-variant max-w-2xl mx-auto">

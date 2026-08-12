@@ -7,43 +7,39 @@ import type { ServiceTime } from "@/types";
 
 export const serviceTimes: ServiceTime[] = [
   // ── Sunday Services ──
-  // 1st Sunday: Thanksgiving | 3rd Sunday: Friends & Family | Last Sunday: SuperSunday/Communion
   {
     id: "sunday-8am",
-    name: "Sunday Service",
+    name: "1st Sunday",
     day: "Sunday",
     time: "8:00 AM",
     branch: "Both",
-    description:
-      "1st Sunday: Thanksgiving Service | 3rd Sunday: Friends & Family Sunday | Last Sunday: SuperSunday / Communion Service",
+    description: "Thanksgiving",
   },
   {
     id: "sunday-10am",
-    name: "Sunday Service",
+    name: "3rd Sunday",
     day: "Sunday",
     time: "10:00 AM",
     branch: "Both",
-    description:
-      "1st Sunday: Thanksgiving Service | 3rd Sunday: Friends & Family Sunday | Last Sunday: SuperSunday / Communion Service",
+    description: "Friends and family Sunday",
   },
   {
     id: "sunday-12noon",
-    name: "Sunday Service",
+    name: "Last Sunday",
     day: "Sunday",
     time: "12:00 PM",
     branch: "Both",
-    description:
-      "1st Sunday: Thanksgiving Service | 3rd Sunday: Friends & Family Sunday | Last Sunday: SuperSunday / Communion Service",
+    description: "Super Sunday/ communion service",
   },
 
   // ── Tuesday ──
   {
     id: "tuesday",
-    name: "Hour of Revelation",
+    name: "HOR",
     day: "Tuesday",
     time: "8:00 AM",
     branch: "Both",
-    description: "Morning prayer and revelation hour to start your day with the Word.",
+    description: "Hour of Revelation — morning prayer and revelation hour.",
   },
 
   // ── Wednesday ──
@@ -69,12 +65,12 @@ export const serviceTimes: ServiceTime[] = [
   // ── 4th Saturday ──
   {
     id: "jewels",
-    name: "The Jewels & Winning Women Breakfast Meeting",
+    name: "Jewels",
     day: "Every 4th Saturday of the Month",
-    time: "8:00 AM",
+    time: "9:00 AM",
     branch: "Both",
     description:
-      "Every 4th Saturday of the month — a breakfast meeting for women (ages 18–45, single & married).",
+      "Breakfast meeting for women (ages 18–45, single & married).",
   },
 ];
 

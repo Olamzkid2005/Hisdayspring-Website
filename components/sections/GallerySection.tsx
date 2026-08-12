@@ -2,9 +2,12 @@
 
 import { useRef, useState, useEffect, useCallback } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { galleryPhotos, galleryCategories } from "@/data/gallery";
+import { testimonials } from "@/data/testimonials";
 import type { GalleryCategory } from "@/types";
+
+const featuredTestimonials = testimonials.slice(0, 3);
 
 const bentoSizes = [
   "md:col-span-2 md:row-span-2",
@@ -87,14 +90,14 @@ export function GallerySection() {
   }, [selectedPhoto]);
 
   return (
-    <section id="gallery" ref={ref} className="py-16 md:py-24 px-6 md:px-12 max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-16 gap-8">
+    <section id="gallery" ref={ref} className="py-12 md:py-16 px-6 md:px-12 max-w-7xl mx-auto">
+      <div className="flex flex-col md:flex-row justify-between items-end mb-8 md:mb-10 gap-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-headline text-5xl md:text-6xl text-primary font-bold mb-3">
+          <h2 className="font-headline text-3xl md:text-5xl text-primary font-bold mb-3">
             Moments of Grace
           </h2>
           <p className="text-on-surface-variant text-lg">
@@ -179,7 +182,7 @@ export function GallerySection() {
         initial={{ opacity: 0, y: 20 }}
         animate={isInView ? { opacity: 1, y: 0 } : {}}
         transition={{ duration: 0.5, delay: 0.6 }}
-        className="flex justify-center mt-10"
+        className="flex justify-center mt-8"
       >
         <button
           onClick={() => {
@@ -190,6 +193,59 @@ export function GallerySection() {
         >
           View All Photos
         </button>
+      </motion.div>
+
+      {/** ---- Testimonials strip ---- */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.6, delay: 0.2 }}
+        className="mt-14 md:mt-20"
+      >
+        <div className="text-center mb-8">
+          <h3 className="font-headline text-2xl md:text-4xl text-on-surface">
+            Divine Encounters
+          </h3>
+          <p className="text-on-surface-variant mt-2 max-w-2xl mx-auto text-sm md:text-base">
+            Hear how God has transformed lives through His Power and Grace.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          {featuredTestimonials.map((testimonial, index) => (
+            <motion.div
+              key={testimonial.id}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.4, delay: index * 0.1 }}
+              className={`p-5 md:p-6 rounded-2xl ${
+                index % 2 === 0
+                  ? "bg-surface-container-lowest shadow-sm border border-outline-variant/20"
+                  : "bg-primary text-on-primary"
+              }`}
+            >
+              <Quote
+                className={`w-8 h-8 mb-3 ${
+                  index % 2 === 0 ? "text-primary/20" : "text-white/30"
+                }`}
+              />
+              <p
+                className={`text-sm md:text-base leading-relaxed line-clamp-4 ${
+                  index % 2 === 0 ? "text-on-surface" : "text-on-primary/90"
+                }`}
+              >
+                &ldquo;{testimonial.testimony}&rdquo;
+              </p>
+              <p
+                className={`mt-4 text-sm font-bold ${
+                  index % 2 === 0 ? "text-primary" : "text-white"
+                }`}
+              >
+                {testimonial.name}
+              </p>
+            </motion.div>
+          ))}
+        </div>
       </motion.div>
 
       {/** ---- Lightbox ---- */}

@@ -104,6 +104,11 @@ export interface Ministry {
     label: string;
   }[];
   gallery?: string[];
+  programs?: {
+    name: string;
+    description: string;
+    topics?: string[];
+  }[];
 }
 
 // =============================================================================
@@ -206,10 +211,11 @@ export interface SocialLink {
 export type DonationPurpose =
   | "tithes"
   | "offerings"
+  | "welfare"
+  | "crusade"
+  | "prophetic-seed"
   | "special-projects"
-  | "building-fund"
-  | "missions"
-  | "youth-ministry";
+  | "missions";
 
 export type PaymentMethod = "bank-transfer" | "card-payment" | "mobile-money";
 

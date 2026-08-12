@@ -1,120 +1,39 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { HandCoins, Heart, Globe, Building, Landmark, Users, Copy, Check } from "lucide-react";
-import { bankAccount, donationPurposes } from "@/data/donations";
-import type { DonationPurpose } from "@/types";
-
-const purposeIcons: Record<DonationPurpose, React.ElementType> = {
-  tithes: HandCoins,
-  offerings: Heart,
-  missions: Globe,
-  "special-projects": Building,
-  "building-fund": Landmark,
-  "youth-ministry": Users,
-};
+import { HeartHandshake, ArrowRight } from "lucide-react";
 
 export function GiveSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [selected, setSelected] = useState<DonationPurpose>("tithes");
-  const [copied, setCopied] = useState(false);
-
-  const copyAccountNumber = () => {
-    navigator.clipboard.writeText(bankAccount.accountNumber);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
   return (
-    <section id="give" ref={ref} className="bg-surface-container-low py-16 md:py-24">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 grid lg:grid-cols-2 gap-8 md:gap-16">
+    <section id="give" ref={ref} className="py-10 md:py-14 px-4 md:px-8">
+      <div className="max-w-7xl mx-auto">
         <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.1 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="relative overflow-hidden rounded-3xl bg-primary px-6 py-12 md:px-16 md:py-16 text-center"
         >
-          <h2 className="font-headline text-2xl md:text-4xl font-bold text-primary mb-4">Support the Mission</h2>
-          <p className="text-on-surface-variant text-base md:text-lg mb-6 md:mb-10">
-            Your generosity fuels the work of God and transforms lives across our communities.
-          </p>
-
-          <div className="space-y-3">
-            {donationPurposes.map((purpose) => {
-              const Icon = purposeIcons[purpose.id];
-              return (
-                <label
-                  key={purpose.id}
-                  className={`group cursor-pointer flex items-center justify-between p-4 md:p-6 bg-surface-container-lowest rounded-xl border-l-4 transition-colors ${
-                    selected === purpose.id ? "border-secondary" : "border-transparent hover:border-secondary"
-                  }`}
-                >
-                  <div className="flex items-center gap-4">
-                    <Icon className="w-6 h-6 text-primary" />
-                    <div>
-                      <h4 className="font-bold text-lg text-on-surface">{purpose.label}</h4>
-                      {purpose.description && (
-                        <p className="text-sm text-zinc-500">{purpose.description}</p>
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    type="radio"
-                    name="donation-purpose"
-                    value={purpose.id}
-                    checked={selected === purpose.id}
-                    onChange={() => setSelected(purpose.id)}
-                    className="accent-primary w-5 h-5"
-                  />
-                </label>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="bg-surface-container-lowest p-6 md:p-10"
-        >
-          <h3 className="font-headline text-2xl font-bold text-on-surface mb-8">Secure Ways to Give</h3>
-
-          <div className="p-6 rounded-xl bg-surface-container-low mb-8">
-            <p className="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-4">Bank Details</p>
-            <div className="flex justify-between border-b border-outline-variant pb-3 mb-3">
-              <span className="text-on-surface-variant text-sm">Bank</span>
-              <span className="font-bold text-on-surface">{bankAccount.bankName}</span>
-            </div>
-            <div className="flex justify-between border-b border-outline-variant pb-3 mb-3">
-              <span className="text-on-surface-variant text-sm">Account Name</span>
-              <span className="font-bold text-on-surface">{bankAccount.accountName}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-on-surface-variant text-sm">Account Number</span>
-              <div className="flex items-center gap-3">
-                <span className="font-bold text-lg md:text-xl text-primary">{bankAccount.accountNumber}</span>
-                <button
-                  type="button"
-                  onClick={copyAccountNumber}
-                  className="p-2.5 rounded hover:bg-surface-container transition-colors min-w-[44px] min-h-[44px]"
-                  aria-label="Copy account number"
-                >
-                  {copied ? <Check className="w-4 h-4 text-primary" /> : <Copy className="w-4 h-4 text-on-surface-variant" />}
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => window.location.href = "/giving"}
-              className="w-full py-4 rounded-full font-bold text-white bg-primary hover:brightness-110 transition-all shadow-lg shadow-primary/20"
+          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,white,transparent_45%),radial-gradient(circle_at_80%_80%,white,transparent_45%)]" />
+          <div className="relative z-10 max-w-3xl mx-auto">
+            <HeartHandshake className="w-10 h-10 md:w-12 md:h-12 text-secondary mx-auto mb-4" />
+            <h2 className="font-headline text-3xl md:text-5xl text-on-primary font-bold mb-3">
+              Support the Mission
+            </h2>
+            <p className="text-on-primary/80 text-base md:text-lg mb-8 max-w-xl mx-auto">
+              Your generosity fuels the work of God and transforms lives across
+              our communities.
+            </p>
+            <a
+              href="/giving"
+              className="inline-flex items-center gap-2 px-10 py-4 md:px-14 md:py-5 rounded-full bg-secondary text-on-secondary font-headline font-bold text-lg md:text-xl hover:brightness-110 transition-all shadow-xl shadow-black/20"
             >
               Give Online
-            </button>
+              <ArrowRight className="w-5 h-5" />
+            </a>
           </div>
         </motion.div>
       </div>

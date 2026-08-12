@@ -7,15 +7,38 @@ import type { Event } from "@/types";
 
 export const upcomingEvents: Event[] = [
   {
+    id: "hour-of-revelation",
+    title: "Hour of Revelation",
+    date: "2026-08-11",
+    time: "Every Tuesday · 9:00 AM",
+    location: "Hisdayspring Church, Ipaja",
+    description:
+      "Start your day with the Word — a Tuesday morning revelation hour with the Lord.",
+    imageUrl: "/images/events/hour-of-revelation.jpg",
+    category: "general",
+  },
+  {
     id: "discovery-conference",
-    title: "Annual Discovery for Youth & Singles Conference",
+    title: "The Blessing Conference",
     date: "2026-06-20",
     time: "9:00 AM – 5:00 PM",
     location: "Hisdayspring Church, Ipaja",
     description:
       "Our annual conference for young people focused on building strong relationships founded on God's Word.",
+    imageUrl: "/images/events/blessing-conference.jpg",
     category: "youth",
     isFeatured: true,
+  },
+  {
+    id: "membership-class",
+    title: "Membership Class (Modules 1–3)",
+    date: "2026-08-08",
+    time: "9:00 AM",
+    location: "Hisdayspring Church, Ipaja",
+    description:
+      "The foundation class for every member of Hisdayspring Church — three comprehensive modules covering the vision, mission, beliefs, and culture of the church.",
+    imageUrl: "/images/events/membership-class.jpg",
+    category: "special",
   },
   {
     id: "jewels-breakfast",
@@ -36,16 +59,6 @@ export const upcomingEvents: Event[] = [
     ],
   },
   {
-    id: "boms-intake",
-    title: "BOMS New Intake Registration",
-    date: "2026-05-01",
-    time: "All Day",
-    location: "Online / Hisdayspring Church",
-    description:
-      "Registration opens for the new session of the Blessing Ola Mentoring School. Train to become a leader in God's kingdom.",
-    category: "special",
-  },
-  {
     id: "healing-crusade",
     title: "Healing From Heaven Crusade",
     date: "2026-07-15",
@@ -57,16 +70,6 @@ export const upcomingEvents: Event[] = [
     isFeatured: true,
   },
   {
-    id: "midyear-thanksgiving",
-    title: "Midyear Thanksgiving Service",
-    date: "2026-06-30",
-    time: "9:00 AM – 1:00 PM",
-    location: "Both Branches",
-    description:
-      "A time to celebrate God's faithfulness and give thanks for all He has done.",
-    category: "general",
-  },
-  {
     id: "yofic-revival",
     title: "YOFIC Youth Revival",
     date: "2026-05-29",
@@ -74,6 +77,7 @@ export const upcomingEvents: Event[] = [
     location: "Hisdayspring Church, Ipaja",
     description:
       "A special youth service with powerful worship, prayers, and word for young people.",
+    imageUrl: "/images/events/yofic-revival.jpg",
     category: "youth",
   },
 ];

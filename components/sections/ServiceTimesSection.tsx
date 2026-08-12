@@ -17,7 +17,7 @@ export function ServiceTimesSection() {
   );
 
   return (
-    <section id="services" ref={ref} className="py-16 md:py-28 bg-surface relative overflow-hidden">
+    <section id="services" ref={ref} className="py-12 md:py-16 bg-surface relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
           <motion.div
@@ -71,7 +71,7 @@ export function ServiceTimesSection() {
                   {sundayServices.map((service, i) => (
                     <div
                       key={service.id}
-                      className={`flex justify-between items-center py-4 ${
+                      className={`flex justify-between items-start gap-4 py-4 ${
                         i < sundayServices.length - 1
                           ? "border-b border-outline-variant/30"
                           : ""
@@ -82,12 +82,12 @@ export function ServiceTimesSection() {
                           {service.name}
                         </p>
                         {service.description && (
-                          <p className="text-sm text-on-surface-variant mt-0.5 line-clamp-1">
+                          <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
                             {service.description}
                           </p>
                         )}
                       </div>
-                      <span className="bg-secondary/10 text-secondary-fixed-dim rounded-full text-xs font-bold px-3 py-1 whitespace-nowrap ml-4">
+                      <span className="bg-secondary/10 text-secondary-fixed-dim rounded-full text-xs font-bold px-3 py-1 whitespace-nowrap flex-shrink-0">
                         {service.time}
                       </span>
                     </div>

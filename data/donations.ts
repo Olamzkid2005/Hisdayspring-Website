@@ -17,24 +17,29 @@ export const donationPurposes: DonationPurposeOption[] = [
     description: "Seed offerings for God's work",
   },
   {
-    id: "special-projects",
-    label: "Special Projects",
-    description: "Support church building and projects",
+    id: "welfare",
+    label: "Welfare",
+    description: "Support food, clothing, and medical care outreaches",
   },
   {
-    id: "building-fund",
-    label: "Building Fund",
-    description: "Contribute to our church expansion",
+    id: "crusade",
+    label: "Crusade",
+    description: "Support Healing From Heaven Crusade outreaches",
+  },
+  {
+    id: "prophetic-seed",
+    label: "Prophetic Seed",
+    description: "Plant a seed for prophetic declarations and impartation",
+  },
+  {
+    id: "special-projects",
+    label: "Special Projects & Building Fund",
+    description: "Support church building and expansion projects",
   },
   {
     id: "missions",
     label: "Missions",
     description: "Support evangelism and mission work",
-  },
-  {
-    id: "youth-ministry",
-    label: "Youth Ministry",
-    description: "Support YOFIC and youth programs",
   },
 ];
 

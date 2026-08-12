@@ -8,28 +8,13 @@ import type { ServiceTime } from "@/types";
 export const serviceTimes: ServiceTime[] = [
   // ── Sunday Services ──
   {
-    id: "sunday-8am",
-    name: "1st Sunday",
+    id: "sunday-services",
+    name: "Sunday Services",
     day: "Sunday",
-    time: "8:00 AM",
+    time: "8am, 10am, 12pm",
     branch: "Both",
-    description: "Thanksgiving",
-  },
-  {
-    id: "sunday-10am",
-    name: "3rd Sunday",
-    day: "Sunday",
-    time: "10:00 AM",
-    branch: "Both",
-    description: "Friends and family Sunday",
-  },
-  {
-    id: "sunday-12noon",
-    name: "Last Sunday",
-    day: "Sunday",
-    time: "12:00 PM",
-    branch: "Both",
-    description: "Super Sunday/ communion service",
+    description:
+      "1st Sunday: Thanksgiving | 3rd Sunday: Friends & Family | Last Sunday: Super Sunday/Communion",
   },
 
   // ── Tuesday ──

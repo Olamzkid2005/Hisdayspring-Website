@@ -68,28 +68,21 @@ export function ServiceTimesSection() {
                   The Lord&apos;s Day
                 </h3>
                 <div>
-                  {sundayServices.map((service, i) => (
-                    <div
-                      key={service.id}
-                      className={`flex justify-between items-start gap-4 py-4 ${
-                        i < sundayServices.length - 1
-                          ? "border-b border-outline-variant/30"
-                          : ""
-                      }`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-body font-semibold text-on-surface">
+                  {sundayServices.map((service) => (
+                    <div key={service.id} className="py-2">
+                      <div className="flex items-center gap-3 mb-2">
+                        <p className="font-body font-semibold text-on-surface text-lg">
                           {service.name}
                         </p>
-                        {service.description && (
-                          <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
-                            {service.description}
-                          </p>
-                        )}
+                        <span className="bg-secondary/10 text-secondary-fixed-dim rounded-full text-sm font-bold px-4 py-1">
+                          {service.time}
+                        </span>
                       </div>
-                      <span className="bg-secondary/10 text-secondary-fixed-dim rounded-full text-xs font-bold px-3 py-1 whitespace-nowrap flex-shrink-0">
-                        {service.time}
-                      </span>
+                      {service.description && (
+                        <p className="text-sm text-on-surface-variant leading-relaxed">
+                          {service.description}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </div>

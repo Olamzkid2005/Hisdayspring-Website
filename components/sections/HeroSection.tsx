@@ -16,22 +16,25 @@ function shuffleArray<T>(arr: T[]): T[] {
 }
 
 const HERO_COUNT = 12;
+const FIRST_HERO = "/images/Very good hero.JPG";
 
 export function HeroSection() {
   // Initialise deterministically with the first gallery photo (same on server & client).
   // On client-mount, useEffect replaces it with a shuffled subset — no hydration error.
-  const fallbackUrl = galleryPhotos[0]?.imageUrl ?? "";
+  const fallbackUrl = FIRST_HERO;
   const [heroImages, setHeroImages] = useState<string[]>(
-    galleryPhotos.length > 0 ? [fallbackUrl] : []
+    [FIRST_HERO]
   );
   const [currentImage, setCurrentImage] = useState(0);
 
   // Seed random images on client only
   useEffect(() => {
     if (galleryPhotos.length > 0) {
-      setHeroImages(
-        shuffleArray(galleryPhotos).slice(0, HERO_COUNT).map((p) => p.imageUrl)
-      );
+      const others = shuffleArray(galleryPhotos)
+        .filter((p) => p.imageUrl !== FIRST_HERO)
+        .slice(0, HERO_COUNT - 1)
+        .map((p) => p.imageUrl);
+      setHeroImages([FIRST_HERO, ...others]);
     }
   }, []);
 

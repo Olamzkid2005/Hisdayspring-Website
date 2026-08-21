@@ -1,13 +1,37 @@
 "use client";
 
-import { useRef } from "react";
-import { motion, useInView } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Clock, BookOpen, Sunrise, Church, Flower2 } from "lucide-react";
 import { serviceTimes } from "@/data";
+
+const servicePhotos = [
+  {
+    src: "/images/service times/DAYSPRING HOUR OF REVELATION  DP 2026 3.jpg",
+    alt: "Dayspring Hour of Revelation",
+  },
+  {
+    src: "/images/service times/WhatsApp Image 2026-08-19 at 11.19.48.jpeg",
+    alt: "Service gathering",
+  },
+  {
+    src: "/images/service times/WhatsApp Image 2026-08-19 at 11.20.09.jpeg",
+    alt: "Service gathering",
+  },
+];
 
 export function ServiceTimesSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [currentPhoto, setCurrentPhoto] = useState(0);
+  const [lightbox, setLightbox] = useState<number | null>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPhoto((prev) => (prev + 1) % servicePhotos.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const sundayServices = serviceTimes.filter((s) => s.day === "Sunday");
   const midweekServices = serviceTimes.filter((s) => s.day === "Wednesday");
@@ -19,39 +43,29 @@ export function ServiceTimesSection() {
   return (
     <section id="services" ref={ref} className="py-12 md:py-16 bg-surface relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 md:py-12">
+        {/* Heading */}
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          transition={{ duration: 0.6 }}
+          className="mb-8 md:mb-12"
+        >
+          <span className="font-label text-secondary font-semibold tracking-widest uppercase text-sm">
+            Fellowship With Us
+          </span>
+          <h2 className="font-headline text-3xl md:text-5xl text-on-surface mt-4 leading-tight">
+            Sacred Gatherings &amp; Service Times
+          </h2>
+          <p className="text-on-surface-variant text-base md:text-lg mt-6 leading-relaxed max-w-3xl">
+            We gather throughout the week in various settings — from Sunday worship
+            celebrations to Tuesday revelation hours and Wednesday word studies. Come
+            and experience the presence of God with us.
+          </p>
+        </motion.div>
+
+        {/* Service times cards (left) + Gallery (right) side by side */}
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12">
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
-            transition={{ duration: 0.6 }}
-            className="md:col-span-5"
-          >
-            <span className="font-label text-secondary font-semibold tracking-widest uppercase text-sm">
-              Fellowship With Us
-            </span>
-            <h2 className="font-headline text-3xl md:text-5xl text-on-surface mt-4 leading-tight">
-              Sacred Gatherings &amp; Service Times
-            </h2>
-            <p className="text-on-surface-variant text-base md:text-lg mt-6 leading-relaxed">
-              We gather throughout the week in various settings — from Sunday worship
-              celebrations to Tuesday revelation hours and Wednesday word studies. Come
-              and experience the presence of God with us.
-            </p>
-          </motion.div>
-
-          <div className="hidden md:flex items-center">
-            <div className="flex flex-col items-center gap-3">
-              <div className="w-px h-12 bg-secondary/20" />
-              <div className="w-8 h-8 rounded-full border border-secondary/30 flex items-center justify-center">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" className="text-secondary/50">
-                  <rect x="7" y="0" width="2" height="16" fill="currentColor" />
-                  <rect x="0" y="7" width="16" height="2" fill="currentColor" />
-                </svg>
-              </div>
-              <div className="w-px flex-1 bg-secondary/20" />
-            </div>
-          </div>
-
+          {/* LEFT: Service times cards */}
           <div className="md:col-span-7 relative">
             <div className="absolute left-0 top-0 bottom-0 w-1 rounded-full bg-gradient-to-b from-secondary/40 via-secondary/20 to-transparent hidden md:block" />
 
@@ -157,7 +171,100 @@ export function ServiceTimesSection() {
               ))}
             </div>
           </div>
+
+          {/* RIGHT: Auto-rotating gallery (same level as cards) */}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="md:col-span-5"
+          >
+            <div className="relative aspect-square overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm bg-surface-container-low">
+              <button
+                type="button"
+                onClick={() => setLightbox(currentPhoto)}
+                className="absolute inset-0 z-10 cursor-zoom-in"
+                aria-label="Enlarge photo"
+              />
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={currentPhoto}
+                  src={servicePhotos[currentPhoto].src}
+                  alt={servicePhotos[currentPhoto].alt}
+                  loading="lazy"
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 1.02 }}
+                  transition={{ duration: 0.8, ease: "easeInOut" }}
+                  className="absolute inset-0 w-full h-full object-cover"
+                />
+              </AnimatePresence>
+              <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 p-3 flex items-center justify-between">
+                <p className="text-white/90 text-sm font-medium drop-shadow">
+                  {servicePhotos[currentPhoto].alt}
+                </p>
+                <div className="flex gap-1.5">
+                  {servicePhotos.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setCurrentPhoto(i)}
+                      aria-label={`Show photo ${i + 1}`}
+                      className={`w-2 h-2 rounded-full transition-colors ${
+                        i === currentPhoto ? "bg-white" : "bg-white/40"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </motion.div>
         </div>
+
+        {/* Lightbox */}
+        {lightbox !== null && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+            onClick={() => setLightbox(null)}
+            onKeyDown={(e) => e.key === "Escape" && setLightbox(null)}
+            role="dialog"
+            aria-label="Enlarged photo"
+          >
+            <button
+              type="button"
+              onClick={() => setLightbox(null)}
+              className="absolute top-4 right-4 text-white/80 hover:text-white text-3xl font-bold z-50"
+              aria-label="Close"
+            >
+              &times;
+            </button>
+            <motion.img
+              key={lightbox}
+              src={servicePhotos[lightbox].src}
+              alt={servicePhotos[lightbox].alt}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+              className="max-w-full max-h-[85vh] object-contain rounded-xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
+              {servicePhotos.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); setLightbox(i); }}
+                  aria-label={`Show photo ${i + 1}`}
+                  className={`w-2.5 h-2.5 rounded-full transition-colors ${
+                    i === lightbox ? "bg-white" : "bg-white/40"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

@@ -65,11 +65,10 @@ NEXT_PUBLIC_YOUTUBE_API_KEY=your_client_side_key
 YOUTUBE_API_KEY=your_server_side_key
 YOUTUBE_CHANNEL_ID=@hisdayspring
 
-# Paystack (for donations)
-NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY=pk_live_xxxxx
-
-# Flutterwave (optional)
-NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY=pk_live_xxxxx
+# Server-side payment secrets (never expose these to the browser)
+PAYSTACK_SECRET_KEY=sk_live_xxxxx
+FLUTTERWAVE_SECRET_KEY=your_flutterwave_secret_key
+FLUTTERWAVE_SECRET_HASH=your_flutterwave_webhook_secret_hash
 
 # Google Maps (for contact section)
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
@@ -119,6 +118,19 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+2349066192155
 ├── types/               # TypeScript type definitions
 └── __tests__/          # Jest tests
 ```
+
+### Payment routes
+
+Payment initialization and verification are handled by server-side route handlers:
+
+- `POST /api/payments/paystack/initialize`
+- `POST /api/payments/paystack/verify`
+- `POST /api/payments/paystack/webhook`
+- `POST /api/payments/flutterwave/initialize`
+- `POST /api/payments/flutterwave/verify`
+- `POST /api/payments/flutterwave/webhook`
+
+Configure the provider dashboard webhook URLs using the deployed site origin. Webhooks authenticate signatures, but payment records are not persisted because this project does not yet include a database or queue. Add persistence before relying on webhook events for donor receipts, reconciliation, or fulfillment.
 
 ## Updating Content
 

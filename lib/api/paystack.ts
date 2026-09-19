@@ -1,103 +1,68 @@
 /**
- * Paystack API client for donation payments
+ * Browser adapter for the server-side Paystack payment routes.
+ * Secret keys must never be used in client components.
  */
 
 import type { PaymentResponse } from "@/types";
-import { config } from "@/lib/config";
 
-const PAYSTACK_INITIALIZE_URL = "https://api.paystack.co/transaction/initialize";
-
-export interface PaystackInitializeResponse {
-  status: boolean;
-  message: string;
-  data: {
-    authorization_url: string;
-    reference: string;
-    access_code: string;
-    reference_code: string;
-  };
+interface PaymentRouteResponse extends PaymentResponse {
+  status?: string;
+  amount?: number;
+  currency?: string;
 }
 
-/**
- * Initialize a Paystack payment
- */
-export async function initializePayment(
-  email: string,
-  amount: number, // Amount in kobo (Naira * 100)
-  metadata?: Record<string, string>
-): Promise<PaymentResponse> {
-  const publicKey = config.paystackPublicKey;
-
-  if (!publicKey) {
-    console.warn("Paystack public key not configured");
-    return {
-      success: false,
-      message: "Payment system not configured",
-    };
-  }
-
+async function postPaymentRoute(
+  path: string,
+  body: Record<string, unknown>
+): Promise<PaymentRouteResponse> {
   try {
-    const response = await fetch(PAYSTACK_INITIALIZE_URL, {
+    const response = await fetch(path, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${publicKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        email,
-        amount,
-        currency: "NGN",
-        metadata: {
-          ...metadata,
-          source: "hisdayspring-website",
-        },
-      }),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
+    const data = (await response.json()) as PaymentRouteResponse;
 
-    const data: PaystackInitializeResponse = await response.json();
-
-    if (data.status) {
+    if (!response.ok) {
       return {
-        success: true,
-        authorizationUrl: data.data.authorization_url,
-        reference: data.data.reference,
-        message: data.message,
+        success: false,
+        message: data.message || "Payment request failed",
       };
     }
 
-    return {
-      success: false,
-      message: data.message || "Payment initialization failed",
-    };
+    return data;
   } catch (error) {
-    console.error("Paystack error:", error);
+    console.error("Paystack request error:", error);
     return {
       success: false,
-      message: "An error occurred while initializing payment",
+      message: "Unable to connect to the payment service",
     };
   }
 }
 
 /**
- * Verify a Paystack payment
- * Note: This should be called from a server-side API route with secret key
+ * Initialize a Paystack payment through our server-side route.
+ * `amount` is in kobo for backwards compatibility with existing callers.
+ * Settlement routing (e.g. pastoral giving) is resolved server-side.
  */
-export async function verifyPayment(_reference: string): Promise<boolean> {
-  // This would be called from /api/verify-payment route
-  // Server-side only with PAYSTACK_SECRET_KEY
-  try {
-    const response = await fetch(
-      `${PAYSTACK_INITIALIZE_URL.replace("initialize", "verify/${reference}")}`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        },
-      }
-    );
+export async function initializePayment(
+  email: string,
+  amount: number,
+  metadata?: Record<string, string>
+): Promise<PaymentResponse> {
+  return postPaymentRoute("/api/payments/paystack/initialize", {
+    email,
+    amount: amount / 100,
+    metadata,
+  });
+}
 
-    const data = await response.json();
-    return data.status && data.data.status === "success";
-  } catch {
-    return false;
-  }
+/**
+ * Verify a Paystack payment through our server-side route.
+ */
+export async function verifyPayment(reference: string): Promise<boolean> {
+  const result = await postPaymentRoute("/api/payments/paystack/verify", {
+    reference,
+  });
+  return result.success;
 }

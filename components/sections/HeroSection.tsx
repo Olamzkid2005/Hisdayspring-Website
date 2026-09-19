@@ -1,42 +1,23 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, ChevronDown } from "lucide-react";
 import { galleryPhotos } from "@/data/gallery";
 
-/** Fisher-Yates shuffle (client-only, never during SSR) */
-function shuffleArray<T>(arr: T[]): T[] {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
 const HERO_COUNT = 12;
 const FIRST_HERO = "/images/Very good hero.JPG";
 
 export function HeroSection() {
-  // Initialise deterministically with the first gallery photo (same on server & client).
-  // On client-mount, useEffect replaces it with a shuffled subset — no hydration error.
-  const fallbackUrl = FIRST_HERO;
-  const [heroImages, setHeroImages] = useState<string[]>(
-    [FIRST_HERO]
-  );
+  const [heroImages] = useState<string[]>(() => [
+    FIRST_HERO,
+    ...galleryPhotos
+      .filter((p) => p.imageUrl !== FIRST_HERO)
+      .slice(0, HERO_COUNT - 1)
+      .map((p) => p.imageUrl),
+  ]);
   const [currentImage, setCurrentImage] = useState(0);
-
-  // Seed random images on client only
-  useEffect(() => {
-    if (galleryPhotos.length > 0) {
-      const others = shuffleArray(galleryPhotos)
-        .filter((p) => p.imageUrl !== FIRST_HERO)
-        .slice(0, HERO_COUNT - 1)
-        .map((p) => p.imageUrl);
-      setHeroImages([FIRST_HERO, ...others]);
-    }
-  }, []);
 
   // Auto-advance to a random image every 8s
   useEffect(() => {
@@ -56,7 +37,7 @@ export function HeroSection() {
 
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-zinc-900">
+      <div className="absolute inset-0 bg-surface-container-low">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentImage}
@@ -66,9 +47,11 @@ export function HeroSection() {
             transition={{ duration: 0.8, ease: "easeInOut" }}
             className="absolute inset-0"
           >
-            <img
+            <Image
               src={heroImages[currentImage]}
               alt="Hisdayspring Ministries"
+              fill
+              sizes="100vw"
               className="w-full h-full object-cover object-center"
             />
           </motion.div>

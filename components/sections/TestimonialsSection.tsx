@@ -84,7 +84,7 @@ export function TestimonialsSection() {
           <h2 className="font-headline text-3xl md:text-5xl font-bold text-on-surface mb-4">
             Divine Encounters
           </h2>
-          <p className="text-zinc-500 max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
+          <p className="text-on-surface-variant max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
             Hear from members of our community about how God has transformed their lives
             through His Power and Grace.
           </p>

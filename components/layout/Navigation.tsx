@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown } from "lucide-react";
@@ -94,12 +95,12 @@ export function Navigation() {
       if (element) {
         element.scrollIntoView({ behavior: "smooth" });
       } else {
-        window.location.href = href;
+        window.location.assign(href);
       }
       closeMenus();
       return;
     }
-    window.location.href = href;
+    window.location.assign(href);
     closeMenus();
   };
 
@@ -107,15 +108,17 @@ export function Navigation() {
 
   return (
     <>
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md">
+      <nav className="fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-md">
         <div className="flex justify-between items-center px-4 md:px-8 py-4 max-w-screen-2xl mx-auto">
           <button
             onClick={() => navigateTo("home")}
             className="flex items-center gap-2"
           >
-            <img
+            <Image
               src="/images/logo/Logo-Website.png"
               alt="Hisdayspring"
+              width={160}
+              height={40}
               className="h-10 w-auto"
             />
           </button>
@@ -133,8 +136,8 @@ export function Navigation() {
                     onClick={() => navigateTo(link.id)}
                     className={`flex items-center gap-1 transition-colors whitespace-nowrap ${
                       activeSection === link.id
-                        ? "text-rose-700 font-bold border-b-2 border-amber-500 pb-1"
-                        : "text-zinc-600 hover:text-rose-600"
+                        ? "text-primary font-bold border-b-2 border-secondary pb-1"
+                        : "text-on-surface-variant hover:text-primary"
                     }`}
                   >
                     {link.label}
@@ -151,21 +154,21 @@ export function Navigation() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 8 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-zinc-100 p-2"
+                        className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant p-2"
                       >
                         {dropdownLinks.map((item) => (
                           <button
                             key={item.id}
                             onClick={() => navigateToHref(item.href)}
-                            className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-zinc-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                            className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors"
                           >
                             {item.label}
                           </button>
                         ))}
-                        <div className="my-2 h-px bg-zinc-100" />
+                        <div className="my-2 h-px bg-surface-container-low" />
                         <button
                           onClick={() => navigateTo("ministries")}
-                          className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors"
+                          className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors"
                         >
                           View All Ministries →
                         </button>
@@ -179,8 +182,8 @@ export function Navigation() {
                   onClick={() => navigateTo(link.id)}
                   className={`transition-colors whitespace-nowrap ${
                     activeSection === link.id
-                      ? "text-rose-700 font-bold border-b-2 border-amber-500 pb-1"
-                      : "text-zinc-600 hover:text-rose-600"
+                      ? "text-primary font-bold border-b-2 border-secondary pb-1"
+                      : "text-on-surface-variant hover:text-primary"
                   }`}
                 >
                   {link.label}
@@ -199,8 +202,8 @@ export function Navigation() {
                   openDropdown === "more" ||
                   activeSection === "sermons" ||
                   activeSection === "gallery"
-                    ? "text-rose-700 font-bold border-b-2 border-amber-500 pb-1"
-                    : "text-zinc-600 hover:text-rose-600"
+                    ? "text-primary font-bold border-b-2 border-secondary pb-1"
+                    : "text-on-surface-variant hover:text-primary"
                 }`}
               >
                 More
@@ -217,23 +220,23 @@ export function Navigation() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 8 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute top-full right-0 mt-3 w-64 bg-white rounded-2xl shadow-xl border border-zinc-100 p-2"
+                    className="absolute top-full right-0 mt-3 w-64 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant p-2"
                   >
                     {moreLinks.slice(0, 2).map((item) => (
                       <button
                         key={item.id}
                         onClick={() => navigateToHref(item.href)}
-                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-zinc-700 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-on-surface hover:text-primary hover:bg-primary/5 transition-colors"
                       >
                         {item.label}
                       </button>
                     ))}
-                    <div className="my-2 h-px bg-zinc-100" />
+                    <div className="my-2 h-px bg-surface-container-low" />
                     {moreLinks.slice(2).map((item) => (
                       <button
                         key={item.id}
                         onClick={() => navigateToHref(item.href)}
-                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-zinc-600 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors"
                       >
                         {item.label}
                       </button>
@@ -255,7 +258,7 @@ export function Navigation() {
 
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-3 text-zinc-600 hover:text-rose-600 transition-colors relative z-50 pointer-events-auto touch-manipulation"
+            className="lg:hidden p-3 text-on-surface-variant hover:text-primary transition-colors relative z-50 pointer-events-auto touch-manipulation"
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
           >
@@ -275,7 +278,7 @@ export function Navigation() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-zinc-950/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-40 bg-inverse-surface/60 backdrop-blur-sm lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <motion.div
@@ -284,18 +287,20 @@ export function Navigation() {
               exit={{ x: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-white shadow-2xl"
+              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-surface-container-lowest shadow-2xl"
             >
               <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-6 border-b border-zinc-100">
-                  <img
+                <div className="flex items-center justify-between p-6 border-b border-outline-variant">
+                  <Image
                     src="/images/logo/Logo-Website.png"
                     alt="Hisdayspring"
+                    width={128}
+                    height={32}
                     className="h-8 w-auto"
                   />
                   <button
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-zinc-600 hover:text-rose-600 transition-colors"
+                    className="p-2 text-on-surface-variant hover:text-primary transition-colors"
                     aria-label="Close menu"
                   >
                     <X className="w-6 h-6" />
@@ -311,10 +316,10 @@ export function Navigation() {
                           initial={{ opacity: 0, x: 20 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.05 }}
-                          className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-zinc-50 transition-colors font-headline ${
+                          className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 transition-colors font-headline ${
                             activeSection === link.id
-                              ? "text-rose-700 font-bold bg-rose-50"
-                              : "text-zinc-600 hover:text-rose-600 hover:bg-zinc-50"
+                              ? "text-primary font-bold bg-primary/5"
+                              : "text-on-surface-variant hover:text-primary hover:bg-surface-container-low"
                           }`}
                         >
                           {link.label}
@@ -323,7 +328,7 @@ export function Navigation() {
                           <button
                             key={item.id}
                             onClick={() => navigateToHref(item.href)}
-                            className="block w-full text-left px-10 py-3 text-sm text-zinc-500 hover:text-rose-600 hover:bg-zinc-50 border-b border-zinc-50 transition-colors"
+                            className="block w-full text-left px-10 py-3 text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container-low border-b border-outline-variant/30 transition-colors"
                           >
                             {item.label}
                           </button>
@@ -336,10 +341,10 @@ export function Navigation() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-zinc-50 transition-colors font-headline ${
+                        className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 transition-colors font-headline ${
                           activeSection === link.id
-                            ? "text-rose-700 font-bold bg-rose-50"
-                            : "text-zinc-600 hover:text-rose-600 hover:bg-zinc-50"
+                            ? "text-primary font-bold bg-primary/5"
+                            : "text-on-surface-variant hover:text-primary hover:bg-surface-container-low"
                         }`}
                       >
                         {link.label}
@@ -348,14 +353,14 @@ export function Navigation() {
                   )}
 
                   <div>
-                    <div className="block w-full text-left px-6 py-4 text-base font-medium border-b border-zinc-50 font-headline text-zinc-600">
+                    <div className="block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 font-headline text-on-surface-variant">
                       More
                     </div>
                     {moreLinks.map((link) => (
                       <button
                         key={link.id}
                         onClick={() => navigateToHref(link.href)}
-                        className="block w-full text-left px-10 py-3 text-sm text-zinc-500 hover:text-rose-600 hover:bg-zinc-50 border-b border-zinc-50 transition-colors"
+                        className="block w-full text-left px-10 py-3 text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container-low border-b border-outline-variant/30 transition-colors"
                       >
                         {link.label}
                       </button>
@@ -363,7 +368,7 @@ export function Navigation() {
                   </div>
                 </div>
 
-                <div className="p-6 border-t border-zinc-100">
+                <div className="p-6 border-t border-outline-variant">
                   <button
                     onClick={() => navigateTo("giving")}
                     className="block w-full bg-primary text-on-primary px-6 py-3 rounded-full font-medium text-center hover:brightness-110 transition-all min-h-[44px]"

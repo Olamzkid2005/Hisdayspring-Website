@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Noto_Serif, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { CookieConsent } from "@/components/utility/CookieConsent";
+import { Analytics } from "@vercel/analytics/react";
 
 const notoSerif = Noto_Serif({
   subsets: ["latin"],
@@ -21,7 +22,15 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#1a1c1c" },
+  ],
+};
+
 export const metadata: Metadata = {
+  metadataBase: new URL("https://hisdayspring.org"),
   title: {
     default: "Hisdayspring Ministries International",
     template: "%s | Hisdayspring Ministries International",
@@ -58,6 +67,18 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
+  alternates: {
+    canonical: "/",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -95,15 +116,22 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${notoSerif.variable} ${plusJakartaSans.variable}`}>
       <body className="min-h-screen flex flex-col antialiased font-body">
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-4 focus:left-4 focus:px-4 focus:py-2 focus:rounded-full focus:bg-primary focus:text-on-primary focus:font-bold"
+        >
+          Skip to main content
+        </a>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
         <Navigation />
-        <main className="flex-1 pt-24">{children}</main>
+        <main id="main-content" className="flex-1 pt-24">{children}</main>
         <Footer />
         <WhatsAppFloat />
         <CookieConsent />
+        <Analytics />
       </body>
     </html>
   );

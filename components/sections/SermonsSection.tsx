@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { Play, ArrowRight, Calendar, Clock } from "lucide-react";
+import { Play, ArrowRight } from "lucide-react";
 import { fetchSermons } from "@/lib/api/youtube";
 import { Modal } from "@/components/ui";
 import type { YouTubeVideo, LiveStreamStatus } from "@/types";
@@ -81,25 +81,6 @@ export function SermonsSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const getNextService = () => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
-    const nextSunday = new Date(now);
-    nextSunday.setDate(now.getDate() + daysUntilSunday);
-
-    return {
-      name: "Sunday Service",
-      date: nextSunday.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-      }),
-      time: "8:00 AM",
-    };
-  };
-
-  const nextService = getNextService();
   const isLive = liveStatus?.isLive ?? false;
 
   const featured = sermons[0];
@@ -137,7 +118,7 @@ export function SermonsSection() {
         >
           <div className="flex items-center gap-3">
             {isLive ? (
-              <span className="flex items-center gap-2 bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold tracking-widest">
+              <span className="flex items-center gap-2 bg-error text-on-error px-3 py-1 rounded-full text-xs font-bold tracking-widest">
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                 LIVE NOW
               </span>
@@ -154,7 +135,7 @@ export function SermonsSection() {
           <div className="flex items-center gap-3 md:gap-4">
             <a
               href="/live"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-sm transition-colors"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-error hover:bg-error text-on-error rounded-full font-semibold text-sm transition-colors"
             >
               <Play className="w-4 h-4 fill-white" />
               Watch Live on YouTube

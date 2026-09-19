@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { BookOpen } from "lucide-react";
 import { books } from "@/data/books";
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function BooksPage() {
   return (
     <>
-      <section className="relative min-h-[45vh] flex items-end overflow-hidden bg-zinc-900">
+      <section className="relative min-h-[45vh] flex items-end overflow-hidden bg-surface-container-low">
         <img
           src="https://images.unsplash.com/photo-1493552152660-f915ab47ae9d?w=1920&q=80"
           alt="Books"
@@ -47,10 +48,11 @@ export default function BooksPage() {
                 className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col"
               >
                 <div className="relative aspect-[3/4] overflow-hidden bg-surface-container-low">
-                  <img
+                  <Image
                     src={book.imageUrl}
                     alt={book.title}
-                    loading="lazy"
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                     className="w-full h-full object-cover"
                   />
                   <span

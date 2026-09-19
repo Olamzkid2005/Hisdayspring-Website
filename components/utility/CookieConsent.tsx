@@ -67,30 +67,30 @@ export function CookieConsent() {
           <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
             <div className="p-6 md:p-8">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-accent-100 flex items-center justify-center">
-                  <Cookie className="w-6 h-6 text-accent-600" />
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+                  <Cookie className="w-6 h-6 text-secondary" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-serif font-bold text-lg text-primary-900">
+                    <h3 className="font-serif font-bold text-lg text-on-surface">
                       We value your privacy
                     </h3>
                     <button
                       onClick={handleDecline}
-                      className="p-1 text-muted hover:text-foreground transition-colors rounded-lg hover:bg-primary-50"
+                      className="p-1 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg hover:bg-surface-container-low"
                       aria-label="Close cookie banner"
                     >
                       <X className="w-5 h-5" />
                     </button>
                   </div>
-                  <p className="text-muted text-sm leading-relaxed mb-4">
+                  <p className="text-on-surface-variant text-sm leading-relaxed mb-4">
                     We use cookies to enhance your browsing experience, serve personalized
                     content, and analyze our traffic. By clicking &quot;Accept&quot;, you consent
                     to our use of cookies. You can manage your preferences or learn more
                     about our cookie use in our{" "}
                     <Link
                       href="/privacy"
-                      className="text-accent-600 hover:underline"
+                      className="text-secondary hover:underline"
                     >
                       Privacy Policy
                     </Link>

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { workforce } from "@/data";
@@ -36,11 +37,12 @@ function WorkforceCard({
       <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
         {/* Photo */}
         <div className="relative aspect-[4/5] overflow-hidden">
-          <img
+          <Image
             src={member.imageUrl}
             alt={member.name}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            loading={index < 2 ? "eager" : "lazy"}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 

@@ -52,7 +52,7 @@ export function RadioSection() {
 
           <div className="border-t border-white/10 p-6 bg-black/20">
             <p className="text-white/70 text-center text-sm">
-              Click "Open in Zeno.fm" below to listen to the live stream
+              Click &quot;Open in Zeno.fm&quot; below to listen to the live stream
             </p>
           </div>
         </div>

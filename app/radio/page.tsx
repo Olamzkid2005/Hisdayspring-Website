@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RadioPage() {
   return (
     <>
-      <section className="relative min-h-[60vh] flex items-end overflow-hidden bg-zinc-900">
+      <section className="relative min-h-[60vh] flex items-end overflow-hidden bg-surface-container-low">
         <img
           src="https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80"
           alt="Hisdayspring Radio"

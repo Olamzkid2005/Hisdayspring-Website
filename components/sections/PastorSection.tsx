@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Heart, Users, Home } from "lucide-react";
@@ -62,9 +63,11 @@ export function PastorSection() {
             className="relative"
           >
             <div className="relative aspect-[4/3] md:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
-              <img
+              <Image
                 src="/images/pastors/Main Pastors.jpg"
                 alt="Hisdayspring Ministries family gathering"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />

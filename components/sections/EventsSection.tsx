@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Clock, CalendarPlus, X, Expand } from "lucide-react";
-import { upcomingEvents } from "@/data/events";
+import { getUpcomingEvents } from "@/data/events";
 import type { Event } from "@/types";
 
 function getCategoryBadge(category: Event["category"]) {
@@ -34,7 +35,7 @@ function formatDate(event: Event) {
       })),
     };
   }
-  const d = new Date(event.date);
+  const d = new Date(`${event.date}T00:00:00`);
   return {
     day: d.getDate(),
     month: d.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
@@ -59,7 +60,7 @@ function EventItem({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
-      className="group flex flex-col md:flex-row items-center gap-4 md:gap-8 p-6 bg-surface-container-lowest rounded-2xl hover:bg-white transition-all shadow-sm"
+      className="group flex flex-col md:flex-row items-center gap-4 md:gap-8 p-6 bg-surface-container-lowest rounded-2xl bg-surface-container-lowest transition-all shadow-sm"
     >
       {event.imageUrl && (
         <button
@@ -68,10 +69,11 @@ function EventItem({
           aria-label={`Enlarge image of ${event.title}`}
           className="relative flex-none rounded-2xl overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary cursor-zoom-in"
         >
-          <img
+          <Image
             src={event.imageUrl}
             alt={event.title}
-            loading="lazy"
+            width={112}
+            height={112}
             className="w-24 h-24 md:w-28 md:h-28 object-cover shadow-sm"
           />
           <span className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -125,6 +127,7 @@ export function EventsSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [lightboxEvent, setLightboxEvent] = useState<Event | null>(null);
+  const upcomingEvents = getUpcomingEvents();
 
   useEffect(() => {
     if (!lightboxEvent) return;
@@ -156,21 +159,12 @@ export function EventsSection() {
       <div className="max-w-4xl mx-auto px-4 md:px-8 space-y-6">
         {upcomingEvents.length > 0 ? (
           upcomingEvents.map((event, index) => (
-            <EventItem
-              key={event.id}
-              event={event}
-              index={index}
-              onImageClick={setLightboxEvent}
-            />
+            <EventItem key={event.id} event={event} index={index} onImageClick={setLightboxEvent} />
           ))
         ) : (
           <div className="text-center py-16">
-            <h3 className="font-headline text-2xl font-bold text-on-surface mb-2">
-              No Upcoming Events
-            </h3>
-            <p className="text-on-surface-variant">
-              Check back soon for upcoming events at Hisdayspring!
-            </p>
+            <h3 className="font-headline text-2xl font-bold text-on-surface mb-2">No Upcoming Events</h3>
+            <p className="text-on-surface-variant">Check back soon for upcoming events at Hisdayspring!</p>
           </div>
         )}
       </div>
@@ -192,20 +186,26 @@ export function EventsSection() {
               type="button"
               onClick={() => setLightboxEvent(null)}
               aria-label="Close image"
-              className="absolute top-4 right-4 md:top-6 md:right-6 p-3 rounded-full bg-white/10 text-white hover:bg-white/20 transition-colors"
+              className="absolute top-4 right-4 md:top-6 md:right-6 p-3 rounded-full bg-white/10 text-white bg-surface-container-lowest/20 transition-colors"
             >
               <X className="w-6 h-6" />
             </button>
-            <motion.img
+            <motion.div
               initial={{ scale: 0.95 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               transition={{ duration: 0.25 }}
-              src={lightboxEvent.imageUrl}
-              alt={lightboxEvent.title}
-              className="max-w-full max-h-[85vh] rounded-2xl shadow-2xl object-contain"
+              className="relative w-full max-w-5xl h-[85vh]"
               onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <Image
+                src={lightboxEvent.imageUrl}
+                alt={lightboxEvent.title}
+                fill
+                sizes="100vw"
+                className="rounded-2xl shadow-2xl object-contain"
+              />
+            </motion.div>
             <p className="absolute bottom-6 left-1/2 -translate-x-1/2 text-white/80 text-sm font-medium">
               {lightboxEvent.title}
             </p>

@@ -3,7 +3,6 @@
  */
 
 export * from "./about";
-export * from "./pastor";
 export * from "./services";
 export * from "./ministries";
 export * from "./events";

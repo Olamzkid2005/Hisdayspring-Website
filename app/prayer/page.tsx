@@ -5,7 +5,7 @@ import { PrayerSection } from "@/components/sections";
 export const metadata: Metadata = {
   title: "Prayer Requests",
   description:
-    "Share your prayer request with Hisdayspring — our team will stand with you in faith. All requests are confidential.",
+    "Share your prayer request with Hisdayspring — WhatsApp will open so you can send it directly to our prayer team. Please avoid sharing highly sensitive information.",
 };
 
 export default function PrayerPage() {

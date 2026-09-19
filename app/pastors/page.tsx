@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import { GraduationCap, Heart, Users, Church } from "lucide-react";
 import { workforce } from "@/data/workforce";
@@ -36,10 +37,11 @@ function MemberCard({ member }: { member: WorkforceMember }) {
   return (
     <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="relative aspect-[4/5] overflow-hidden bg-surface-container-low">
-        <img
+        <Image
           src={member.imageUrl}
           alt={member.name}
-          loading="lazy"
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -106,9 +108,11 @@ function LeadPastorCard({ member }: { member: WorkforceMember }) {
   return (
     <div className="bg-surface-container-lowest rounded-3xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
       <div className="relative aspect-[4/5] md:aspect-square overflow-hidden bg-surface-container-low">
-        <img
+        <Image
           src={member.imageUrl}
           alt={member.name}
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-transparent to-transparent" />
@@ -161,10 +165,12 @@ function LeadPastorCard({ member }: { member: WorkforceMember }) {
 export default function PastorsPage() {
   return (
     <>
-      <section className="relative min-h-[50vh] flex items-end overflow-hidden bg-zinc-900">
-        <img
+      <section className="relative min-h-[50vh] flex items-end overflow-hidden bg-surface-container-low">
+        <Image
           src="/images/gallery/DSC01528.jpg"
           alt="Hisdayspring pastors"
+          fill
+          sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent" />

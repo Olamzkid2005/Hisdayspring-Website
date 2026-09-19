@@ -41,6 +41,19 @@ jest.mock("next/link", () => ({
   },
 }));
 
+// Mock next/image as a normal image element for jsdom tests
+jest.mock("next/image", () => ({
+  __esModule: true,
+  default: (props: Record<string, unknown>) => {
+    const { priority, fill, sizes, ...imageProps } = props;
+    void priority;
+    void fill;
+    void sizes;
+    const { createElement } = require("react");
+    return createElement("img", imageProps);
+  },
+}));
+
 // Mock window.matchMedia
 Object.defineProperty(window, "matchMedia", {
   writable: true,

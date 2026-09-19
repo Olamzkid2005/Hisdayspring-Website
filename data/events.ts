@@ -1,13 +1,17 @@
 /**
- * Events data
- * PLACEHOLDER - Church to provide actual event details
+ * Events data.
+ *
+ * Do not publish an event here until its date, time, and location have been
+ * confirmed by the church. Historical entries remain available for archives.
  */
 
 import type { Event } from "@/types";
 
-export const upcomingEvents: Event[] = [
+const scheduledEvents: Event[] = [];
+
+export const pastEvents: Event[] = [
   {
-    id: "hour-of-revelation",
+    id: "hour-of-revelation-2026-08-11",
     title: "Hour of Revelation",
     date: "2026-08-11",
     time: "Every Tuesday · 9:00 AM",
@@ -18,7 +22,7 @@ export const upcomingEvents: Event[] = [
     category: "general",
   },
   {
-    id: "discovery-conference",
+    id: "blessing-conference-2026-06-20",
     title: "The Blessing Conference",
     date: "2026-06-20",
     time: "9:00 AM – 5:00 PM",
@@ -30,7 +34,7 @@ export const upcomingEvents: Event[] = [
     isFeatured: true,
   },
   {
-    id: "membership-class",
+    id: "membership-class-2026-08-08",
     title: "Membership Class (Modules 1–3)",
     date: "2026-08-08",
     time: "9:00 AM",
@@ -41,7 +45,7 @@ export const upcomingEvents: Event[] = [
     category: "special",
   },
   {
-    id: "jewels-breakfast",
+    id: "jewels-breakfast-2026-08-15",
     title: "The Jewels Monthly Breakfast Meeting",
     date: "2026-08-15",
     time: "9:00 AM",
@@ -59,18 +63,18 @@ export const upcomingEvents: Event[] = [
     ],
   },
   {
-    id: "healing-crusade",
+    id: "healing-crusade-2026-07-15",
     title: "Healing From Heaven Crusade",
     date: "2026-07-15",
     time: "6:00 PM – 9:00 PM",
     location: "Hisdayspring Church, Ikeja",
     description:
-      "A powerful crusade focused on divine healing and deliverence for all who attend.",
+      "A powerful crusade focused on divine healing and deliverance for all who attend.",
     category: "special",
     isFeatured: true,
   },
   {
-    id: "yofic-revival",
+    id: "yofic-revival-2026-05-29",
     title: "YOFIC Youth Revival",
     date: "2026-05-29",
     time: "5:00 PM – 8:00 PM",
@@ -80,9 +84,6 @@ export const upcomingEvents: Event[] = [
     imageUrl: "/images/events/yofic-revival.jpg",
     category: "youth",
   },
-];
-
-export const pastEvents: Event[] = [
   {
     id: "easter-2026",
     title: "Easter Celebration 2026",
@@ -103,10 +104,30 @@ export const pastEvents: Event[] = [
   },
 ];
 
+function getEventEndDate(event: Event): Date {
+  const dates = event.dates;
+  const finalDate = dates && dates.length > 0 ? dates[dates.length - 1].date : event.date;
+  return new Date(`${finalDate}T23:59:59`);
+}
+
+/** Return only events that have not ended as of the supplied date. */
+export function filterUpcomingEvents(events: Event[], referenceDate: Date = new Date()): Event[] {
+  return events
+    .filter((event) => getEventEndDate(event) >= referenceDate)
+    .sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export function getUpcomingEvents(referenceDate: Date = new Date()): Event[] {
+  return filterUpcomingEvents(scheduledEvents, referenceDate);
+}
+
+// Compatibility export for consumers that read the collection directly.
+export const upcomingEvents = getUpcomingEvents();
+
 export const getEventsByCategory = (category: Event["category"]) => {
-  return upcomingEvents.filter((event) => event.category === category);
+  return getUpcomingEvents().filter((event) => event.category === category);
 };
 
 export const getFeaturedEvents = () => {
-  return upcomingEvents.filter((event) => event.isFeatured);
+  return getUpcomingEvents().filter((event) => event.isFeatured);
 };

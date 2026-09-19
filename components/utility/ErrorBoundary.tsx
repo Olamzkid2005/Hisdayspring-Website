@@ -43,12 +43,12 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-primary-50 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-surface-container-low px-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
-            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-100 flex items-center justify-center">
-              <AlertTriangle className="w-8 h-8 text-red-600" />
+            <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-error-container flex items-center justify-center">
+              <AlertTriangle className="w-8 h-8 text-error" />
             </div>
-            <h1 className="font-serif text-2xl font-bold text-primary-900 mb-3">
+            <h1 className="font-serif text-2xl font-bold text-on-surface mb-3">
               Something went wrong
             </h1>
             <p className="text-muted mb-6">
@@ -68,7 +68,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
               If you continue to experience issues, please contact us at{" "}
               <a
                 href="mailto:hello@hisdayspring.org"
-                className="text-accent-600 hover:underline"
+                className="text-primary hover:underline"
               >
                 hello@hisdayspring.org
               </a>

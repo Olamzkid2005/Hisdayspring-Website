@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Heart } from "lucide-react";
@@ -37,9 +38,11 @@ export function PrayerSection() {
       <div className="max-w-4xl mx-auto rounded-3xl p-8 md:p-16 relative overflow-hidden" style={{ boxShadow: "0 24px 48px -12px rgba(184, 0, 53, 0.06)" }}>
         {/* Background image — subtle watermark style */}
         <div className="absolute inset-0 -z-10">
-          <img
+          <Image
             src="/images/gallery/DSC_5073.jpg"
             alt=""
+            fill
+            sizes="100vw"
             className="w-full h-full object-cover opacity-50"
             aria-hidden="true"
           />
@@ -59,7 +62,7 @@ export function PrayerSection() {
             How can we pray for you?
           </h2>
           <p className="text-on-surface-variant max-w-lg mx-auto mt-4">
-            Whatever you&apos;re going through, God cares for you and so do we. Share your prayer request and our team will stand with you in faith.
+            Share your prayer request and our team will stand with you in faith. Your request will open in WhatsApp for you to send directly to our prayer team; please avoid sharing highly sensitive information.
           </p>
         </motion.div>
 
@@ -98,10 +101,10 @@ export function PrayerSection() {
               required
               minLength={10}
               placeholder="Share your prayer request with us..."
-              className={`w-full bg-surface-container-low border-b-2 border-transparent focus:border-secondary outline-none p-4 rounded-lg ${errors.prayerRequest ? "border-red-500 focus:border-red-500" : ""}`}
+              className={`w-full bg-surface-container-low border-b-2 border-transparent focus:border-secondary outline-none p-4 rounded-lg ${errors.prayerRequest ? "border-error focus:border-error" : ""}`}
             />
             {errors.prayerRequest && (
-              <p className="mt-1.5 text-sm text-red-500" role="alert">
+              <p className="mt-1.5 text-sm text-error" role="alert">
                 {errors.prayerRequest}
               </p>
             )}
@@ -115,7 +118,7 @@ export function PrayerSection() {
               Submit Prayer Request
             </Button>
             <p className="text-sm text-on-surface-variant">
-              All submissions are confidential and treated with respect.
+              WhatsApp will open with your request prepared. This website does not store or send prayer requests, so please do not include highly sensitive information.
             </p>
           </div>
         </form>

@@ -27,14 +27,14 @@ describe("Button Component", () => {
   it("applies primary variant classes correctly", () => {
     render(<Button variant="primary">Primary</Button>);
     expect(screen.getByRole("button", { name: /primary/i })).toHaveClass(
-      "bg-accent-500"
+      "bg-[#b80035]"
     );
   });
 
   it("applies secondary variant classes correctly", () => {
     render(<Button variant="secondary">Secondary</Button>);
     expect(screen.getByRole("button", { name: /secondary/i })).toHaveClass(
-      "bg-primary-700"
+      "bg-[#735c00]"
     );
   });
 

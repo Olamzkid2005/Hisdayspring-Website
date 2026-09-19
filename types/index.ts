@@ -32,22 +32,6 @@ export interface AboutContent {
 }
 
 // =============================================================================
-// Pastor Section Types
-// =============================================================================
-
-export interface PastorInfo {
-  name: string;
-  title: string;
-  biography: string;
-  imageUrl: string;
-  education: string[];
-  ministries: string[];
-  spouse?: string;
-  children?: string;
-  mentoringSchool?: string;
-}
-
-// =============================================================================
 // Workforce Section Types
 // =============================================================================
 
@@ -211,7 +195,8 @@ export interface SocialLink {
 export type DonationPurpose =
   | "tithes"
   | "offerings"
-  | "seeds-and-donations";
+  | "seeds-and-donations"
+  | "pastoral-giving";
 
 export type PaymentMethod = "bank-transfer" | "card-payment" | "mobile-money";
 

@@ -61,7 +61,7 @@ export function LiveStreamSection() {
         transition={{ duration: 0.6 }}
         className="rounded-xl overflow-hidden bg-surface-container shadow-2xl"
       >
-        <div className="aspect-video w-full bg-zinc-900 relative">
+        <div className="aspect-video w-full bg-surface-container-low relative">
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
@@ -80,7 +80,7 @@ export function LiveStreamSection() {
                 className="absolute inset-0 bg-cover bg-center opacity-60"
                 style={{ backgroundImage: "url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80')" }}
               />
-              <div className="absolute top-6 left-6 flex items-center gap-2 bg-red-600 text-white px-4 py-1.5 rounded-full font-bold tracking-widest text-xs">
+              <div className="absolute top-6 left-6 flex items-center gap-2 bg-error text-on-error px-4 py-1.5 rounded-full font-bold tracking-widest text-xs">
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
                 LIVE
               </div>
@@ -96,7 +96,7 @@ export function LiveStreamSection() {
               </div>
               <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 bg-gradient-to-t from-black/80 to-transparent">
                 <h2 className="font-headline text-xl md:text-3xl text-white">Sunday Service</h2>
-                <p className="text-zinc-300">Join us live every Sunday at 8am, 10am, or 12noon</p>
+                <p className="text-on-surface-variant">Join us live every Sunday at 8am, 10am, or 12noon</p>
               </div>
             </>
           )}
@@ -122,7 +122,7 @@ export function LiveStreamSection() {
                 href="https://www.youtube.com/@hisdayspring"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-semibold text-sm transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-2.5 bg-error text-on-error rounded-full font-semibold text-sm transition-colors"
               >
                 <Play className="w-5 h-5 fill-white" />
                 Subscribe on YouTube

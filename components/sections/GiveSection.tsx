@@ -2,7 +2,8 @@
 
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import { HeartHandshake, ArrowRight } from "lucide-react";
+import { HeartHandshake, ArrowRight, Building2, ShieldCheck } from "lucide-react";
+import Link from "next/link";
 
 export function GiveSection() {
   const ref = useRef<HTMLElement>(null);
@@ -25,15 +26,30 @@ export function GiveSection() {
             </h2>
             <p className="text-on-primary/80 text-base md:text-lg mb-8 max-w-xl mx-auto">
               Your generosity fuels the work of God and transforms lives across
-              our communities.
+              our communities. Give securely in under two minutes.
             </p>
-            <a
-              href="/giving"
-              className="inline-flex items-center gap-2 px-10 py-4 md:px-14 md:py-5 rounded-full bg-secondary text-on-secondary font-headline font-bold text-lg md:text-xl hover:brightness-110 transition-all shadow-xl shadow-black/20"
-            >
-              Give Online
-              <ArrowRight className="w-5 h-5" />
-            </a>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+              <Link
+                href="/giving"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-4 md:px-14 md:py-5 rounded-full bg-secondary text-on-secondary font-headline font-bold text-lg md:text-xl hover:brightness-110 transition-all shadow-xl shadow-black/20"
+              >
+                Give Now
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                href="/giving"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 rounded-full border-2 border-on-primary/40 text-on-primary font-headline font-bold text-base md:text-lg hover:bg-white/10 transition-all"
+              >
+                <Building2 className="w-5 h-5" />
+                Bank Transfer Details
+              </Link>
+            </div>
+
+            <p className="inline-flex items-center gap-2 text-on-primary/70 text-sm">
+              <ShieldCheck className="w-4 h-4" />
+              Secure payments via Paystack &amp; Flutterwave
+            </p>
           </div>
         </motion.div>
       </div>

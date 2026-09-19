@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Clock, BookOpen, Sunrise, Church, Flower2 } from "lucide-react";
@@ -187,17 +188,22 @@ export function ServiceTimesSection() {
                 aria-label="Enlarge photo"
               />
               <AnimatePresence mode="wait">
-                <motion.img
+                <motion.div
                   key={currentPhoto}
-                  src={servicePhotos[currentPhoto].src}
-                  alt={servicePhotos[currentPhoto].alt}
-                  loading="lazy"
                   initial={{ opacity: 0, scale: 1.05 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 1.02 }}
                   transition={{ duration: 0.8, ease: "easeInOut" }}
-                  className="absolute inset-0 w-full h-full object-cover"
-                />
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={servicePhotos[currentPhoto].src}
+                    alt={servicePhotos[currentPhoto].alt}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 42vw"
+                    className="object-cover"
+                  />
+                </motion.div>
               </AnimatePresence>
               <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
               <div className="absolute inset-x-0 bottom-0 p-3 flex items-center justify-between">
@@ -239,17 +245,24 @@ export function ServiceTimesSection() {
             >
               &times;
             </button>
-            <motion.img
+            <motion.div
               key={lightbox}
-              src={servicePhotos[lightbox].src}
-              alt={servicePhotos[lightbox].alt}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="max-w-full max-h-[85vh] object-contain rounded-xl"
+              className="relative max-w-full max-h-[85vh]"
               onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <Image
+                src={servicePhotos[lightbox].src}
+                alt={servicePhotos[lightbox].alt}
+                width={1600}
+                height={1200}
+                sizes="100vw"
+                className="max-w-full max-h-[85vh] object-contain rounded-xl"
+              />
+            </motion.div>
             <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-2">
               {servicePhotos.map((_, i) => (
                 <button

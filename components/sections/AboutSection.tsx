@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
@@ -43,12 +44,14 @@ export function AboutSection() {
         }}
       />
 
-      <img
+      <Image
         src="/images/logo/logo crop.jpg"
         alt=""
         aria-hidden="true"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-20 select-none pointer-events-none"
-        style={{ width: "clamp(20rem, 40vw, 50rem)", height: "auto", maxWidth: "70vw" }}
+        width={800}
+        height={400}
+        sizes="(max-width: 768px) 70vw, 40vw"
+        className="absolute top-1/2 left-1/2 w-[clamp(20rem,40vw,50rem)] max-w-[70vw] -translate-x-1/2 -translate-y-1/2 object-contain opacity-20 select-none pointer-events-none"
       />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 relative">

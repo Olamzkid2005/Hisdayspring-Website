@@ -21,19 +21,19 @@ export default function NotFound() {
         className="text-center max-w-2xl"
       >
         {/* 404 Badge */}
-        <div className="inline-flex items-center justify-center w-24 h-24 bg-primary-100 rounded-full mb-8">
-          <span className="font-serif text-5xl font-bold text-primary-700">
+        <div className="inline-flex items-center justify-center w-24 h-24 bg-primary/10 rounded-full mb-8">
+          <span className="font-serif text-5xl font-bold text-primary">
             404
           </span>
         </div>
 
         {/* Heading */}
-        <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary-900 mb-4">
+        <h1 className="font-serif text-4xl md:text-5xl font-bold text-on-surface mb-4">
           Page Not Found
         </h1>
 
         {/* Description */}
-        <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto">
+        <p className="text-lg text-on-surface-variant mb-8 max-w-lg mx-auto">
           Sorry, the page you are looking for does not exist. It may have been
           moved or deleted.
         </p>
@@ -42,14 +42,14 @@ export default function NotFound() {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
           <Link
             href="/"
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-700 text-white rounded-lg hover:bg-primary-800 transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-container transition-colors font-medium"
           >
             <Home className="w-5 h-5" />
             Go to Homepage
           </Link>
           <button
             onClick={() => window.history.back()}
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-primary-700 text-primary-700 rounded-lg hover:bg-primary-50 transition-colors font-medium"
+            className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-primary text-primary rounded-lg hover:bg-surface-container-low transition-colors font-medium"
           >
             <ArrowLeft className="w-5 h-5" />
             Go Back
@@ -57,8 +57,8 @@ export default function NotFound() {
         </div>
 
         {/* Quick Links */}
-        <div className="border-t border-gray-200 pt-8">
-          <p className="text-sm text-gray-500 mb-4">
+        <div className="border-t border-outline-variant pt-8">
+          <p className="text-sm text-on-surface-variant mb-4">
             You can also explore these sections:
           </p>
           <div className="flex flex-wrap justify-center gap-4">
@@ -66,7 +66,7 @@ export default function NotFound() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition-all text-gray-700 hover:text-primary-700"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-outline-variant rounded-lg hover:border-outline hover:shadow-sm transition-all text-on-surface hover:text-primary"
               >
                 <link.icon className="w-4 h-4" />
                 {link.label}

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -47,11 +48,13 @@ export function MinistryDetail({
 
   return (
     <>
-      <section className="relative min-h-[70vh] flex items-end overflow-hidden bg-zinc-900">
+      <section className="relative min-h-[70vh] flex items-end overflow-hidden bg-surface-container-low">
         {ministry.imageUrl && (
-          <img
+          <Image
             src={ministry.imageUrl}
             alt={ministry.name}
+            fill
+            sizes="100vw"
             className="absolute inset-0 w-full h-full object-cover"
           />
         )}
@@ -290,13 +293,16 @@ export function MinistryDetail({
                 <div
                   key={i}
                   className={`relative rounded-2xl overflow-hidden group ${
-                    i === 0 ? "col-span-2 md:col-span-2 md:row-span-2" : ""
+                    i === 0
+                      ? "col-span-2 md:col-span-2 md:row-span-2 aspect-[16/10] md:aspect-auto md:min-h-[28rem]"
+                      : "aspect-[4/3]"
                   }`}
                 >
-                  <img
+                  <Image
                     src={image}
-                    alt={`${ministry.name} — photo ${i + 1}`}
-                    loading="lazy"
+                    alt={`${ministry.name} — ${i + 1}`}
+                    fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
                     className={`w-full object-cover transition-transform duration-500 group-hover:scale-105 ${
                       i === 0 ? "aspect-[16/10] md:aspect-auto md:h-full" : "aspect-[4/3] md:aspect-[4/3]"
                     }`}
@@ -321,9 +327,11 @@ export function MinistryDetail({
                 className="group relative h-56 rounded-2xl overflow-hidden"
               >
                 {other.imageUrl && (
-                  <img
+                  <Image
                     src={other.imageUrl}
                     alt={other.name}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                 )}

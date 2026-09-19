@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { ArrowRight } from "lucide-react";
@@ -46,11 +47,12 @@ export function BooksSection() {
             className="group"
           >
             <div className="aspect-[3/4] bg-surface-container rounded-xl overflow-hidden mb-6 relative">
-              <img
+              <Image
                 src={book.imageUrl}
                 alt={book.title}
+                fill
+                sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                loading={index < 4 ? "eager" : "lazy"}
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <a

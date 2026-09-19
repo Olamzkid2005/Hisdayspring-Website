@@ -12,15 +12,7 @@ export function ContactSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
-  const {
-    values,
-    errors,
-    isSubmitting,
-    handleChange,
-    handleSubmit,
-    resetForm,
-    setFieldValue,
-  } = useFormValidation({
+  const contactForm = useFormValidation({
     fields: {
       firstName: { required: true },
       lastName: { required: true },
@@ -29,21 +21,16 @@ export function ContactSection() {
       message: { required: true, minLength: 10 },
     },
     onSubmit: async (values) => {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Contact form submitted:", values);
-      alert("Thank you for your message! We'll get back to you soon.");
-      resetForm();
+      const subject = encodeURIComponent(`${values.subject} — Hisdayspring website`);
+      const body = encodeURIComponent(
+        `Name: ${values.firstName} ${values.lastName}\nEmail: ${values.email}\n\n${values.message}`
+      );
+      window.location.assign(`mailto:${contactInfo.email}?subject=${subject}&body=${body}`);
+      contactForm.resetForm();
     },
   });
 
-  const {
-    values: prayerValues,
-    errors: prayerErrors,
-    isSubmitting: prayerSubmitting,
-    handleChange: handlePrayerChange,
-    handleSubmit: handlePrayerSubmit,
-    resetForm: resetPrayerForm,
-  } = useFormValidation({
+  const prayerForm = useFormValidation({
     fields: {
       name: { required: true },
       email: { required: true, email: true },
@@ -51,9 +38,11 @@ export function ContactSection() {
     },
     onSubmit: async (values) => {
       const phone = config.whatsappNumber.replace(/\s/g, "").replace("+", "");
-      const message = `Prayer Request from ${values.name} (${values.email}):%0A%0A${encodeURIComponent(values.prayerRequest)}`;
-      window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-      resetPrayerForm();
+      const message = encodeURIComponent(
+        `Prayer Request from ${values.name} (${values.email}):\n\n${values.prayerRequest}`
+      );
+      window.open(`https://wa.me/${phone}?text=${message}`, "_blank", "noopener,noreferrer");
+      prayerForm.resetForm();
     },
   });
 
@@ -92,17 +81,11 @@ export function ContactSection() {
               </span>
               <div>
                 <h3 className="font-headline text-lg font-semibold text-on-surface">Office Lines</h3>
-                <a
-                  href={`tel:${contactInfo.phone.replace(/\s/g, "")}`}
-                  className="text-on-surface-variant mt-1 block hover:text-primary transition-colors"
-                >
+                <a href={`tel:${contactInfo.phone.replace(/\s/g, "")}`} className="text-on-surface-variant mt-1 block hover:text-primary transition-colors">
                   {contactInfo.phone}
                 </a>
                 {contactInfo.phoneAlt && (
-                  <a
-                    href={`tel:${contactInfo.phoneAlt.replace(/\s/g, "")}`}
-                    className="text-on-surface-variant mt-1 block hover:text-primary transition-colors"
-                  >
+                  <a href={`tel:${contactInfo.phoneAlt.replace(/\s/g, "")}`} className="text-on-surface-variant mt-1 block hover:text-primary transition-colors">
                     {contactInfo.phoneAlt}
                   </a>
                 )}
@@ -115,10 +98,7 @@ export function ContactSection() {
               </span>
               <div>
                 <h3 className="font-headline text-lg font-semibold text-on-surface">Email Support</h3>
-                <a
-                  href={`mailto:${contactInfo.email}`}
-                  className="text-on-surface-variant mt-1 block hover:text-primary transition-colors"
-                >
+                <a href={`mailto:${contactInfo.email}`} className="text-on-surface-variant mt-1 block hover:text-primary transition-colors">
                   {contactInfo.email}
                 </a>
               </div>
@@ -145,92 +125,32 @@ export function ContactSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-col gap-6"
         >
-          <h3 className="font-headline text-2xl text-on-surface mb-8">
-            Send us a Message
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-6">            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <Input
-                label="First Name"
-                name="firstName"
-                value={values.firstName}
-                onChange={handleChange}
-                error={errors.firstName}
-                required
-                placeholder="John"
-              />
-              <Input
-                label="Last Name"
-                name="lastName"
-                value={values.lastName}
-                onChange={handleChange}
-                error={errors.lastName}
-                required
-                placeholder="Doe"
-              />
+          <h3 className="font-headline text-2xl text-on-surface mb-8">Send us a Message</h3>
+          <form onSubmit={contactForm.handleSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <Input label="First Name" name="firstName" value={contactForm.values.firstName} onChange={contactForm.handleChange} error={contactForm.errors.firstName} required placeholder="John" />
+              <Input label="Last Name" name="lastName" value={contactForm.values.lastName} onChange={contactForm.handleChange} error={contactForm.errors.lastName} required placeholder="Doe" />
             </div>
-            <Input
-              label="Email Address"
-              name="email"
-              type="email"
-              value={values.email}
-              onChange={handleChange}
-              error={errors.email}
-              required
-              placeholder="john@example.com"
-            />
+            <Input label="Email Address" name="email" type="email" value={contactForm.values.email} onChange={contactForm.handleChange} error={contactForm.errors.email} required placeholder="john@example.com" />
             <div>
-              <label htmlFor="contact-subject" className="block text-sm font-medium mb-1.5 text-on-surface">
-                Subject <span className="text-primary">*</span>
-              </label>
-              <select
-                id="contact-subject"
-                name="subject"
-                value={values.subject}
-                onChange={(e) => setFieldValue("subject", e.target.value)}
-                required
-                className={`w-full px-4 py-2.5 rounded-xl border bg-surface-container-low text-on-surface transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${errors.subject ? "border-red-500 focus:ring-red-500" : "border-outline-variant hover:border-outline focus:border-primary"}`}
-              >
+              <label htmlFor="contact-subject" className="block text-sm font-medium mb-1.5 text-on-surface">Subject <span className="text-primary">*</span></label>
+              <select id="contact-subject" name="subject" value={contactForm.values.subject} onChange={(e) => contactForm.setFieldValue("subject", e.target.value)} required className={`w-full px-4 py-2.5 rounded-xl border bg-surface-container-low text-on-surface transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${contactForm.errors.subject ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`}>
                 <option value="">Inquiry Topic</option>
                 <option value="membership">Membership</option>
                 <option value="ministries">Ministries</option>
                 <option value="technical-support">Technical Support</option>
                 <option value="other">Other</option>
               </select>
-              {errors.subject && (
-                <p className="mt-1.5 text-sm text-red-500" role="alert">
-                  {errors.subject}
-                </p>
-              )}
+              {contactForm.errors.subject && <p className="mt-1.5 text-sm text-error" role="alert">{contactForm.errors.subject}</p>}
             </div>
             <div>
-              <label htmlFor="contact-message" className="block text-sm font-medium mb-1.5 text-on-surface">
-                Message <span className="text-primary">*</span>
-              </label>
-              <textarea
-                id="contact-message"
-                name="message"
-                value={values.message}
-                onChange={handleChange}
-                rows={5}
-                required
-                minLength={10}
-                placeholder="Your message..."
-                className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${errors.message ? "border-red-500 focus:ring-red-500" : "border-outline-variant hover:border-outline focus:border-primary"}`}
-              />
-              {errors.message && (
-                <p className="mt-1.5 text-sm text-red-500" role="alert">
-                  {errors.message}
-                </p>
-              )}
+              <label htmlFor="contact-message" className="block text-sm font-medium mb-1.5 text-on-surface">Message <span className="text-primary">*</span></label>
+              <textarea id="contact-message" name="message" value={contactForm.values.message} onChange={contactForm.handleChange} rows={5} required minLength={10} placeholder="Your message..." className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${contactForm.errors.message ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`} />
+              {contactForm.errors.message && <p className="mt-1.5 text-sm text-error" role="alert">{contactForm.errors.message}</p>}
             </div>
-            <Button
-              type="submit"
-              isLoading={isSubmitting}
-              className="w-full bg-secondary text-on-secondary py-4 rounded-full font-bold"
-            >
-              Send Message
-            </Button>
+            <Button type="submit" isLoading={contactForm.isSubmitting} className="w-full bg-secondary text-on-secondary py-4 rounded-full font-bold">Send Message</Button>
           </form>
+          <p className="text-xs text-on-surface-variant">Your email app will open with the message prepared for {contactInfo.email}. No message is sent by this website.</p>
         </motion.div>
 
         <motion.div
@@ -240,68 +160,23 @@ export function ContactSection() {
           className="bg-surface-container-lowest p-6 md:p-8 rounded-3xl border border-outline-variant/10"
         >
           <div className="flex items-center gap-3 mb-6">
-            <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-              <Heart className="w-5 h-5 text-primary" />
-            </span>
+            <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"><Heart className="w-5 h-5 text-primary" /></span>
             <div>
-              <h3 className="font-headline text-xl text-on-surface">
-                How can we pray for you?
-              </h3>
-              <p className="text-sm text-on-surface-variant">
-                Our team will stand with you in faith — all requests are confidential.
-              </p>
+              <h3 className="font-headline text-xl text-on-surface">How can we pray for you?</h3>
+              <p className="text-sm text-on-surface-variant">This opens WhatsApp so you can send your request directly to our prayer team. Please avoid sharing highly sensitive information.</p>
             </div>
           </div>
-          <form onSubmit={handlePrayerSubmit} className="space-y-4">
+          <form onSubmit={prayerForm.handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input
-                label="Your Name"
-                name="name"
-                value={prayerValues.name}
-                onChange={handlePrayerChange}
-                error={prayerErrors.name}
-                required
-                placeholder="John Doe"
-              />
-              <Input
-                label="Email Address"
-                name="email"
-                type="email"
-                value={prayerValues.email}
-                onChange={handlePrayerChange}
-                error={prayerErrors.email}
-                required
-                placeholder="john@example.com"
-              />
+              <Input label="Your Name" name="name" value={prayerForm.values.name} onChange={prayerForm.handleChange} error={prayerForm.errors.name} required placeholder="John Doe" />
+              <Input label="Email Address" name="email" type="email" value={prayerForm.values.email} onChange={prayerForm.handleChange} error={prayerForm.errors.email} required placeholder="john@example.com" />
             </div>
             <div>
-              <label htmlFor="prayer-request" className="block text-sm font-medium mb-1.5 text-on-surface">
-                Prayer Request <span className="text-primary">*</span>
-              </label>
-              <textarea
-                id="prayer-request"
-                name="prayerRequest"
-                value={prayerValues.prayerRequest}
-                onChange={handlePrayerChange}
-                rows={3}
-                required
-                minLength={10}
-                placeholder="Share your prayer request with us..."
-                className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${prayerErrors.prayerRequest ? "border-red-500 focus:ring-red-500" : "border-outline-variant hover:border-outline focus:border-primary"}`}
-              />
-              {prayerErrors.prayerRequest && (
-                <p className="mt-1.5 text-sm text-red-500" role="alert">
-                  {prayerErrors.prayerRequest}
-                </p>
-              )}
+              <label htmlFor="prayer-request" className="block text-sm font-medium mb-1.5 text-on-surface">Prayer Request <span className="text-primary">*</span></label>
+              <textarea id="prayer-request" name="prayerRequest" value={prayerForm.values.prayerRequest} onChange={prayerForm.handleChange} rows={3} required minLength={10} placeholder="Share your prayer request with us..." className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${prayerForm.errors.prayerRequest ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`} />
+              {prayerForm.errors.prayerRequest && <p className="mt-1.5 text-sm text-error" role="alert">{prayerForm.errors.prayerRequest}</p>}
             </div>
-            <Button
-              type="submit"
-              isLoading={prayerSubmitting}
-              className="w-full bg-primary text-on-primary py-4 rounded-full font-bold"
-            >
-              Submit Prayer Request
-            </Button>
+            <Button type="submit" isLoading={prayerForm.isSubmitting} className="w-full bg-primary text-on-primary py-4 rounded-full font-bold">Submit Prayer Request</Button>
           </form>
         </motion.div>
       </div>

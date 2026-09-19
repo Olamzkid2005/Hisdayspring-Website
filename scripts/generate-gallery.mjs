@@ -3,7 +3,7 @@
  * Run: node scripts/generate-gallery.mjs
  */
 
-import { readdirSync, writeFileSync, statSync } from "fs";
+import { readdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { cwd } from "process";
 

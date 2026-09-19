@@ -6,8 +6,6 @@
 interface EnvConfig {
   youtubeApiKeyPublic: string | undefined;
   youtubeApiKeyServer: string | undefined;
-  paystackPublicKey: string | undefined;
-  flutterwavePublicKey: string | undefined;
   googleMapsApiKey: string | undefined;
   whatsappNumber: string;
 }
@@ -40,12 +38,6 @@ export const config: EnvConfig = {
 
   // Server-side YouTube API key (never exposed to client)
   youtubeApiKeyServer: getOptionalEnv("YOUTUBE_API_KEY"),
-
-  // Paystack public key (safe to expose - used on client-side)
-  paystackPublicKey: getOptionalEnv("NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY"),
-
-  // Flutterwave public key (optional - safe to expose)
-  flutterwavePublicKey: getOptionalEnv("NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY"),
 
   // Google Maps API key (used for embeds)
   googleMapsApiKey: getOptionalEnv("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"),

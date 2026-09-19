@@ -35,6 +35,6 @@ describe("Input Component", () => {
   it("applies error styling when error prop is provided", () => {
     render(<Input label="Email" name="email" error="Error" />);
     const input = screen.getByLabelText(/email/i);
-    expect(input).toHaveClass("border-red-500");
+    expect(input).toHaveClass("border-error");
   });
 });

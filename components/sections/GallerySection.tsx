@@ -1,6 +1,7 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import Image from "next/image";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { galleryPhotos, galleryCategories } from "@/data/gallery";
@@ -35,10 +36,13 @@ export function GallerySection() {
   const [lightboxLoaded, setLightboxLoaded] = useState(false);
   const [shuffledPhotos, setShuffledPhotos] = useState<typeof galleryPhotos>([]);
 
-  const filteredPhotos =
-    activeCategory === "all"
-      ? galleryPhotos
-      : galleryPhotos.filter((photo) => photo.category === activeCategory);
+  const filteredPhotos = useMemo(
+    () =>
+      activeCategory === "all"
+        ? galleryPhotos
+        : galleryPhotos.filter((photo) => photo.category === activeCategory),
+    [activeCategory]
+  );
 
   // Seed shuffled on mount and when category changes
   useEffect(() => {
@@ -154,16 +158,22 @@ export function GallerySection() {
             }}
           >
             <AnimatePresence mode="wait">
-              <motion.img
+              <motion.div
                 key={photo.id}
-                src={photo.imageUrl}
-                alt={photo.caption || "Gallery photo"}
                 initial={{ opacity: 0, scale: 1.05 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.5 }}
-                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+                className="absolute inset-0"
+              >
+                <Image
+                  src={photo.imageUrl}
+                  alt={photo.caption || "Gallery photo"}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </motion.div>
             </AnimatePresence>
             {/* Overlay gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -301,7 +311,7 @@ export function GallerySection() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ duration: 0.3 }}
-                  className="max-w-5xl max-h-[70vh] mx-4 flex flex-col items-center justify-center"
+                  className="relative w-full max-w-5xl h-[70vh] mx-4 flex flex-col items-center justify-center"
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
                   role="img"
@@ -311,12 +321,14 @@ export function GallerySection() {
                       <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     </div>
                   )}
-                  <img
+                  <Image
                     src={filteredPhotos[selectedPhoto].imageUrl}
                     alt={filteredPhotos[selectedPhoto].caption || "Gallery photo"}
+                    fill
+                    sizes="100vw"
                     onLoad={() => setLightboxLoaded(true)}
-                    className={`max-w-full max-h-[70vh] object-contain rounded-sm transition-opacity duration-300 ${
-                      lightboxLoaded ? "opacity-100" : "opacity-0 absolute"
+                    className={`object-contain rounded-sm transition-opacity duration-300 ${
+                      lightboxLoaded ? "opacity-100" : "opacity-0"
                     }`}
                   />
                   {(filteredPhotos[selectedPhoto].caption ||

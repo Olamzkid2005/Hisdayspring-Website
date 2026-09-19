@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import Link from "next/link";
@@ -42,9 +43,11 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
         className="block h-[300px] md:h-[400px] relative rounded-2xl overflow-hidden group focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
       >
         {src ? (
-          <img
+          <Image
             src={src}
             alt={ministry.name}
+            fill
+            sizes="(max-width: 768px) 280px, 320px"
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (

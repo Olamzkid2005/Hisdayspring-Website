@@ -20,6 +20,10 @@
 # production
 /build
 
+# images live on Cloudinary (see DEPLOYMENT.md) — originals are NOT in git
+/public/images/
+.cdn-uploads.json
+
 # misc
 .DS_Store
 *.pem

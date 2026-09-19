@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Heart,
   Banknote,
@@ -14,10 +14,15 @@ import {
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { bankAccounts, donationPurposes, scriptureReferences } from "@/data/donations";
+import {
+  bankAccounts,
+  donationPurposes,
+  scriptureReferences,
+  pastoralGivingAccount,
+} from "@/data/donations";
 import { initializePayment } from "@/lib/api/paystack";
 import { initializeFlutterwavePayment } from "@/lib/api/flutterwave";
-import type { DonationPurpose, PaymentMethod } from "@/types";
+import type { BankAccount, DonationPurpose, PaymentMethod } from "@/types";
 
 const PRESET_AMOUNTS = [1000, 2500, 5000, 10000];
 
@@ -41,8 +46,7 @@ export default function GivingPage() {
   const [error, setError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
-  const [paystackLoading, setPaystackLoading] = useState(false);
-  const [flutterwaveLoading, setFlutterwaveLoading] = useState(false);
+  const [gateway, setGateway] = useState<"paystack" | "flutterwave">("paystack");
   const [currentBg, setCurrentBg] = useState(0);
 
   // Auto-advance background image every 6s
@@ -54,55 +58,11 @@ export default function GivingPage() {
   }, []);
 
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   const copyAccountNumber = (accountNumber: string) => {
     navigator.clipboard.writeText(accountNumber);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handlePaystack = async () => {
-    if (!validateForm()) return;
-    setPaystackLoading(true);
-    setError(null);
-
-    const result = await initializePayment(donorEmail, amount * 100, {
-      name: donorName,
-      phone: donorPhone,
-      purpose,
-      type: "donation",
-    });
-
-    setPaystackLoading(false);
-
-    if (result.success && result.authorizationUrl) {
-      window.location.href = result.authorizationUrl;
-    } else {
-      setError(result.message || "Payment initialization failed. Please try again.");
-    }
-  };
-
-  const handleFlutterwave = async () => {
-    if (!validateForm()) return;
-    setFlutterwaveLoading(true);
-    setError(null);
-
-    const result = await initializeFlutterwavePayment(
-      donorEmail,
-      amount,
-      donorName,
-      donorPhone,
-      { purpose, type: "donation" }
-    );
-
-    setFlutterwaveLoading(false);
-
-    if (result.success && result.authorizationUrl) {
-      window.location.href = result.authorizationUrl;
-    } else {
-      setError(result.message || "Payment initialization failed. Please try again.");
-    }
   };
 
   const validateForm = () => {
@@ -164,30 +124,45 @@ export default function GivingPage() {
       return;
     }
 
-    const result = await initializePayment(donorEmail, amount * 100, {
-      name: donorName,
-      phone: donorPhone,
-      purpose,
-      type: "donation",
-    });
+    const result =
+      gateway === "paystack"
+        ? await initializePayment(donorEmail, amount * 100, {
+            name: donorName,
+            phone: donorPhone,
+            purpose,
+            type: "donation",
+          })
+        : await initializeFlutterwavePayment(
+            donorEmail,
+            amount,
+            donorName,
+            donorPhone,
+            { purpose, type: "donation" }
+          );
 
     setIsSubmitting(false);
 
     if (result.success && result.authorizationUrl) {
-      window.location.href = result.authorizationUrl;
+      window.location.assign(result.authorizationUrl);
     } else {
       setError(result.message || "Payment initialization failed. Please try again.");
     }
   };
 
   const selectedPurpose = donationPurposes.find((p) => p.id === purpose);
+  const transferAccounts: BankAccount[] =
+    purpose === "pastoral-giving" && pastoralGivingAccount
+      ? [pastoralGivingAccount]
+      : bankAccounts;
+  const isPastoralTransfer =
+    purpose === "pastoral-giving" && pastoralGivingAccount !== null;
 
   // ---- Success State ----
   if (showSuccess) {
     return (
       <section className="relative min-h-screen py-28 md:py-36 overflow-hidden">
         {/* Background slideshow */}
-        <div className="absolute inset-0 bg-zinc-900">
+        <div className="absolute inset-0 bg-surface-container-low">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentBg}
@@ -201,7 +176,7 @@ export default function GivingPage() {
           </AnimatePresence>
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/70" />
         </div>
-        <div className="max-w-2xl mx-auto px-4 md:px-8">
+        <div className="relative z-10 max-w-2xl mx-auto px-4 md:px-8">
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -217,13 +192,13 @@ export default function GivingPage() {
             </h2>
             <p className="text-on-surface-variant mb-6">
               {paymentMethod === "bank-transfer"
-                ? `Thank you for your ${selectedPurpose?.label.toLowerCase() || "donation"} of ₦${amount.toLocaleString()}!`
-                : "Please complete your payment on the Paystack page."}
+                ? `Thank you for your ${selectedPurpose?.label.toLowerCase() || "donation"} of ₦${amount.toLocaleString()}! Use the details below to complete your transfer.`
+                : "Please complete your payment on the secure checkout page."}
             </p>
 
             {paymentMethod === "bank-transfer" && (
               <div className="bg-surface-container-low rounded-xl p-6 text-left space-y-4 mb-6">
-                {bankAccounts.map((bank, index) => (
+                {transferAccounts.map((bank, index) => (
                   <div key={index} className={index > 0 ? 'mt-4 pt-4 border-t border-outline-variant/30' : ''}>
                     <div className="font-bold text-on-surface mb-2">{bank.bankName}</div>
                     <div className="flex justify-between">
@@ -283,7 +258,7 @@ export default function GivingPage() {
   return (
     <section ref={ref} className="relative py-16 md:py-24 min-h-screen overflow-hidden">
       {/* Background slideshow */}
-      <div className="absolute inset-0 bg-zinc-900">
+      <div className="absolute inset-0 bg-surface-container-low">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentBg}
@@ -476,7 +451,7 @@ export default function GivingPage() {
                 <p className="block text-sm font-semibold text-on-surface mb-3">
                   Payment Method
                 </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("card-payment")}
@@ -523,6 +498,42 @@ export default function GivingPage() {
                       <div className="text-xs text-on-surface-variant">Get account details after submission</div>
                     </div>
                   </button>
+                  <div
+                    className={`p-4 rounded-xl border-2 transition-all ${
+                      paymentMethod === "card-payment"
+                        ? "border-secondary bg-secondary-container/10"
+                        : "border-outline-variant/50 opacity-60"
+                    }`}
+                    aria-hidden={paymentMethod !== "card-payment"}
+                  >
+                    <p className="block text-xs font-semibold text-on-surface mb-2">Card Gateway</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        disabled={paymentMethod !== "card-payment"}
+                        onClick={() => setGateway("paystack")}
+                        className={`py-2 rounded-lg text-xs font-bold border transition-all ${
+                          gateway === "paystack"
+                            ? "bg-[#09a5db] text-white border-[#09a5db]"
+                            : "border-outline-variant text-on-surface-variant hover:border-[#09a5db]"
+                        }`}
+                      >
+                        Paystack
+                      </button>
+                      <button
+                        type="button"
+                        disabled={paymentMethod !== "card-payment"}
+                        onClick={() => setGateway("flutterwave")}
+                        className={`py-2 rounded-lg text-xs font-bold border transition-all ${
+                          gateway === "flutterwave"
+                            ? "bg-[#f5a623] text-white border-[#f5a623]"
+                            : "border-outline-variant text-on-surface-variant hover:border-[#f5a623]"
+                        }`}
+                      >
+                        Flutterwave
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -545,14 +556,16 @@ export default function GivingPage() {
                 {isSubmitting ? (
                   "Processing..."
                 ) : paymentMethod === "card-payment" ? (
-                  `Donate ₦${amount > 0 ? amount.toLocaleString() : "0"} with Card`
+                  `Donate ₦${amount > 0 ? amount.toLocaleString() : "0"} with ${gateway === "paystack" ? "Paystack" : "Flutterwave"}`
                 ) : (
                   "Continue to Bank Transfer"
                 )}
               </Button>
 
               <p className="text-center text-sm text-on-surface-variant mt-4">
-                Secure payment powered by Paystack
+                {paymentMethod === "card-payment"
+                  ? `Secure payment powered by ${gateway === "paystack" ? "Paystack" : "Flutterwave"}`
+                  : "You will receive account details to complete your transfer"}
               </p>
             </div>
           </motion.div>
@@ -567,10 +580,12 @@ export default function GivingPage() {
             {/* Bank Details Card */}
             <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-sm border border-outline-variant/20">
               <h3 className="font-headline text-xl font-bold text-on-surface mb-6">
-                Bank Transfer Details
+                {isPastoralTransfer
+                  ? "Pastor's Account Details"
+                  : "Bank Transfer Details"}
               </h3>
 
-              {bankAccounts.map((bank, index) => (
+              {transferAccounts.map((bank, index) => (
                 <div key={index} className={`${index > 0 ? 'mt-6 pt-6 border-t border-outline-variant/50' : ''}`}>
                   <h4 className="font-bold text-on-surface mb-4">{bank.bankName}</h4>
                   <div className="space-y-3">
@@ -615,43 +630,21 @@ export default function GivingPage() {
               </div>
             </div>
 
-            {/* Paystack / Flutterwave Buttons */}
+            {/* Quick tip */}
             <div className="bg-surface-container-low rounded-3xl p-8 border border-outline-variant/20">
               <h3 className="font-headline text-lg font-bold text-on-surface mb-4">
-                Pay Online Now
+                Prefer to transfer directly?
               </h3>
               <p className="text-sm text-on-surface-variant mb-6">
-                Fill in the form on the left, then choose your payment gateway below.
+                Choose <span className="font-semibold text-on-surface">Bank Transfer</span> in the form and we&apos;ll show you the account details instantly.
               </p>
-              <div className="space-y-3">
-                <button
-                  type="button"
-                  onClick={handlePaystack}
-                  disabled={paystackLoading || flutterwaveLoading}
-                  className="w-full py-4 rounded-full font-bold text-white bg-[#09a5db] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {paystackLoading ? (
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    "Give with Paystack"
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleFlutterwave}
-                  disabled={paystackLoading || flutterwaveLoading}
-                  className="w-full py-4 rounded-full font-bold text-white bg-[#f5a623] hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {flutterwaveLoading ? (
-                    <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    "Give with Flutterwave"
-                  )}
-                </button>
-              </div>
-              <p className="text-xs text-on-surface-variant text-center mt-4">
-                Secure payments processed by Paystack and Flutterwave
-              </p>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("bank-transfer")}
+                className="text-secondary font-semibold text-sm underline underline-offset-4 hover:text-secondary/80 transition-colors"
+              >
+                Use bank transfer instead
+              </button>
             </div>
           </motion.div>
         </div>

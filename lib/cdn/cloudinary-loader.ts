@@ -7,11 +7,18 @@ import type { ImageLoaderProps } from "next/image";
  * this loader rewrites them to Cloudinary delivery URLs with on-the-fly
  * optimization (f_auto → WebP/AVIF, c_limit,w_<width> → never upscaled).
  *
- * If NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is unset (e.g. local dev fallback),
- * the original local path is returned so nothing breaks.
+ * If the cloud name is unset AND no default is compiled in (never in this
+ * repo), the original local path is returned so nothing breaks.
  */
 
 const CDN_HOST = "res.cloudinary.com";
+
+/**
+ * The church's Cloudinary cloud name. Public information (it appears in every
+ * delivery URL), so a hardcoded default keeps fresh clones working even if
+ * the env var is forgotten. Set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME to override.
+ */
+const DEFAULT_CLOUD_NAME = "hurqcssn";
 
 function encodePublicId(localPath: string): string {
   // "/images/gallery/DSC01524.jpg" -> "gallery/DSC01524" (segments URI-encoded)
@@ -24,7 +31,7 @@ function encodePublicId(localPath: string): string {
 }
 
 export function cloudinaryLoader({ src, width, quality }: ImageLoaderProps): string {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || DEFAULT_CLOUD_NAME;
 
   // No cloud configured → serve the file as-is (local fallback).
   if (!cloudName) return src;

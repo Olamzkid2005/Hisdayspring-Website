@@ -44,8 +44,8 @@ Official flow per docs.pxxl.app (`Dashboard > Deploy Project`):
    | Start command | `npm start` |
    | Runtime version | Node 20+ |
    | Package manager | npm |
-6. **Server and Scaling**: pick a higher memory tier than the smallest —
-   the image library is heavy. Enable **Build cache**.
+6. **Server and Scaling**: the default tier is fine — images are served from
+   the Cloudinary CDN, not the app. Enable **Build cache**.
 7. **Advanced Options**:
    - Auto-deploy on push: **enable** (deploys every push to `main`)
    - Preview environments: enable (for testing future branches)
@@ -68,6 +68,7 @@ Add these in the Environment Variables panel **before deploying**.
 | `YOUTUBE_API_KEY` | Google Cloud Console → YouTube Data API v3 credential | no (live page degrades gracefully) |
 | `YOUTUBE_CHANNEL_ID` | Your YouTube channel ID | no |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | `+2348077829444` | no (has default) |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name — `hurqcssn` (baked in as default; only set to override) | no |
 | `PASTORAL_PAYSTACK_SUBACCOUNT` | Paystack subaccount code (`ACCT_...`) — see section 6 | optional |
 | `PASTORAL_FLUTTERWAVE_SUBACCOUNT_ID` | Flutterwave subaccount ID — see section 6 | optional |
 
@@ -232,14 +233,21 @@ Targets: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO �
 
 ## 9. Known follow-ups (not blockers)
 
-- **Repo size ~1.6 GB** — images are committed to git. Works, but makes
-  Pxxl clones/builds slow. Migrate `public/images` to a CDN (UploadThing,
-  Cloudflare Images, etc.) and shrink the repo when convenient.
 - **4 lint warnings** (`<img>` in `app/radio`, `app/books`,
   `SermonsSection` ×2) — YouTube thumbnails / background images; harmless.
 - **Update `public/.well-known/security.txt` `Expires:` field yearly**.
 - **`security.txt` contact** — currently `hello@hisdayspring.org`; consider a
   dedicated `security@hisdayspring.org` later.
+- **Cloudinary free tier** — 25 credits/mo ≈ 25 GB transformations + 25 GB
+  bandwidth. Current usage fits comfortably; if the site outgrows it, upgrade
+  or add a custom CDN domain in the Cloudinary dashboard.
+- **Local dev images**: `public/images/` is no longer in git. The site pulls
+  everything from Cloudinary, so no local copies are needed. If you ever need
+  the originals: `~/Downloads/FOR WEBSITE` (camera masters) and
+  `~/Documents/Hisdayspring-Website-git-backup.git` (full pre-migration git
+  mirror). Re-download from Cloudinary or re-run
+  `node scripts/upload-images-to-cdn.mjs` (it skips already-uploaded files via
+  `.cdn-uploads.json`).
 
 ---
 

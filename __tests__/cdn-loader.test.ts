@@ -37,10 +37,9 @@ describe("cloudinaryLoader", () => {
     expect(url).toContain(encodeURIComponent("https://images.unsplash.com/photo-123?w=800"));
   });
 
-  it("falls back to the raw src when no cloud name is configured (local dev)", () => {
+  it("uses the compiled-in default cloud name when the env var is unset", () => {
     delete process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-    expect(cloudinaryLoader(props("/images/gallery/DSC01524.jpg"))).toBe(
-      "/images/gallery/DSC01524.jpg",
-    );
+    const url = cloudinaryLoader(props("/images/gallery/DSC01524.jpg"));
+    expect(url).toContain("https://res.cloudinary.com/hurqcssn/image/upload/");
   });
 });

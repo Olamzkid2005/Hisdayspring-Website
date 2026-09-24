@@ -1,8 +1,4 @@
-import { initializePayment, verifyPayment } from "@/lib/api/paystack";
-import {
-  initializeFlutterwavePayment,
-  verifyFlutterwavePayment,
-} from "@/lib/api/flutterwave";
+import { initializeDonation, verifyDonation } from "@/lib/api/bachs";
 
 function mockFetch(
   ...responses: Array<{ ok: boolean; status: number; body: unknown }>
@@ -23,107 +19,156 @@ function mockFetch(
   return fetchMock;
 }
 
-describe("browser payment adapters", () => {
+function sentPayload(fetchMock: jest.Mock): Record<string, unknown> {
+  const [, requestInit] = fetchMock.mock.calls[0] as [string, RequestInit];
+  return JSON.parse(String(requestInit.body));
+}
+
+describe("bachs browser adapter", () => {
   afterEach(() => jest.restoreAllMocks());
 
-  it("returns a successful Paystack initialization response", async () => {
+  it("starts a checkout through the server route", async () => {
     const fetchMock = mockFetch({
       ok: true,
       status: 200,
       body: {
         success: true,
-        reference: "ps_ref",
-        authorizationUrl: "https://paystack.test/checkout",
+        checkoutId: "chk_test123",
+        authorizationUrl: "https://checkout.bachs.io/c/test",
+        reference: "hisdayspring-tithes-1",
       },
     });
 
     await expect(
-      initializePayment("donor@example.com", 100_000, { purpose: "tithes" })
+      initializeDonation({
+        email: "donor@example.com",
+        amount: 5000,
+        name: "Jane Donor",
+        phone: "+2348000000000",
+        purpose: "tithes",
+        paymentMethod: "card-payment",
+      })
     ).resolves.toMatchObject({
       success: true,
-      authorizationUrl: "https://paystack.test/checkout",
+      checkoutId: "chk_test123",
+      authorizationUrl: "https://checkout.bachs.io/c/test",
     });
+
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/payments/paystack/initialize",
+      "/api/payments/bachs/initialize",
       expect.objectContaining({ method: "POST" })
     );
   });
 
-  it("normalizes provider failures and verification failures", async () => {
-    mockFetch(
-      { ok: false, status: 502, body: { message: "Provider unavailable" } },
-      { ok: false, status: 404, body: { message: "Not found" } }
-    );
-
-    await expect(initializePayment("donor@example.com", 100_000)).resolves.toEqual({
-      success: false,
-      message: "Provider unavailable",
+  it("sends the amount in Naira, not minor units", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      body: { success: true, authorizationUrl: "https://checkout.bachs.io/c/x" },
     });
-    await expect(verifyPayment("missing_ref")).resolves.toBe(false);
+
+    await initializeDonation({
+      email: "donor@example.com",
+      amount: 5000,
+      name: "Jane Donor",
+      phone: "+2348000000000",
+      purpose: "offerings",
+      paymentMethod: "card-payment",
+    });
+
+    const payload = sentPayload(fetchMock);
+    expect(payload.amount).toBe(5000);
+    expect(payload.amount).not.toBe(500000);
   });
 
-  it("supports successful Flutterwave initialization and verification", async () => {
+  it("sends the purpose and payment method but no routing fields", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      body: { success: true, authorizationUrl: "https://checkout.bachs.io/c/x" },
+    });
+
+    await initializeDonation({
+      email: "donor@example.com",
+      amount: 5000,
+      name: "Jane Donor",
+      phone: "+2348000000000",
+      purpose: "pastoral-giving",
+      paymentMethod: "bank-transfer",
+    });
+
+    const payload = sentPayload(fetchMock);
+    const metadata = payload.metadata as Record<string, unknown>;
+
+    expect(metadata.purpose).toBe("pastoral-giving");
+    expect(metadata.type).toBe("donation");
+    expect(payload.paymentMethod).toBe("bank-transfer");
+
+    // Settlement is resolved server-side; the client never names a destination.
+    expect(payload.transfer_data).toBeUndefined();
+    expect(payload.subaccount).toBeUndefined();
+    expect(payload.platform_fee).toBeUndefined();
+  });
+
+  it("normalizes server-side failures", async () => {
     mockFetch(
-      {
-        ok: true,
-        status: 200,
-        body: {
-          success: true,
-          reference: "flw_ref",
-          authorizationUrl: "https://flutterwave.test/checkout",
-        },
-      },
-      { ok: true, status: 200, body: { success: true } }
+      { ok: false, status: 502, body: { message: "Provider unavailable" } },
+      { ok: false, status: 400, body: { message: "A valid checkout ID is required" } }
     );
 
     await expect(
-      initializeFlutterwavePayment(
-        "donor@example.com",
-        1000,
-        "Jane Donor",
-        "+2348000000000"
-      )
-    ).resolves.toMatchObject({ success: true });
-    await expect(verifyFlutterwavePayment("12345")).resolves.toBe(true);
+      initializeDonation({
+        email: "donor@example.com",
+        amount: 5000,
+        name: "Jane Donor",
+        phone: "+2348000000000",
+        purpose: "offerings",
+        paymentMethod: "card-payment",
+      })
+    ).resolves.toEqual({ success: false, message: "Provider unavailable" });
+
+    await expect(verifyDonation("bad id")).resolves.toBe(false);
   });
 
-  it("sends purpose metadata for pastoral giving so the server can route it", async () => {
+  it("verifies a checkout by id", async () => {
     const fetchMock = mockFetch({
       ok: true,
       status: 200,
-      body: { success: true, authorizationUrl: "https://paystack.test/checkout" },
+      body: { success: true, status: "completed" },
     });
 
-    await initializePayment("donor@example.com", 100_000, {
-      purpose: "pastoral-giving",
-      type: "donation",
-    });
+    await expect(verifyDonation("chk_test123")).resolves.toBe(true);
 
-    const [, requestInit] = fetchMock.mock.calls[0] as [string, RequestInit];
-    const payload = JSON.parse(String(requestInit.body));
-    expect(payload.metadata.purpose).toBe("pastoral-giving");
-    // Routing is resolved server-side; the client never sends a subaccount.
-    expect(payload.subaccount).toBeUndefined();
-  });
-
-  it("sends purpose metadata to Flutterwave for pastoral giving", async () => {
-    const fetchMock = mockFetch({
-      ok: true,
-      status: 200,
-      body: { success: true, authorizationUrl: "https://flutterwave.test/checkout" },
-    });
-
-    await initializeFlutterwavePayment(
-      "donor@example.com",
-      1000,
-      "Jane Donor",
-      "+2348000000000",
-      { purpose: "pastoral-giving", type: "donation" }
+    const payload = sentPayload(fetchMock);
+    expect(payload.checkoutId).toBe("chk_test123");
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/payments/bachs/verify",
+      expect.objectContaining({ method: "POST" })
     );
+  });
 
-    const [, requestInit] = fetchMock.mock.calls[0] as [string, RequestInit];
-    const payload = JSON.parse(String(requestInit.body));
-    expect(payload.metadata.purpose).toBe("pastoral-giving");
-    expect(payload.subaccountId).toBeUndefined();
+  it("reports a network failure instead of throwing", async () => {
+    const fetchMock = jest.fn().mockRejectedValue(new Error("offline"));
+    Object.defineProperty(globalThis, "fetch", {
+      configurable: true,
+      writable: true,
+      value: fetchMock,
+    });
+    jest.spyOn(console, "error").mockImplementation(() => {});
+
+    await expect(verifyDonation("chk_test123")).resolves.toBe(false);
+    await expect(
+      initializeDonation({
+        email: "donor@example.com",
+        amount: 5000,
+        name: "Jane Donor",
+        phone: "+2348000000000",
+        purpose: "offerings",
+        paymentMethod: "card-payment",
+      })
+    ).resolves.toEqual({
+      success: false,
+      message: "Unable to connect to the payment service",
+    });
   });
 });

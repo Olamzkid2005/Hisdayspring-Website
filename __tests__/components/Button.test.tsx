@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from "@testing-library/react";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClasses } from "@/components/ui/Button";
 
 describe("Button Component", () => {
   it("renders with correct text", () => {
@@ -41,5 +41,16 @@ describe("Button Component", () => {
   it("renders with different sizes", () => {
     render(<Button size="sm">Small</Button>);
     expect(screen.getByRole("button", { name: /small/i })).toBeInTheDocument();
+  });
+
+  // `buttonClasses` exists so a navigating Link can wear these styles without
+  // being wrapped in this component (a <button> inside an <a>). That only
+  // works while the two produce identical class lists, so pin it.
+  it("hands out exactly the classes it renders", () => {
+    render(<Button variant="outline">Outline</Button>);
+
+    expect(screen.getByRole("button", { name: /outline/i }).className).toBe(
+      buttonClasses("outline")
+    );
   });
 });

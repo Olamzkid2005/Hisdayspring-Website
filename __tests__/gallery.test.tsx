@@ -1,4 +1,10 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { GallerySection } from "@/components/sections/GallerySection";
 import { galleryPhotos } from "@/data/gallery";
 
@@ -27,12 +33,19 @@ describe("GallerySection", () => {
 
     const firstPhotoButton = screen.getAllByRole("button", { name: /^View / })[0];
     const firstCaption = firstPhotoButton.getAttribute("aria-label")!.replace("View ", "");
+    // The fallback label would make the caption check below meaningless.
+    expect(firstCaption).not.toBe("gallery photo");
     fireEvent.click(firstPhotoButton);
 
-    expect(screen.getByRole("dialog", { name: "Image lightbox" })).toBeInTheDocument();
-    expect(screen.getAllByAltText(firstCaption).length).toBeGreaterThan(0);
+    const dialog = screen.getByRole("dialog", { name: "Image lightbox" });
+    // The photo is decorative (its caption is exposed as text instead), so the
+    // caption is what says which picture the lightbox opened.
+    expect(within(dialog).getByText(firstCaption)).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Next photo" }));
+    await waitFor(() =>
+      expect(within(dialog).queryByText(firstCaption)).not.toBeInTheDocument()
+    );
     expect(screen.getByRole("dialog", { name: "Image lightbox" })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Close lightbox" }));

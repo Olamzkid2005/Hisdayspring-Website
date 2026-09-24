@@ -1,6 +1,3 @@
 export { fetchSermons, fetchLiveStreamStatus } from "./youtube";
-export { initializePayment, verifyPayment } from "./paystack";
-export {
-  initializeFlutterwavePayment,
-  verifyFlutterwavePayment,
-} from "./flutterwave";
+export { initializeDonation, verifyDonation } from "./bachs";
+export type { DonationCheckoutInput } from "./bachs";

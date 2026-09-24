@@ -1,10 +1,31 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
+/**
+ * Provider-agnostic donation validation.
+ *
+ * Provider-specific concerns (API calls, webhook signature verification) live
+ * in `lib/server/bachs.ts`. Everything here is about making sure the numbers
+ * and identities a donor submits are sane before any gateway sees them.
+ */
+
+import { MIN_DONATION_AMOUNT } from "@/data/donations";
 
 export const PAYMENT_CURRENCY = "NGN";
-export const MIN_DONATION_AMOUNT = 100;
+
+/**
+ * The NGN floor (100) is Bachs' minimum charge as well as ours, so it lives
+ * with the giving data and is shared with the form. Re-exported here to keep
+ * the server-side import surface unchanged.
+ */
+export { MIN_DONATION_AMOUNT };
+
+/**
+ * A sanity ceiling only. Bachs enforces the real per-account deposit limit and
+ * rejects violations with `DEPOSIT_LIMIT_EXCEEDED`, returning the authoritative
+ * cap in `details.max_allowed_amount`. Do not treat this value as the gateway
+ * limit — see `lib/server/bachs.ts`.
+ */
 export const MAX_DONATION_AMOUNT = 100_000_000;
 
-const VALID_DONATION_PURPOSES = new Set([
+export const VALID_DONATION_PURPOSES = new Set([
   "tithes",
   "offerings",
   "seeds-and-donations",
@@ -46,43 +67,5 @@ export function isValidMetadata(metadata: unknown): metadata is PaymentMetadata 
     VALID_DONATION_PURPOSES.has(value.purpose) &&
     value.purpose.trim().length <= 80 &&
     value.type === "donation"
-  );
-}
-
-export function getWebhookSecret(provider: "paystack" | "flutterwave") {
-  return provider === "paystack"
-    ? process.env.PAYSTACK_SECRET_KEY
-    : process.env.FLUTTERWAVE_SECRET_HASH;
-}
-
-export function verifyPaystackSignature(
-  payload: string,
-  signature: string | null,
-  secret: string | undefined
-): boolean {
-  if (!signature || !secret) return false;
-  return verifyDigest("sha512", payload, signature, secret);
-}
-
-export function verifyFlutterwaveSignature(
-  signature: string | null,
-  secretHash: string | undefined
-): boolean {
-  return Boolean(signature && secretHash && signature === secretHash);
-}
-
-function verifyDigest(
-  algorithm: "sha512",
-  payload: string,
-  signature: string,
-  secret: string
-): boolean {
-  const expected = createHmac(algorithm, secret).update(payload).digest("hex");
-  const expectedBuffer = Buffer.from(expected, "utf8");
-  const receivedBuffer = Buffer.from(signature, "utf8");
-
-  return (
-    expectedBuffer.length === receivedBuffer.length &&
-    timingSafeEqual(expectedBuffer, receivedBuffer)
   );
 }

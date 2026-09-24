@@ -131,7 +131,25 @@ export interface Book {
   imageUrl: string;
   format: BookFormat;
   availability: BookAvailability;
+  /** Legacy external shop link (no longer rendered; ordering is in-site). */
   purchaseUrl?: string;
+  /**
+   * PDF delivery path. When omitted, the convention in `data/books.ts`
+   * (`books/pdf/<id>.pdf` on Cloudinary) is used, so per-book entries are
+   * only needed for a PDF hosted outside the convention.
+   */
+  pdfPath?: string;
+}
+
+// -----------------------------------------------------------------------------
+// Book Ordering Types (paid via Bachs, picked up in church or PDF download)
+// -----------------------------------------------------------------------------
+
+export type BookOrderFulfillment = "pickup" | "pdf";
+
+export interface BookOrderItem {
+  bookId: string;
+  quantity: number;
 }
 
 // =============================================================================

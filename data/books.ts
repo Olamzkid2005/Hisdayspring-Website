@@ -1,9 +1,33 @@
 /**
  * Books and resources data
- * Matched to actual book cover images in /public/images/books/
+ * Matched to actual book cover images in /images/books/ (Cloudinary)
  */
 
 import type { Book } from "@/types";
+
+/**
+ * Where paid PDF copies are delivered from.
+ *
+ * These are not yet uploaded — until a PDF exists on the CDN the download
+ * route refuses politely instead of serving a 404. Upload each PDF to
+ * Cloudinary as `books/pdf/<book id>` and it goes live with no code change.
+ */
+export function bookPdfUrl(book: Book): string {
+  return book.pdfPath ?? `images/books/pdf/${book.id}`;
+}
+
+/**
+ * Hard cap per title per order — a receipt-shown-at-the-bookstand flow has no
+ * stock system behind it, so the pickup model realistically holds to the
+ * physical copies the stand has on hand.
+ */
+export const MAX_QUANTITY_PER_TITLE = 20;
+
+/**
+ * Hard cap on the number of distinct titles in one order. Bachs metadata is
+ * capped at 10 KB; orders beyond this cannot be represented reliably.
+ */
+export const MAX_DISTINCT_TITLES = 10;
 
 export const books: Book[] = [
   {

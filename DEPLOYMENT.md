@@ -134,6 +134,31 @@ Note: the donor's thank-you page is driven by a server-side call to
 does not break the donor journey — but without it there is no server-side
 record of the payment beyond the Bachs dashboard.
 
+### Book ordering (paid online, collected in church)
+
+`/books` has in-site ordering on the same Bachs pipeline: a multi-book cart,
+a **Pick up in church** option (buyer shows the payment reference at the
+bookstand) and a **PDF** option (download links shown right after payment).
+The cart is priced server-side from `data/books.ts` — clients send only book
+IDs and quantities.
+
+Setup and notes:
+
+1. **PDF delivery** uses Cloudinary. Upload each PDF as
+   `books/pdf/<book-id>` (e.g. `books/pdf/made-to-be-whole`) in the
+   **raw** uploads folder of the `hurqcssn` cloud. A title whose PDF is not
+   uploaded yet gets a polite "not available yet" message at download time —
+   no code change needed when the file goes live.
+2. **Staff verification**: at the bookstand, open
+   `/books/verify`, paste the buyer's reference (or their download-link URL),
+   and confirm what was paid before handing over books. It checks the
+   checkout against Bachs' API live — no database.
+3. The Bachs webhook endpoint receives book-order `collection.succeeded`
+   events too; nothing extra to configure.
+4. Download links are per-checkout and re-verified on every request, but
+   anyone holding the link can download — same trust model as any download
+   link sent by email.
+
 ---
 
 ## 6. Pastor & Ministerial giving (direct transfer only)
@@ -224,6 +249,8 @@ Run through this after DNS + deploy:
 - [ ] Hand-edit `?checkout_id=fake` on `/giving` → page reports it could not confirm (never shows a thank-you)
 - [ ] Pick **Pastor & Ministerial Giving** → the online form disappears, the pastor's account (Access/Diamond `0025053293`) shows, and both **Copy** buttons put the right text on the clipboard over HTTPS
 - [ ] Open `/giving?purpose=pastoral-giving` directly → it lands on the pastor's account without any clicking, and the address bar keeps the selection when another purpose is chosen
+- [ ] Order a book on `/books` (₦100 min title works) → pay → reference shows → `/books/verify` confirms it at the bookstand
+- [ ] Pick **PDF** fulfillment → download link serves a file after payment; a hand-edited `?checkout_id=fake` link is refused
 - [ ] Bachs webhook: Developer Portal → Webhooks → send a test → 200 response in Pxxl Live Logs
 - [ ] `/live` shows the stream status with the production `YOUTUBE_API_KEY`
 - [ ] Prayer request form opens WhatsApp with the message prefilled

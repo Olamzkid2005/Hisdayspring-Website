@@ -41,6 +41,8 @@ export interface BachsCheckoutSession {
   reference: string | null;
   expiresAt?: string;
   createdAt?: string;
+  /** Metadata echoed back by the API; used to decode book orders. */
+  metadata?: Record<string, unknown>;
 }
 
 export type BachsResult<T> =
@@ -102,6 +104,10 @@ export interface CreateBachsCheckoutInput {
   idempotencyKey: string;
   /** Your own reference for the session, max 128 chars, unique per account. */
   reference: string;
+  /** What the checkout is for; recorded in metadata. Defaults to "donation". */
+  type?: "donation" | "book-order";
+  /** Extra metadata key/values (e.g. the encoded book-order cart). */
+  metadataExtras?: Record<string, string>;
 }
 
 function parseErrorEnvelope(
@@ -166,6 +172,10 @@ function toCheckoutSession(data: unknown): BachsCheckoutSession | null {
     reference: typeof value.reference === "string" ? value.reference : null,
     expiresAt: typeof value.expires_at === "string" ? value.expires_at : undefined,
     createdAt: typeof value.created_at === "string" ? value.created_at : undefined,
+    metadata:
+      value.metadata && typeof value.metadata === "object"
+        ? (value.metadata as Record<string, unknown>)
+        : undefined,
   };
 }
 
@@ -209,8 +219,9 @@ export async function createBachsCheckoutSession(
       name: input.name,
       phone: input.phone,
       purpose: input.purpose,
-      type: "donation",
+      type: input.type ?? "donation",
       source: "hisdayspring-website",
+      ...input.metadataExtras,
     },
     success_url: input.successUrl,
     cancel_url: input.cancelUrl,

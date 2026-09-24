@@ -43,24 +43,12 @@ export const books: Book[] = [
     purchaseUrl: "https://pastorblessing.com/product/100-days-devotional-prayer-book/",
   },
   {
-    id: "100-insights-relationship",
-    title: "100 Insights In Relationship",
-    author: "Pastor Blessing Olamijulo",
-    description:
-      "Practical wisdom and biblical insights for building godly relationships that stand the test of time.",
-    price: 1000,
-    imageUrl: "/images/books/100 Insights In Relationship.jpg",
-    format: "both",
-    availability: "in-stock",
-    purchaseUrl: "https://pastorblessing.com/shop/",
-  },
-  {
     id: "hundred-lights",
     title: "A Hundred Lights",
     author: "Pastor Blessing Olamijulo",
     description:
       "Illuminating truths and spiritual insights to guide your walk with God and brighten your path.",
-    price: 1000,
+    price: 500,
     imageUrl: "/images/books/A Hundred Lights.jpg",
     format: "both",
     availability: "in-stock",
@@ -144,7 +132,7 @@ export const books: Book[] = [
     author: "Pastor Blessing Olamijulo",
     description:
       "A youth-focused book on rising above challenges and soaring to great heights in God.",
-    price: 500,
+    price: 1000,
     imageUrl: "/images/books/The Eagle Youth.jpg",
     format: "both",
     availability: "in-stock",
@@ -156,7 +144,7 @@ export const books: Book[] = [
     author: "Pastor Blessing Olamijulo",
     description:
       "Essential guide for business owners and aspiring entrepreneurs seeking to build successful businesses God's way.",
-    price: 1200,
+    price: 1000,
     imageUrl: "/images/books/The Entrepreneurs Handbook.jpg",
     format: "both",
     availability: "in-stock",
@@ -168,7 +156,7 @@ export const books: Book[] = [
     author: "Pastor Blessing Olamijulo",
     description:
       "For young people destined to shine, learn how to nurture your God-given potential.",
-    price: 500,
+    price: 1000,
     imageUrl: "/images/books/The Nurtured Star.jpg",
     format: "both",
     availability: "in-stock",

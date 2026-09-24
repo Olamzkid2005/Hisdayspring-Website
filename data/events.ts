@@ -16,12 +16,12 @@ import type { Event } from "@/types";
 const scheduledEvents: Event[] = [
   {
     id: "young-yielded-concert-2026-09-25",
-    title: "Young & Yielded Outdoor Concert",
+    title: "Young & Yielded 2.0 Outdoor Concert — YOC'2026",
     date: "2026-09-25",
-    time: "3:00 PM",
-    location: "Church Car Park, Hisdayspring Evangelical Ministries Intl.",
+    time: "4:00 PM",
+    location: "Open Venue, Plot 200, 21 Road, Gate Busstop, Gowon Estate, Lagos",
     description:
-      "Intense worship and soul-lifting praise under the open sky — for we are not ashamed of the gospel of Christ (Romans 1:16).",
+      "Theme: SHINE. Intense worship and soul-lifting praise under the open sky — for we are not ashamed of the gospel of Christ (Romans 1:16).",
     imageUrl: "/images/events/young-yielded-concert.webp",
     category: "youth",
     isFeatured: true,

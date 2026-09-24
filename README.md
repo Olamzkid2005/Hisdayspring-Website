@@ -5,7 +5,7 @@ A premium, accessible church website built with Next.js 14+, TypeScript, Tailwin
 ## Features
 
 - **16 Sections**: Hero, About, Pastor, Service Times, Sermons, Radio, Ministries, Events, Giving, Donation, Books, Live Stream, Testimonials, Gallery, Prayer Request, Contact
-- **External Integrations**: YouTube API, Zeno.fm Radio, Paystack Payments, Google Maps
+- **External Integrations**: YouTube API, Zeno.fm Radio, Bachs Payments, Google Maps
 - **Accessibility**: WCAG 2.1 Level AA compliant with semantic HTML and ARIA attributes
 - **Responsive Design**: Mobile-first approach supporting 320px to 1920px viewports
 - **Performance**: Optimized images, lazy loading, and automatic code splitting
@@ -66,9 +66,16 @@ YOUTUBE_API_KEY=your_server_side_key
 YOUTUBE_CHANNEL_ID=@hisdayspring
 
 # Server-side payment secrets (never expose these to the browser)
-PAYSTACK_SECRET_KEY=sk_live_xxxxx
-FLUTTERWAVE_SECRET_KEY=your_flutterwave_secret_key
-FLUTTERWAVE_SECRET_HASH=your_flutterwave_webhook_secret_hash
+# `sk_sandbox_...` routes to sandbox-api.bachs.io, `sk_live_...` to
+# api.bachs.io. The base URL is derived from the key prefix, so going live is
+# a key swap rather than a code change.
+BACHS_SECRET_KEY=sk_sandbox_xxxxx
+
+# Signing secret from the webhook endpoint (Bachs Developer Portal → Webhooks)
+BACHS_WEBHOOK_SECRET=xxxxx
+
+# Optional: override the API base URL (defaults from the key prefix)
+# BACHS_API_BASE_URL=
 
 # Google Maps (for contact section)
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_google_maps_key
@@ -80,7 +87,7 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+2349066192155
 ### Obtaining API Keys
 
 - **YouTube API Key**: [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials → Create Credentials
-- **Paystack Public Key**: [Paystack Dashboard](https://dashboard.paystack.com/) → Settings → API Keys
+- **Bachs Keys**: [Bachs dashboard](https://app.bachs.io) → Developer Portal → API keys (secret key) and → Webhooks (signing secret). Build against the sandbox first — see the [Bachs docs](https://docs.bachs.io)
 - **Google Maps API Key**: [Google Cloud Console](https://console.cloud.google.com/) → APIs & Services → Credentials
 
 ## Project Structure
@@ -111,8 +118,10 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+2349066192155
 ├── lib/
 │   ├── api/             # External API clients
 │   │   ├── youtube.ts
-│   │   ├── paystack.ts
-│   │   └── flutterwave.ts
+│   │   └── bachs.ts
+│   ├── server/          # Server-only helpers
+│   │   ├── bachs.ts     # Checkout sessions + webhook signature checks
+│   │   └── payments.ts  # Donation validation
 │   ├── animations/      # Framer Motion variants
 │   └── config/         # Environment configuration
 ├── types/               # TypeScript type definitions
@@ -123,14 +132,17 @@ NEXT_PUBLIC_WHATSAPP_NUMBER=+2349066192155
 
 Payment initialization and verification are handled by server-side route handlers:
 
-- `POST /api/payments/paystack/initialize`
-- `POST /api/payments/paystack/verify`
-- `POST /api/payments/paystack/webhook`
-- `POST /api/payments/flutterwave/initialize`
-- `POST /api/payments/flutterwave/verify`
-- `POST /api/payments/flutterwave/webhook`
+- `POST /api/payments/bachs/initialize`
+- `POST /api/payments/bachs/verify`
+- `POST /api/payments/bachs/webhook`
 
-Configure the provider dashboard webhook URLs using the deployed site origin. Webhooks authenticate signatures, but payment records are not persisted because this project does not yet include a database or queue. Add persistence before relying on webhook events for donor receipts, reconciliation, or fulfillment.
+Donations are collected on a Bachs hosted checkout: the server creates a checkout session priced in NGN (as a decimal string, never minor units) and the donor is redirected to it. Both card (`NGN_CARD`) and bank transfer (`NGN_BANK_TRANSFER`) complete on that same page.
+
+Returning from checkout is not treated as proof of payment — the success page calls `/verify`, which asks the Bachs API whether the session actually reached `completed`. Webhooks (`collection.succeeded`) remain the source of truth for fulfilment and are verified with an HMAC-SHA256 signature over `"{timestamp}.{raw_body}"`.
+
+Configure the Bachs webhook URL as `https://<your-domain>/api/payments/bachs/webhook` and subscribe to the Payments and Checkout events. Webhooks authenticate signatures, but payment records are not persisted because this project does not yet include a database or queue. Add persistence before relying on webhook events for donor receipts, reconciliation, or fulfillment.
+
+Pastor & ministerial giving is transfer-only. Selecting it replaces the online form with the pastor's own bank account and copy-to-clipboard buttons, because a card gift cannot be routed to an individual and would silently settle into the church account. The account shown to donors is `pastoralGivingAccount` in `data/donations.ts` — change it there, not in the page. See `DEPLOYMENT.md` §6.
 
 ## Updating Content
 

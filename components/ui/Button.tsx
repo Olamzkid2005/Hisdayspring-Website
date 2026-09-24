@@ -25,6 +25,24 @@ const sizeStyles: Record<ButtonSize, string> = {
   lg: "px-8 py-4 text-lg rounded-full",
 };
 
+const baseStyles =
+  "inline-flex items-center justify-center font-semibold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b80035] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+
+/**
+ * The classes a Button renders with, for the times a **link** has to look like
+ * one. Wrapping this component in `<Link>` produces a `<button>` inside an
+ * `<a>` — invalid interactive nesting that assistive technology announces
+ * unpredictably — so a navigating control should be a `Link` carrying these
+ * classes instead.
+ */
+export function buttonClasses(
+  variant: ButtonVariant = "primary",
+  size: ButtonSize = "md",
+  className = ""
+): string {
+  return `${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`.trim();
+}
+
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -44,15 +62,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={isDisabled}
-        className={`
-          inline-flex items-center justify-center font-semibold
-          transition-all duration-200 ease-out
-          focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b80035] focus-visible:ring-offset-2
-          disabled:opacity-50 disabled:cursor-not-allowed
-          ${variantStyles[variant]}
-          ${sizeStyles[size]}
-          ${className}
-        `.trim()}
+        className={buttonClasses(variant, size, className)}
         {...props}
       >
         {isLoading && (

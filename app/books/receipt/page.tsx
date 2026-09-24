@@ -10,9 +10,10 @@
  * chrome are removed by print styles in globals.css.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { toPng } from "html-to-image";
 import {
   Check,
   Printer,
@@ -23,13 +24,19 @@ import {
   Download,
   AlertCircle,
   Loader2,
+  ImageDown,
+  MessageCircle,
 } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import { verifyBookOrder, type VerifiedBookOrder } from "@/lib/api/bachs";
+import { config } from "@/lib/config/env";
 
 const CHURCH_NAME = "Hisdayspring Evangelical Ministry International";
 const CHURCH_PHONE = "+234 807 782 9444";
 const CHURCH_EMAIL = "hello@hisdayspring.org";
+
+/** Church WhatsApp number in international digits-only form for wa.me links. */
+const CHURCH_WHATSAPP = config.whatsappNumber.replace(/[^0-9]/g, "");
 
 /** Corridor (e.g. NGN_CARD) → human label for the receipt. */
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -58,11 +65,30 @@ export default function BookReceiptPage() {
   const [state, setState] = useState<ReceiptState>({ kind: "loading" });
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
+  const [canShareFiles, setCanShareFiles] = useState(false);
+  const [savingImage, setSavingImage] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const receiptRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setCanShare(
-      typeof navigator !== "undefined" && typeof navigator.share === "function"
-    );
+    // Feature-detect both text sharing and file sharing (the receipt image)
+    // so the right buttons appear on each device.
+    const nav = navigator as Navigator & {
+      canShare?: (data: ShareData) => boolean;
+    };
+    setCanShare(typeof nav.share === "function");
+    try {
+      const probe = new File(
+        [new Blob([""], { type: "image/png" })],
+        "probe.png",
+        { type: "image/png" }
+      );
+      setCanShareFiles(
+        Boolean(typeof nav.share === "function" && nav.canShare?.({ files: [probe] }))
+      );
+    } catch {
+      setCanShareFiles(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -131,12 +157,107 @@ export default function BookReceiptPage() {
     }
   };
 
-  const shareOnWhatsApp = () => {
+  /**
+   * Order confirmation to the church's WhatsApp number.
+   *
+   * wa.me links can only pre-fill text — never attachments — so this opens
+   * the church chat with the order message; the buyer then attaches the
+   * receipt image ("Save receipt image" produces a logo-stamped PNG for
+   * exactly this). The receipt link lets the bookstand verify independently.
+   */
+  const sendOrderOnWhatsApp = () => {
     if (state.kind !== "verified") return;
-    const url = `https://wa.me/?text=${encodeURIComponent(
-      `${receiptText}\n${window.location.origin}/books/receipt?checkout_id=${encodeURIComponent(state.checkoutId)}`
-    )}`;
-    window.open(url, "_blank", "noopener,noreferrer");
+    const receiptUrl = `${window.location.origin}/books/receipt?checkout_id=${encodeURIComponent(state.checkoutId)}`;
+    const firstLine = state.order.lines[0];
+    const moreCount = state.order.lines.length - 1;
+    const message = [
+      `Hi, I just ordered from the ${CHURCH_NAME} bookstand.`,
+      "",
+      firstLine
+        ? `Order: ${firstLine.quantity} × ${firstLine.title}${
+            moreCount > 0
+              ? ` (+${moreCount} more title${moreCount === 1 ? "" : "s"})`
+              : ""
+          }`
+        : "Order: books",
+      `Total paid: ₦${state.order.total.toLocaleString()}`,
+      `Reference: ${state.reference ?? state.checkoutId}`,
+      `Receipt: ${receiptUrl}`,
+      "",
+      "I have attached my receipt image.",
+    ].join("\n");
+
+    window.open(
+      `https://wa.me/${CHURCH_WHATSAPP}?text=${encodeURIComponent(message)}`,
+      "_blank",
+      "noopener,noreferrer"
+    );
+  };
+
+  /**
+   * Capture the receipt sheet as a PNG. The sheet is the whole receipt —
+   * logo, lines, totals — while the action buttons live outside it, so the
+   * image is clean by construction.
+   */
+  const captureReceiptImage = async (): Promise<Blob | null> => {
+    if (!receiptRef.current) return null;
+    const dataUrl = await toPng(receiptRef.current, {
+      cacheBust: true,
+      pixelRatio: 2,
+      backgroundColor: "#ffffff",
+    });
+    const response = await fetch(dataUrl);
+    return await response.blob();
+  };
+
+  /** Download the PNG (attach this in the WhatsApp chat you just opened). */
+  const saveReceiptImage = async () => {
+    if (state.kind !== "verified") return;
+    setSavingImage(true);
+    setActionError(null);
+    try {
+      const blob = await captureReceiptImage();
+      if (!blob) throw new Error("capture failed");
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `hisdayspring-receipt-${(state.reference ?? state.checkoutId).slice(-12)}.png`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setActionError(
+        "Could not save the image. Try again, or use Save as PDF — it also carries the logo."
+      );
+    } finally {
+      setSavingImage(false);
+    }
+  };
+
+  /** Native share sheet with the PNG attached (mobile). */
+  const shareReceiptImage = async () => {
+    if (state.kind !== "verified") return;
+    setSavingImage(true);
+    setActionError(null);
+    try {
+      const blob = await captureReceiptImage();
+      if (!blob) throw new Error("capture failed");
+      const file = new File([blob], "hisdayspring-receipt.png", {
+        type: "image/png",
+      });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `Receipt — ${CHURCH_NAME}` });
+      } else {
+        setActionError(
+          "This browser can't share images directly — use Save image instead."
+        );
+      }
+    } catch {
+      setActionError(
+        "Could not share the image. Save it instead and attach it in WhatsApp."
+      );
+    } finally {
+      setSavingImage(false);
+    }
   };
 
   const copyLink = async () => {
@@ -215,6 +336,30 @@ export default function BookReceiptPage() {
             </button>
             <button
               type="button"
+              onClick={saveReceiptImage}
+              disabled={savingImage}
+              className={buttonClasses("outline", "sm")}
+            >
+              {savingImage ? (
+                <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+              ) : (
+                <ImageDown className="w-4 h-4 mr-1" />
+              )}
+              Save image
+            </button>
+            {canShareFiles && (
+              <button
+                type="button"
+                onClick={shareReceiptImage}
+                disabled={savingImage}
+                className={buttonClasses("outline", "sm")}
+              >
+                <Share2 className="w-4 h-4 mr-1" />
+                Share image
+              </button>
+            )}
+            <button
+              type="button"
               onClick={copyLink}
               className={buttonClasses("outline", "sm")}
             >
@@ -237,17 +382,24 @@ export default function BookReceiptPage() {
             )}
             <button
               type="button"
-              onClick={shareOnWhatsApp}
+              onClick={sendOrderOnWhatsApp}
               className={buttonClasses("secondary", "sm")}
             >
-              <Share2 className="w-4 h-4 mr-1" />
-              WhatsApp
+              <MessageCircle className="w-4 h-4 mr-1" />
+              Send to church on WhatsApp
             </button>
           </div>
+          {actionError && (
+            <p role="alert" className="mt-2 text-sm text-error w-full">
+              {actionError}
+            </p>
+          )}
         </div>
 
-        {/* The receipt sheet */}
+        {/* The receipt sheet — everything inside this ref is what the saved
+            image contains, so the logo rides along automatically. */}
         <motion.div
+          ref={receiptRef}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           className="receipt-sheet bg-surface-container-lowest rounded-3xl shadow-lg border border-outline-variant/20 overflow-hidden"

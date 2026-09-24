@@ -346,7 +346,7 @@ describe("/books receipt page", () => {
     );
   });
 
-  it("opens WhatsApp share with the receipt content", async () => {
+  it("opens a chat with the church's WhatsApp number carrying the order message", async () => {
     mockFetch(verifyResponse());
     const openSpy = jest
       .spyOn(window, "open")
@@ -359,13 +359,24 @@ describe("/books receipt page", () => {
       () => expect(screen.getByText(/Payment received/i)).toBeInTheDocument(),
       { timeout: 3000 }
     );
-    fireEvent.click(screen.getByRole("button", { name: /WhatsApp/i }));
+    fireEvent.click(
+      screen.getByRole("button", { name: /Send to church on WhatsApp/i })
+    );
 
     expect(openSpy).toHaveBeenCalledTimes(1);
     const [url] = openSpy.mock.calls[0] as [string];
-    expect(url).toContain("https://wa.me/?text=");
-    expect(url).toContain(encodeURIComponent("RECEIPT"));
-    expect(url).toContain(encodeURIComponent("chk_receipt1"));
+    // The church's number, not a generic share sheet.
+    expect(url).toContain(`https://wa.me/2348077829444?text=`);
+    const message = decodeURIComponent(
+      url.split("text=")[1] ?? ""
+    );
+    expect(message).toContain("Hi, I just ordered");
+    expect(message).toContain("Made To Be Whole");
+    expect(message).toContain("₦4,000");
+    expect(message).toContain("hisdayspring-book-abc");
+    expect(message).toContain(
+      "/books/receipt?checkout_id=chk_receipt1"
+    );
   });
 
   it("refuses to render a receipt for an unpaid or bogus checkout", async () => {

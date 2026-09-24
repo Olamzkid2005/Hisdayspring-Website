@@ -43,7 +43,7 @@ Please read this Privacy Policy carefully. By accessing or using our website, yo
 
 • **Zeno.fm**: Our website includes a radio player from Zeno.fm. Their privacy policy applies.
 
-• **Paystack/Flutterwave**: We use these payment processors for handling donations. They have their own privacy policies.
+• **Bachs**: We use Bachs to process donations. Card and bank transfer details are handled by Bachs and their payment partners; card data is never stored on our servers. Bachs' privacy policy applies.
 
 • **Google Maps**: We may embed Google Maps for location information. Google's privacy policy applies.
 

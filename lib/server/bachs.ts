@@ -43,6 +43,8 @@ export interface BachsCheckoutSession {
   createdAt?: string;
   /** Metadata echoed back by the API; used to decode book orders. */
   metadata?: Record<string, unknown>;
+  /** Payment corridor used, when the API reports it (e.g. `NGN_CARD`). */
+  paymentMethod?: string;
 }
 
 export type BachsResult<T> =
@@ -176,6 +178,8 @@ function toCheckoutSession(data: unknown): BachsCheckoutSession | null {
       value.metadata && typeof value.metadata === "object"
         ? (value.metadata as Record<string, unknown>)
         : undefined,
+    paymentMethod:
+      typeof value.payment_method === "string" ? value.payment_method : undefined,
   };
 }
 

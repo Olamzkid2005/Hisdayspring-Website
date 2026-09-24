@@ -24,6 +24,8 @@ import {
   MapPin,
   AlertCircle,
   ArrowLeft,
+  Trash2,
+  FileText,
 } from "lucide-react";
 import { Button, buttonClasses } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -117,6 +119,11 @@ export default function BooksClient() {
       }
       return next;
     });
+  };
+
+  const clearCart = () => {
+    setCart({});
+    setError(null);
   };
 
   const startCheckout = () => setStage("checkout");
@@ -261,17 +268,31 @@ export default function BooksClient() {
               </div>
             )}
 
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               variant="secondary"
               onClick={() => {
                 setStage("browse");
                 setCart({});
                 setPaidOrder(null);
+                setPaidReference(null);
                 setPaidCheckoutId(null);
               }}
             >
               Back to books
             </Button>
+            {/* The receipt lives at its own URL, so it stays openable later —
+                shareable on WhatsApp, printable, and safe to bookmark. */}
+            {paidCheckoutId && (
+              <a
+                href={`/books/receipt?checkout_id=${encodeURIComponent(paidCheckoutId)}`}
+                className={buttonClasses("outline")}
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                View / share receipt
+              </a>
+            )}
+            </div>
           </motion.div>
         </div>
       </section>
@@ -594,9 +615,19 @@ export default function BooksClient() {
                 </p>
               </div>
             </div>
-            <Button size="sm" onClick={startCheckout}>
-              Checkout
-            </Button>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={clearCart}
+                aria-label="Clear all items from your order"
+                className="p-2 rounded-lg border border-outline-variant hover:border-error hover:text-error transition-colors"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+              <Button size="sm" onClick={startCheckout}>
+                Checkout
+              </Button>
+            </div>
           </div>
         </motion.div>
       )}

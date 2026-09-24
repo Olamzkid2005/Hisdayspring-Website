@@ -217,3 +217,64 @@ h1, h2, h3, h4, h5, h6 {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Print styles — book-order receipts (and anything else marked .no-print).
+ *
+ * Printing or "Save as PDF" on the receipt page must produce a clean sheet:
+ * the site chrome (header/footer/consent banner) and all action buttons are
+ * removed, colors are stripped to save ink, and the receipt sheet fills the
+ * page without shadows or borders.
+ * ------------------------------------------------------------------------- */
+@media print {
+  /* Chrome around <main> — nav, footer, cookie consent, floating cart bar. */
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Undo the fixed top padding the layout adds for the sticky nav. */
+  main#main-content {
+    padding-top: 0 !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  /* The receipt sheet itself: flat, full-width, no rounding. */
+  .receipt-sheet {
+    box-shadow: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    background: white !important;
+  }
+
+  .receipt-sheet * {
+    color: #111 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Keep paid banner / pickup instructions readable without color fills. */
+  .receipt-sheet .bg-secondary-container\/30 {
+    background: white !important;
+    border-top: 2px solid #111;
+    border-bottom: 2px solid #111;
+  }
+
+  /* Links in the receipt body shouldn't look like buttons on paper. */
+  .receipt-sheet a {
+    text-decoration: none !important;
+  }
+
+  /* One receipt per page; avoid a stray blank trailing page. */
+  .receipt-sheet {
+    page-break-inside: avoid;
+  }
+
+  @page {
+    margin: 16mm;
+  }
+}

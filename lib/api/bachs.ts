@@ -102,7 +102,13 @@ export interface VerifiedBookOrder {
 export async function verifyBookOrder(
   checkoutId: string
 ): Promise<
-  | { success: true; checkoutId: string; reference?: string; order: VerifiedBookOrder }
+  | {
+      success: true;
+      checkoutId: string;
+      reference?: string;
+      paymentMethod?: string;
+      order: VerifiedBookOrder;
+    }
   | { success: false; message: string }
 > {
   try {
@@ -116,6 +122,7 @@ export async function verifyBookOrder(
       message?: string;
       checkoutId?: string;
       reference?: string;
+      paymentMethod?: string;
       order?: VerifiedBookOrder;
     };
 
@@ -130,6 +137,7 @@ export async function verifyBookOrder(
       success: true,
       checkoutId: data.checkoutId ?? checkoutId,
       reference: data.reference,
+      paymentMethod: data.paymentMethod,
       order: data.order,
     };
   } catch {

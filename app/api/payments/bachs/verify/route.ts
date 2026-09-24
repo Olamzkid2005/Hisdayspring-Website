@@ -77,6 +77,7 @@ export async function POST(request: Request) {
     checkoutId: result.data.checkoutId,
     reference: result.data.reference ?? undefined,
     status: result.data.status,
+    paymentMethod: result.data.paymentMethod,
     message: isSuccessful
       ? "Payment verified"
       : "This checkout has not been completed",

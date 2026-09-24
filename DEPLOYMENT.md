@@ -153,6 +153,11 @@ Setup and notes:
    `/books/verify`, paste the buyer's reference (or their download-link URL),
    and confirm what was paid before handing over books. It checks the
    checkout against Bachs' API live — no database.
+3. **Receipts**: every paid order gets a professional receipt at
+   `/books/receipt?checkout_id=<id>` — church logo, order lines, total,
+   reference and buyer. Shareable straight to WhatsApp, plus native share,
+   copy-link, and a print/save-as-PDF view (site chrome hidden via print
+   styles). The receipt URL is stable, so buyers can return to it later.
 3. The Bachs webhook endpoint receives book-order `collection.succeeded`
    events too; nothing extra to configure.
 4. Download links are per-checkout and re-verified on every request, but

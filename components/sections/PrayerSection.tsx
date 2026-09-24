@@ -100,11 +100,19 @@ export function PrayerSection() {
               rows={4}
               required
               minLength={10}
+              aria-invalid={errors.prayerRequest ? "true" : undefined}
+              aria-describedby={
+                errors.prayerRequest ? "prayer-request-error" : undefined
+              }
               placeholder="Share your prayer request with us..."
               className={`w-full bg-surface-container-low border-b-2 border-transparent focus:border-secondary outline-none p-4 rounded-lg ${errors.prayerRequest ? "border-error focus:border-error" : ""}`}
             />
             {errors.prayerRequest && (
-              <p className="mt-1.5 text-sm text-error" role="alert">
+              <p
+                id="prayer-request-error"
+                className="mt-1.5 text-sm text-error"
+                role="alert"
+              >
                 {errors.prayerRequest}
               </p>
             )}

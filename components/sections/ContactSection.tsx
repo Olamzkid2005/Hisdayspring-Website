@@ -134,19 +134,19 @@ export function ContactSection() {
             <Input label="Email Address" name="email" type="email" value={contactForm.values.email} onChange={contactForm.handleChange} error={contactForm.errors.email} required placeholder="john@example.com" />
             <div>
               <label htmlFor="contact-subject" className="block text-sm font-medium mb-1.5 text-on-surface">Subject <span className="text-primary">*</span></label>
-              <select id="contact-subject" name="subject" value={contactForm.values.subject} onChange={(e) => contactForm.setFieldValue("subject", e.target.value)} required className={`w-full px-4 py-2.5 rounded-xl border bg-surface-container-low text-on-surface transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${contactForm.errors.subject ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`}>
+              <select id="contact-subject" name="subject" value={contactForm.values.subject} onChange={(e) => contactForm.setFieldValue("subject", e.target.value)} required aria-invalid={contactForm.errors.subject ? "true" : undefined} aria-describedby={contactForm.errors.subject ? "contact-subject-error" : undefined} className={`w-full px-4 py-2.5 rounded-xl border bg-surface-container-low text-on-surface transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${contactForm.errors.subject ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`}>
                 <option value="">Inquiry Topic</option>
                 <option value="membership">Membership</option>
                 <option value="ministries">Ministries</option>
                 <option value="technical-support">Technical Support</option>
                 <option value="other">Other</option>
               </select>
-              {contactForm.errors.subject && <p className="mt-1.5 text-sm text-error" role="alert">{contactForm.errors.subject}</p>}
+              {contactForm.errors.subject && <p id="contact-subject-error" className="mt-1.5 text-sm text-error" role="alert">{contactForm.errors.subject}</p>}
             </div>
             <div>
               <label htmlFor="contact-message" className="block text-sm font-medium mb-1.5 text-on-surface">Message <span className="text-primary">*</span></label>
-              <textarea id="contact-message" name="message" value={contactForm.values.message} onChange={contactForm.handleChange} rows={5} required minLength={10} placeholder="Your message..." className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${contactForm.errors.message ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`} />
-              {contactForm.errors.message && <p className="mt-1.5 text-sm text-error" role="alert">{contactForm.errors.message}</p>}
+              <textarea id="contact-message" name="message" value={contactForm.values.message} onChange={contactForm.handleChange} rows={5} required minLength={10} aria-invalid={contactForm.errors.message ? "true" : undefined} aria-describedby={contactForm.errors.message ? "contact-message-error" : undefined} placeholder="Your message..." className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${contactForm.errors.message ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`} />
+              {contactForm.errors.message && <p id="contact-message-error" className="mt-1.5 text-sm text-error" role="alert">{contactForm.errors.message}</p>}
             </div>
             <Button type="submit" isLoading={contactForm.isSubmitting} className="w-full bg-secondary text-on-secondary py-4 rounded-full font-bold">Send Message</Button>
           </form>
@@ -173,8 +173,8 @@ export function ContactSection() {
             </div>
             <div>
               <label htmlFor="prayer-request" className="block text-sm font-medium mb-1.5 text-on-surface">Prayer Request <span className="text-primary">*</span></label>
-              <textarea id="prayer-request" name="prayerRequest" value={prayerForm.values.prayerRequest} onChange={prayerForm.handleChange} rows={3} required minLength={10} placeholder="Share your prayer request with us..." className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${prayerForm.errors.prayerRequest ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`} />
-              {prayerForm.errors.prayerRequest && <p className="mt-1.5 text-sm text-error" role="alert">{prayerForm.errors.prayerRequest}</p>}
+              <textarea id="prayer-request" name="prayerRequest" value={prayerForm.values.prayerRequest} onChange={prayerForm.handleChange} rows={3} required minLength={10} aria-invalid={prayerForm.errors.prayerRequest ? "true" : undefined} aria-describedby={prayerForm.errors.prayerRequest ? "prayer-request-error" : undefined} placeholder="Share your prayer request with us..." className={`w-full px-4 py-3 rounded-xl border bg-surface-container-low text-on-surface placeholder:text-on-surface-variant transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${prayerForm.errors.prayerRequest ? "border-error focus:ring-error" : "border-outline-variant hover:border-outline focus:border-primary"}`} />
+              {prayerForm.errors.prayerRequest && <p id="prayer-request-error" className="mt-1.5 text-sm text-error" role="alert">{prayerForm.errors.prayerRequest}</p>}
             </div>
             <Button type="submit" isLoading={prayerForm.isSubmitting} className="w-full bg-primary text-on-primary py-4 rounded-full font-bold">Submit Prayer Request</Button>
           </form>

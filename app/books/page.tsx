@@ -6,7 +6,7 @@ import BooksClient from "./BooksClient";
 export const metadata: Metadata = {
   title: "Books",
   description:
-    "Books and devotionals by Pastor Blessing Olamijulo — order online, pick up in church or download PDF copies.",
+    "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online, pick up in church or download PDF copies.",
 };
 
 export default function BooksPage() {
@@ -31,8 +31,9 @@ export default function BooksPage() {
             Books &amp; Resources
           </h1>
           <p className="text-white/80 text-base md:text-lg mt-4 max-w-2xl leading-relaxed">
-            Books and devotionals by Pastor Blessing Olamijulo — order online
-            and pick up in church, or get instant PDF copies.
+            Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe
+            Olamijulo — order online and pick up in church, or get instant PDF
+            copies.
           </p>
         </div>
       </section>

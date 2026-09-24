@@ -57,7 +57,7 @@ export const books: Book[] = [
   {
     id: "be-youtiful",
     title: "Be-Youtiful",
-    author: "Pastor Blessing Olamijulo",
+    author: "Pastor (Mrs) Adebamigbe Olamijulo",
     description:
       "Discover your true beauty and identity in Christ — a message for every young woman walking in purpose.",
     price: 1000,
@@ -153,7 +153,7 @@ export const books: Book[] = [
   {
     id: "nurtured-star",
     title: "The Nurtured Star",
-    author: "Pastor Blessing Olamijulo",
+    author: "Pastor (Mrs) Adebamigbe Olamijulo",
     description:
       "For young people destined to shine, learn how to nurture your God-given potential.",
     price: 1000,

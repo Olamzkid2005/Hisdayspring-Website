@@ -9,24 +9,42 @@ import { galleryPhotos } from "@/data/gallery";
 const HERO_COUNT = 12;
 const FIRST_HERO = "/images/Very good hero.JPG";
 
+/**
+ * Permanent second slide: the current flagship event handbill. When the
+ * conference has passed, swap this path (and the caption) for whatever is
+ * next — the rest of the carousel carries on automatically.
+ */
+const FEATURED_EVENT_SLIDE = {
+  image: "/images/events/greater-works-conference.webp",
+  alt: "Greater Works Ministers & Leaders Conference — Making Ministry Impact, 26–27 October 2026",
+  caption: "Making Ministry Impact · 26 & 27 October, 9AM",
+};
+
+interface HeroSlide {
+  image: string;
+  alt: string;
+  caption?: string;
+}
+
 export function HeroSection() {
-  const [heroImages] = useState<string[]>(() => [
-    FIRST_HERO,
+  const [heroSlides] = useState<HeroSlide[]>(() => [
+    { image: FIRST_HERO, alt: "Hisdayspring Ministries" },
+    FEATURED_EVENT_SLIDE,
     ...galleryPhotos
       .filter((p) => p.imageUrl !== FIRST_HERO)
-      .slice(0, HERO_COUNT - 1)
-      .map((p) => p.imageUrl),
+      .slice(0, HERO_COUNT - 2)
+      .map((p) => ({ image: p.imageUrl, alt: p.caption || "Hisdayspring Ministries" })),
   ]);
   const [currentImage, setCurrentImage] = useState(0);
 
   // Auto-advance to a random image every 8s
   useEffect(() => {
-    if (heroImages.length === 0) return;
+    if (heroSlides.length === 0) return;
     const interval = setInterval(() => {
-      setCurrentImage(Math.floor(Math.random() * heroImages.length));
+      setCurrentImage(Math.floor(Math.random() * heroSlides.length));
     }, 8000);
     return () => clearInterval(interval);
-  }, [heroImages.length]);
+  }, [heroSlides.length]);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -48,8 +66,8 @@ export function HeroSection() {
             className="absolute inset-0"
           >
             <Image
-              src={heroImages[currentImage]}
-              alt="Hisdayspring Ministries"
+              src={heroSlides[currentImage].image}
+              alt={heroSlides[currentImage].alt}
               fill
               sizes="100vw"
               className="w-full h-full object-cover object-center"
@@ -60,8 +78,21 @@ export function HeroSection() {
         <div className="absolute inset-0" style={{
           background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)",
         }} />
+        {/* Featured-event caption — only while the handbill slide is up. */}
+        {heroSlides[currentImage].caption && (
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4 text-center"
+          >
+            <span className="inline-block px-5 py-2.5 rounded-full bg-secondary-container/95 text-on-secondary-container text-sm font-bold shadow-lg">
+              {heroSlides[currentImage].caption}
+            </span>
+          </motion.div>
+        )}
+
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-          {heroImages.map((_, index) => (
+          {heroSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentImage(index)}

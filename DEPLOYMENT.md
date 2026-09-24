@@ -15,7 +15,7 @@ Pxxl builds from GitHub. Nothing ships until `main` is up to date.
 
 ```bash
 git add -A
-git commit -m "feat: production payments, pastoral giving, spec compliance, tests"
+git commit -m "feat: production payments (Bachs), pastoral giving, spec compliance, tests"
 git push origin main
 ```
 
@@ -62,15 +62,12 @@ Add these in the Environment Variables panel **before deploying**.
 
 | Variable | Where to get it | Required |
 |---|---|---|
-| `PAYSTACK_SECRET_KEY` | Paystack Dashboard → Settings → API Keys → Secret Key (`sk_live_...`) | yes (payments) |
-| `FLUTTERWAVE_SECRET_KEY` | Flutterwave Dashboard → Settings → API → Secret Key | yes (payments) |
-| `FLUTTERWAVE_SECRET_HASH` | Flutterwave Dashboard → Settings → Webhooks → create a hash yourself, paste the same value here | yes (webhooks) |
+| `BACHS_SECRET_KEY` | Bachs dashboard → Developer Portal → API keys. `sk_live_...` for production, `sk_sandbox_...` for sandbox | yes (donations) |
+| `BACHS_WEBHOOK_SECRET` | Bachs Developer Portal → Webhooks → your endpoint's signing secret | yes (webhooks) |
 | `YOUTUBE_API_KEY` | Google Cloud Console → YouTube Data API v3 credential | no (live page degrades gracefully) |
 | `YOUTUBE_CHANNEL_ID` | Your YouTube channel ID | no |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | `+2348077829444` | no (has default) |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name — `hurqcssn` (baked in as default; only set to override) | no |
-| `PASTORAL_PAYSTACK_SUBACCOUNT` | Paystack subaccount code (`ACCT_...`) — see section 6 | optional |
-| `PASTORAL_FLUTTERWAVE_SUBACCOUNT_ID` | Flutterwave subaccount ID — see section 6 | optional |
 
 Rules:
 - Never use `NEXT_PUBLIC_` for secrets — anything with that prefix is exposed
@@ -114,80 +111,102 @@ they are already configured in `next.config.ts`.
 
 ## 5. Payment webhooks (critical)
 
-Card payments work without this, but webhook-verified payments (and the
-Paystack "pay with transfer" flow) need it:
+Card and bank-transfer donations both complete on Bachs' hosted checkout.
+Webhook-verified fulfilment needs this:
 
-1. **Paystack** Dashboard → Settings → API Keys & Webhooks → Webhook URL:
-
-   ```
-   https://hisdayspring.org/api/payments/paystack/webhook
-   ```
-
-2. **Flutterwave** Dashboard → Settings → Webhooks → Webhook URL:
+1. Bachs dashboard → **Developer Portal → Webhooks** → **Add destination**:
 
    ```
-   https://hisdayspring.org/api/payments/flutterwave/webhook
+   https://hisdayspring.org/api/payments/bachs/webhook
    ```
 
-   Paste the **same secret hash** you set in `FLUTTERWAVE_SECRET_HASH` (section 3).
+2. Subscribe to the **Checkout** and **Payments** events — at minimum
+   `collection.succeeded` (the source of truth for fulfilment) and
+   `checkout.completed`.
+
+3. Copy the endpoint's **signing secret** into `BACHS_WEBHOOK_SECRET` (section 3).
+   Deliveries are signed with HMAC-SHA256 over `"{timestamp}.{raw_body}"` and
+   sent as `X-Bachs-Signature-V2`; the route rejects anything unsigned or older
+   than 5 minutes.
+
+Note: the donor's thank-you page is driven by a server-side call to
+`/api/payments/bachs/verify`, not by the webhook, so a misconfigured webhook
+does not break the donor journey — but without it there is no server-side
+record of the payment beyond the Bachs dashboard.
 
 ---
 
-## 6. Pastor & Ministerial giving (money routing)
+## 6. Pastor & Ministerial giving (direct transfer only)
 
-When a donor picks **"Pastor & Ministerial Giving"**, card payments settle
-into the **pastor's own account** via gateway subaccounts. Everything else
-goes to the church account. Routing is resolved server-side from the purpose —
-clients cannot influence it (tested in `__tests__/pastoral-routing.test.ts`).
+When a donor picks **"Pastor & Ministerial Giving"**, no checkout is created.
+The giving page hides the amount/donor form and the card option, and shows the
+pastor's own bank account with copy-to-clipboard buttons instead. Bachs has no
+subaccount concept, so a card gift cannot be routed to an individual — it would
+settle into the church account while the donor believed it reached the pastor.
+Transfer-only is the honest option, and it also means the church pays no
+processing fee on those gifts.
 
-### One-time gateway setup
+### The pastor's account
 
-1. **Paystack** Dashboard → Subaccounts → Create subaccount:
-   - Business name: pastor's name
-   - Bank + account number: **the pastor's account**
-   - Percentage charge: **0** (so 100% of the gift settles to the pastor)
-   - Copy the subaccount code: `ACCT_xxxxxxxxxxxx`
-2. **Flutterwave** Dashboard → create the subaccount for the pastor,
-   copy its ID (e.g. `RS_...`).
-
-### Wire the codes
-
-Either add the env vars on Pxxl (preferred — no code change, survives red
-
-```
-PASTORAL_PAYSTACK_SUBACCOUNT=ACCT_xxxxxxxxxxxx
-PASTORAL_FLUTTERWAVE_SUBACCOUNT_ID=RS_xxxxxxxxxx
-```
-
-…or paste them into `data/donations.ts`:
+`pastoralGivingAccount` in `data/donations.ts` is the single source for what
+donors are shown:
 
 ```ts
-export const PASTORAL_PAYSTACK_SUBACCOUNT = "ACCT_xxxxxxxxxxxx";
-export const PASTORAL_FLUTTERWAVE_SUBACCOUNT_ID = "RS_xxxxxxxxxx";
-```
-
-Env vars win over the data file if both are set.
-
-### Bank-transfer display
-
-While `pastoralGivingAccount` in `data/donations.ts` is `null`, bank-transfer
-donors see the church accounts. To show the **pastor's account** for
-"Pastor & Ministerial Giving" transfers, fill it in:
-
-```ts
-export const pastoralGivingAccount: BankAccount | null = {
-  bankName: "GTBank",
-  accountNumber: "0123456789",
-  accountName: "Pastor Blessing Olamijulo",
+export const pastoralGivingAccount: BankAccount = {
+  bankName: "Access (Diamond Bank)",
+  accountNumber: "0025053293",
+  accountName: "BLESSING PHILIP OLAMIJULO",
 };
 ```
 
-### Fallback behaviour (safe by default)
+Change the account there, not in the page. The account name is kept exactly as
+the bank prints it so a donor can match it against their transfer
+confirmation.
 
-- Subaccount configured + pastoral purpose → pastor's account
-- Subaccount **not** configured + pastoral purpose → church account (no failure)
-- Any non-pastoral purpose → church account, always
-- Malformed/invalid code in config → ignored, church account
+### Sharing the pastor's account
+
+`https://hisdayspring.org/giving?purpose=pastoral-giving` opens the giving page
+with **Pastor & Ministerial Giving** already selected — this is the link to send
+to members over WhatsApp or print in a bulletin. Choosing a purpose on the page
+writes it back into the address bar, so a URL copied from the browser always
+describes what the donor is looking at rather than going stale. Values that are
+not real purposes are ignored.
+
+Both copy buttons (`Copy account number`, `Copy bank details`) and the
+per-account buttons in the church details card read straight from this data, so
+nothing else needs changing. **Copy bank details** copies bank name, account
+name and account number as three lines, so a donor can paste it into a chat
+message without retyping anything.
+
+### If the church later wants pastoral gifts paid out online
+
+That needs the platform **connect** capability (which irreversibly converts the
+Bachs account from individual to company), a connected account created and
+onboarded for the pastor, and a checkout naming `transfer_data.destination` —
+all recorded here so the option is not rediscovered from scratch:
+
+1. Apply for the **connect** capability on the Bachs account —
+   https://docs.bachs.io/connect/become-a-platform
+2. Create a connected account for the pastor and onboard it —
+   https://docs.bachs.io/connect/guides/create-an-account
+3. Add `transfer_data.destination = <acct_...>` plus either `platform_fee` or
+   `transfer_data.amount` to the checkout in
+   `app/api/payments/bachs/initialize/route.ts`, resolved server-side from the
+   validated purpose only.
+
+Be aware this changes the money model: with a destination charge the church
+stays merchant of record, and a refund or lost dispute debits the **church**
+balance rather than the pastor's.
+See https://docs.bachs.io/connect/split-payments/destination
+
+### Behaviour today (safe by default)
+
+- Pastoral-giving → no checkout at all; the pastor's account is displayed and
+  copyable, and the church account card is hidden to prevent wrong-account gifts
+- Every other purpose → church account, always
+- Client-supplied `transfer_data` / `platform_fee` / subaccount codes → ignored
+- Missing or malformed key config → donations fail cleanly (503) instead of
+  charging to an unintended destination
 
 ---
 
@@ -199,11 +218,13 @@ Run through this after DNS + deploy:
 - [ ] All nav pages render: `/pastors`, `/giving`, `/books`, `/radio`, `/live`, `/welfare`, `/crusade`, `/testimonials`, `/prayer`, `/privacy`, `/ministries/yofic`
 - [ ] `/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/.well-known/security.txt`, `/site.webmanifest` all return 200
 - [ ] Browser tab shows the church logo favicon; `curl -I https://hisdayspring.org` shows `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
-- [ ] Donate ₦100 via **Paystack card** → complete on checkout → confirm it appears in the Paystack dashboard
-- [ ] Donate ₦100 via **Flutterwave** → same check
-- [ ] Pick **Pastor & Ministerial Giving** + card → verify in the gateway dashboard the transaction is **split to the pastor's subaccount**
-- [ ] Pick **Bank Transfer** → account details screen shows, page does NOT hang (success card must be visible over the background)
-- [ ] Paystack webhook: dashboard → Webhooks → send test → 200 response in Pxxl Live Logs
+- [ ] Donate ₦100 via **card** → complete on the Bachs checkout → confirm it appears in the Bachs dashboard
+- [ ] Donate ₦100 via **bank transfer** → complete on the Bachs checkout → same check
+- [ ] Return from checkout → thank-you card shows, and the URL no longer carries `checkout_id`
+- [ ] Hand-edit `?checkout_id=fake` on `/giving` → page reports it could not confirm (never shows a thank-you)
+- [ ] Pick **Pastor & Ministerial Giving** → the online form disappears, the pastor's account (Access/Diamond `0025053293`) shows, and both **Copy** buttons put the right text on the clipboard over HTTPS
+- [ ] Open `/giving?purpose=pastoral-giving` directly → it lands on the pastor's account without any clicking, and the address bar keeps the selection when another purpose is chosen
+- [ ] Bachs webhook: Developer Portal → Webhooks → send a test → 200 response in Pxxl Live Logs
 - [ ] `/live` shows the stream status with the production `YOUTUBE_API_KEY`
 - [ ] Prayer request form opens WhatsApp with the message prefilled
 - [ ] Contact form opens the donor's email client (mailto)
@@ -257,4 +278,4 @@ If a deploy misbehaves:
 
 1. Pxxl Dashboard → Project → **Deployments** → open the previous good deploy → **Redeploy/Rollback**
 2. Domain/DNS problems: revert the Qservers A record to `45.43.14.156` (old host) — propagates in minutes
-3. Payment problems: pastoral routing already fails safe to the church account; for a full freeze, remove `PAYSTACK_SECRET_KEY` on Pxxl (donations return a clean 503 message instead of charging)
+3. Payment problems: pastoral giving is transfer-only and never touches Bachs, so it keeps working; for a full freeze of the online checkout, remove `BACHS_SECRET_KEY` on Pxxl (donations return a clean 503 message instead of charging)

@@ -1,13 +1,34 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { HeartHandshake, ArrowRight, Building2, ShieldCheck } from "lucide-react";
+import {
+  HeartHandshake,
+  ArrowRight,
+  Building2,
+  ShieldCheck,
+  Copy,
+  Check,
+  AlertCircle,
+} from "lucide-react";
 import Link from "next/link";
+import { bankAccounts, formatBankDetails } from "@/data/donations";
+import { useCopyToClipboard } from "@/hooks";
 
 export function GiveSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const { copiedKey, copy } = useCopyToClipboard();
+  const [copyError, setCopyError] = useState<string | null>(null);
+
+  const copyText = async (text: string, key: string) => {
+    const copied = await copy(text, key);
+    setCopyError(
+      copied
+        ? null
+        : "Could not copy automatically. Please select the details and copy them manually."
+    );
+  };
 
   return (
     <section id="give" ref={ref} className="py-10 md:py-14 px-4 md:px-8">
@@ -48,8 +69,84 @@ export function GiveSection() {
 
             <p className="inline-flex items-center gap-2 text-on-primary/70 text-sm">
               <ShieldCheck className="w-4 h-4" />
-              Secure payments via Paystack &amp; Flutterwave
+              Secure payments via Bachs
             </p>
+
+            {/* Direct transfers, so nobody has to open the giving page just to
+                read an account number off the screen. */}
+            <div className="mt-10 pt-8 border-t border-on-primary/20 text-left">
+              <p className="text-on-primary font-headline font-bold text-lg">
+                Or give directly to the church
+              </p>
+              <p className="text-on-primary/70 text-sm mt-1 mb-6">
+                Copy the details straight into your bank app. For pastor &amp;
+                ministerial giving, the pastor&apos;s own account is on the{" "}
+                <Link
+                  href="/giving?purpose=pastoral-giving"
+                  className="underline underline-offset-4 hover:text-on-primary"
+                >
+                  giving page
+                </Link>
+                .
+              </p>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                {bankAccounts.map((bank, index) => (
+                  <div
+                    key={bank.accountNumber}
+                    className="rounded-2xl bg-white/10 border border-on-primary/25 p-5"
+                  >
+                    <p className="text-on-primary/70 text-xs font-semibold uppercase tracking-wide">
+                      {bank.bankName}
+                    </p>
+                    <p className="font-headline font-bold text-on-primary text-xl mt-1 break-words">
+                      {bank.accountNumber}
+                    </p>
+                    <p className="text-on-primary/70 text-xs mt-1">
+                      {bank.accountName}
+                    </p>
+
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => copyText(bank.accountNumber, `number-${index}`)}
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/20 hover:bg-white/30 border border-on-primary/30 text-on-primary text-xs font-semibold transition-colors"
+                        aria-label={`Copy ${bank.bankName} account number`}
+                      >
+                        {copiedKey === `number-${index}` ? (
+                          <Check className="w-3.5 h-3.5" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                        {copiedKey === `number-${index}` ? "Copied" : "Copy number"}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          copyText(formatBankDetails(bank), `details-${index}`)
+                        }
+                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-on-primary/30 hover:bg-white/10 text-on-primary text-xs font-semibold transition-colors"
+                        aria-label={`Copy ${bank.bankName} bank details`}
+                      >
+                        {copiedKey === `details-${index}` ? (
+                          <Check className="w-3.5 h-3.5" />
+                        ) : (
+                          <Copy className="w-3.5 h-3.5" />
+                        )}
+                        {copiedKey === `details-${index}` ? "Copied" : "Copy details"}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {copyError && (
+                <p className="mt-4 flex items-center gap-2 text-sm text-on-primary/90">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  {copyError}
+                </p>
+              )}
+            </div>
           </div>
         </motion.div>
       </div>

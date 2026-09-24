@@ -3,8 +3,9 @@
 import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { Clock, CalendarPlus, X, Expand } from "lucide-react";
+import { Clock, CalendarPlus, X, Expand, Check } from "lucide-react";
 import { getUpcomingEvents } from "@/data/events";
+import { downloadEventIcs } from "@/lib/calendar";
 import type { Event } from "@/types";
 
 function getCategoryBadge(category: Event["category"]) {
@@ -53,6 +54,13 @@ function EventItem({
   onImageClick: (event: Event) => void;
 }) {
   const { day, month, sessions } = formatDate(event);
+  const [added, setAdded] = useState(false);
+
+  const addToCalendar = () => {
+    downloadEventIcs(event);
+    setAdded(true);
+    setTimeout(() => setAdded(false), 2500);
+  };
 
   return (
     <motion.div
@@ -114,10 +122,15 @@ function EventItem({
 
       <button
         type="button"
+        onClick={addToCalendar}
         className="bg-surface-container p-3 rounded-full hover:bg-primary hover:text-white transition-all min-w-[44px] min-h-[44px]"
-        aria-label="Add to calendar"
+        aria-label={`Add ${event.title} to calendar`}
       >
-        <CalendarPlus className="w-5 h-5" />
+        {added ? (
+          <Check className="w-5 h-5 text-primary" aria-hidden="true" />
+        ) : (
+          <CalendarPlus className="w-5 h-5" aria-hidden="true" />
+        )}
       </button>
     </motion.div>
   );

@@ -85,10 +85,13 @@ export function LiveStreamSection() {
                 LIVE
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
+                {/* Icon-only, so it needs its own name: without this a screen
+                    reader announces nothing but "link". */}
                 <a
                   href="https://www.youtube.com/@hisdayspring"
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label="Watch Sunday Service on YouTube"
                   className="relative z-10 w-16 h-16 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center text-white hover:scale-105 transition-transform"
                 >
                   <Play className="w-7 h-7 md:w-10 md:h-10 fill-white" />

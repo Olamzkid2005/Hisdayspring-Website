@@ -166,9 +166,12 @@ export function GallerySection() {
                 transition={{ duration: 0.5 }}
                 className="absolute inset-0"
               >
+                {/* The caption is rendered as visible text on this tile and
+                    the tile is labelled "View <caption>", so repeating it as
+                    alt text makes a screen reader announce it twice. */}
                 <Image
                   src={photo.imageUrl}
-                  alt={photo.caption || "Gallery photo"}
+                  alt=""
                   fill
                   sizes="(max-width: 768px) 100vw, 25vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -314,16 +317,22 @@ export function GallerySection() {
                   className="relative w-full max-w-5xl h-[70vh] mx-4 flex flex-col items-center justify-center"
                   onClick={(e) => e.stopPropagation()}
                   onKeyDown={(e) => e.stopPropagation()}
-                  role="img"
                 >
+                  {/* Deliberately not role="img": that role makes its children
+                      presentational, which would hide the caption below from
+                      assistive technology while still leaving the photo itself
+                      unnamed. The photo is decorative; the caption carries the
+                      meaning. */}
                   {!lightboxLoaded && (
                     <div className="flex items-center justify-center py-20">
                       <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     </div>
                   )}
+                  {/* Same reasoning as the grid: the caption and event name
+                      are printed under the photo, so this image is decorative. */}
                   <Image
                     src={filteredPhotos[selectedPhoto].imageUrl}
-                    alt={filteredPhotos[selectedPhoto].caption || "Gallery photo"}
+                    alt=""
                     fill
                     sizes="100vw"
                     onLoad={() => setLightboxLoaded(true)}

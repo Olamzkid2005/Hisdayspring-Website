@@ -327,9 +327,11 @@ export function MinistryDetail({
                 className="group relative h-56 rounded-2xl overflow-hidden"
               >
                 {other.imageUrl && (
+                  // The ministry name is printed over this card as a heading, so
+                  // repeating it as alt text would be read out twice.
                   <Image
                     src={other.imageUrl}
-                    alt={other.name}
+                    alt=""
                     fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                     className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

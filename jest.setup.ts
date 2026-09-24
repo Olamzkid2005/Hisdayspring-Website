@@ -27,7 +27,11 @@ jest.mock("framer-motion", () => ({
 }));
 
 // Mock next/link
+// `__esModule` is required: without it Babel's interop wraps this mock and
+// `import Link from "next/link"` resolves to the module object `{ default }`
+// rather than the component, so any tree containing a <Link> fails to render.
 jest.mock("next/link", () => ({
+  __esModule: true,
   default: ({
     children,
     href,

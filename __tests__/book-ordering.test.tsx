@@ -50,7 +50,12 @@ function fillBuyer() {
 }
 
 describe("/books ordering", () => {
-  beforeEach(() => setUrl(""));
+  beforeEach(() => {
+    // The cart persists in localStorage across renders — clear it so each
+    // test starts from an empty cart like a first-time visitor.
+    window.localStorage.clear();
+    setUrl("");
+  });
   afterEach(() => jest.restoreAllMocks());
 
   it("adds to the cart, shows the total, and checks out", async () => {
@@ -138,6 +143,94 @@ describe("/books ordering", () => {
     );
     expect(screen.getByText(/Show this reference at the bookstand/i)).toBeInTheDocument();
     expect(screen.getByText(/hisdayspring-book-abc/i)).toBeInTheDocument();
+  });
+
+  it("restores the cart from a previous visit after refresh or navigation", async () => {
+    mockFetch();
+
+    // Simulate a cart saved by an earlier visit.
+    window.localStorage.setItem(
+      "hisdayspring-book-cart",
+      JSON.stringify({ [sample.id]: 3 })
+    );
+
+    render(<BooksClient />);
+
+    // The quantity stepper replaces the Add button once the saved cart is
+    // restored, and the floating bar shows the persisted total.
+    await waitFor(
+      () =>
+        expect(
+          screen.getByRole("button", { name: /Checkout/ })
+        ).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
+    expect(
+      screen.getByLabelText(`${sample.title}: 3 copies`)
+    ).toBeInTheDocument();
+  });
+
+  it("drops saved entries for books that are no longer offered", async () => {
+    const fetchMock = mockFetch();
+
+    window.localStorage.setItem(
+      "hisdayspring-book-cart",
+      JSON.stringify({ "vanished-book": 2, [sample.id]: 1 })
+    );
+
+    render(<BooksClient />);
+
+    await waitFor(
+      () =>
+        expect(
+          screen.getByRole("button", { name: /Checkout/ })
+        ).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
+    // The vanished title is gone from the cart; the valid one survives.
+    expect(
+      screen.getByLabelText(`${sample.title}: 1 copy`)
+    ).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("empties the saved cart once the order is paid", async () => {
+    window.localStorage.setItem(
+      "hisdayspring-book-cart",
+      JSON.stringify({ [sample.id]: 1 })
+    );
+    mockFetch({
+      ok: true,
+      status: 200,
+      body: {
+        success: true,
+        checkoutId: "chk_paid1",
+        order: {
+          fulfillment: "pickup",
+          lines: [
+            {
+              bookId: sample.id,
+              title: sample.title,
+              quantity: 1,
+              unitPrice: sample.price,
+              lineTotal: sample.price,
+            },
+          ],
+          total: sample.price,
+          catalogMatch: true,
+        },
+      },
+    });
+
+    setUrl("?checkout_id=chk_paid1");
+    render(<BooksClient />);
+
+    await waitFor(
+      () =>
+        expect(screen.getByText(/Order paid — thank you/i)).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
+    expect(window.localStorage.getItem("hisdayspring-book-cart")).toBe("{}");
   });
 
   it("shows PDF download links only for a paid pdf order", async () => {

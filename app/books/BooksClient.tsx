@@ -39,9 +39,17 @@ import type { BookOrderFulfillment } from "@/types";
 type Stage = "browse" | "checkout" | "paid";
 
 const DOWNLOAD_URL = "/api/payments/bachs/book-order/download";
+const CART_STORAGE_KEY = "hisdayspring-book-cart";
 
 export default function BooksClient() {
   const [cart, setCart] = useState<Record<string, number>>({});
+  /**
+   * The cart survives refreshes and navigation via localStorage. Rendering
+   * starts empty (matching the server markup), then the stored cart is read
+   * after mount — writes are suppressed until that read is done so the
+   * initial empty state never overwrites what was saved.
+   */
+  const [cartHydrated, setCartHydrated] = useState(false);
   const [stage, setStage] = useState<Stage>("browse");
   const [fulfillment, setFulfillment] = useState<BookOrderFulfillment>("pickup");
   const [buyerName, setBuyerName] = useState("");
@@ -70,6 +78,45 @@ export default function BooksClient() {
   const cartTotal = cartLines.reduce((sum, line) => sum + line.lineTotal, 0);
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0);
 
+  // Restore the saved cart once after mount. Only known titles in valid
+  // quantity bounds are accepted, so stale entries (a book since removed
+  // from the catalogue, hand-edited storage) are dropped silently.
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(CART_STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as Record<string, unknown>;
+        const restored: Record<string, number> = {};
+        for (const [bookId, quantity] of Object.entries(parsed)) {
+          if (
+            books.some((book) => book.id === bookId) &&
+            typeof quantity === "number" &&
+            Number.isInteger(quantity) &&
+            quantity >= 1 &&
+            quantity <= MAX_QUANTITY_PER_TITLE
+          ) {
+            restored[bookId] = quantity;
+          }
+        }
+        setCart(restored);
+      }
+    } catch {
+      // Corrupted or unavailable storage — an empty cart is the safe state.
+    }
+    setCartHydrated(true);
+  }, []);
+
+  // Persist on every change after the initial read.
+  useEffect(() => {
+    if (!cartHydrated) return;
+    try {
+      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+    } catch {
+      // Storage full or blocked (private mode) — the cart still works in
+      // memory for this visit, it just will not survive a refresh.
+    }
+  }, [cart, cartHydrated]);
+
   // Bachs returns the buyer to /books?checkout_id=... — confirm server-side
   // before showing anything paid. The parameter is stripped once handled so a
   // refresh cannot replay the confirmation (and so a double-invoked effect in
@@ -87,6 +134,10 @@ export default function BooksClient() {
       if (cancelled) return;
 
       if (result.success) {
+        // The order is paid — the cart's job is done. Empty it now (the
+        // persistence effect saves the empty cart too) so the buyer does not
+        // walk around with a stale cart of books they already bought.
+        setCart({});
         setPaidOrder(result.order);
         setPaidReference(result.reference ?? result.checkoutId);
         setPaidCheckoutId(result.checkoutId);
@@ -569,7 +620,7 @@ export default function BooksClient() {
                         </button>
                         <span
                           className="font-bold text-on-surface w-6 text-center"
-                          aria-label={`${book.title}: ${inCart} copies`}
+                          aria-label={`${book.title}: ${inCart} ${inCart === 1 ? "copy" : "copies"}`}
                         >
                           {inCart}
                         </span>

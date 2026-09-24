@@ -3,12 +3,13 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, ShoppingCart } from "lucide-react";
 import {
   navigationLinks,
   dropdownLinks,
   moreLinks,
 } from "@/data/navigation";
+import { useBookCartCount } from "@/hooks/useBookCartCount";
 
 const sectionLinkIds = [
   ...navigationLinks
@@ -29,6 +30,7 @@ export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("home");
+  const cartCount = useBookCartCount();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -247,7 +249,27 @@ export function Navigation() {
             </div>
           </div>
 
-          <div className="hidden lg:block">
+          <div className="hidden lg:flex gap-3 items-center">
+            {/* Book cart — visible from any page, links to the order flow. */}
+            <button
+              onClick={() => navigateToHref("/books")}
+              className="relative p-2.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+              aria-label={
+                cartCount > 0
+                  ? `Book cart, ${cartCount} item${cartCount === 1 ? "" : "s"} — open books page`
+                  : "Book cart — open books page"
+              }
+            >
+              <ShoppingCart className="w-5 h-5" />
+              {cartCount > 0 && (
+                <span
+                  className="absolute -top-0.5 -right-0.5 bg-secondary text-on-secondary text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center"
+                  aria-hidden="true"
+                >
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </button>
             <button
               onClick={() => navigateTo("giving")}
               className="bg-primary text-on-primary px-6 py-2 rounded-full font-medium hover:brightness-110 transition-all min-h-[44px] whitespace-nowrap"
@@ -256,18 +278,39 @@ export function Navigation() {
             </button>
           </div>
 
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-3 text-on-surface-variant hover:text-primary transition-colors relative z-50 pointer-events-auto touch-manipulation"
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isMobileMenuOpen}
-          >
-            {isMobileMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
-          </button>
+          <div className="lg:hidden flex items-center gap-1">
+            <button
+              onClick={() => navigateToHref("/books")}
+              className="relative p-3 text-on-surface-variant hover:text-primary transition-colors"
+              aria-label={
+                cartCount > 0
+                  ? `Book cart, ${cartCount} item${cartCount === 1 ? "" : "s"} — open books page`
+                  : "Book cart — open books page"
+              }
+            >
+              <ShoppingCart className="w-6 h-6" />
+              {cartCount > 0 && (
+                <span
+                  className="absolute top-0.5 right-0.5 bg-secondary text-on-secondary text-[10px] font-bold rounded-full min-w-[16px] h-[16px] px-1 flex items-center justify-center"
+                  aria-hidden="true"
+                >
+                  {cartCount > 99 ? "99+" : cartCount}
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-3 text-on-surface-variant hover:text-primary transition-colors relative z-50 pointer-events-auto touch-manipulation"
+              aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
       </nav>
 

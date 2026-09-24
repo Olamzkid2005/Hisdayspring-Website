@@ -34,12 +34,16 @@ import {
   verifyBookOrder,
   type VerifiedBookOrder,
 } from "@/lib/api/bachs";
+import {
+  notifyCartChanged,
+  CART_STORAGE_KEY,
+} from "@/hooks/useBookCartCount";
 import type { BookOrderFulfillment } from "@/types";
 
 type Stage = "browse" | "checkout" | "paid";
 
 const DOWNLOAD_URL = "/api/payments/bachs/book-order/download";
-const CART_STORAGE_KEY = "hisdayspring-book-cart";
+
 
 export default function BooksClient() {
   const [cart, setCart] = useState<Record<string, number>>({});
@@ -106,7 +110,8 @@ export default function BooksClient() {
     setCartHydrated(true);
   }, []);
 
-  // Persist on every change after the initial read.
+  // Persist on every change after the initial read, and tell the nav badge
+  // (same tab; other tabs hear it via the storage event).
   useEffect(() => {
     if (!cartHydrated) return;
     try {
@@ -115,6 +120,7 @@ export default function BooksClient() {
       // Storage full or blocked (private mode) — the cart still works in
       // memory for this visit, it just will not survive a refresh.
     }
+    notifyCartChanged();
   }, [cart, cartHydrated]);
 
   // Bachs returns the buyer to /books?checkout_id=... — confirm server-side

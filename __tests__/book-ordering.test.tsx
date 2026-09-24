@@ -6,10 +6,12 @@
  * staff verify page used at the bookstand.
  */
 
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import BooksClient from "@/app/books/BooksClient";
 import BookVerifyPage from "@/app/books/verify/page";
 import BookReceiptPage from "@/app/books/receipt/page";
+import { Navigation } from "@/components/layout/Navigation";
+import { useBookCartCount, notifyCartChanged } from "@/hooks/useBookCartCount";
 import { books } from "@/data/books";
 
 jest.setTimeout(15000);
@@ -293,6 +295,68 @@ describe("/books ordering", () => {
       { timeout: 3000 }
     );
     expect(screen.queryByText(/Order paid — thank you/i)).not.toBeInTheDocument();
+  });
+});
+
+describe("book cart nav badge", () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  function BadgeProbe() {
+    const count = useBookCartCount();
+    return <span data-testid="cart-count">{count}</span>;
+  }
+
+  beforeEach(() => {
+    window.localStorage.clear();
+  });
+
+  it("counts stored items and updates when the cart changes on this tab", () => {
+    window.localStorage.setItem(
+      "hisdayspring-book-cart",
+      JSON.stringify({ "made-to-be-whole": 2, "be-youtiful": 1 })
+    );
+
+    render(<BadgeProbe />);
+    expect(screen.getByTestId("cart-count")).toHaveTextContent("3");
+
+    // The same-tab announcement BooksClient fires after every mutation.
+    act(() => {
+      window.localStorage.setItem(
+        "hisdayspring-book-cart",
+        JSON.stringify({ "made-to-be-whole": 1 })
+      );
+      notifyCartChanged();
+    });
+    expect(screen.getByTestId("cart-count")).toHaveTextContent("1");
+  });
+
+  it("ignores stale entries for books that no longer exist", () => {
+    window.localStorage.setItem(
+      "hisdayspring-book-cart",
+      JSON.stringify({ "vanished-book": 5, "made-to-be-whole": 2 })
+    );
+
+    render(<BadgeProbe />);
+    expect(screen.getByTestId("cart-count")).toHaveTextContent("2");
+  });
+
+  it("renders the badge with a count in the nav when the cart has items", () => {
+    window.localStorage.setItem(
+      "hisdayspring-book-cart",
+      JSON.stringify({ "made-to-be-whole": 2 })
+    );
+
+    const { container } = render(<Navigation />);
+    const badge = container.querySelector('button[aria-label*="Book cart, 2 items"]');
+    expect(badge).not.toBeNull();
+    expect(badge!.textContent).toContain("2");
+  });
+
+  it("shows no badge count when the cart is empty", () => {
+    const { container } = render(<Navigation />);
+    const badge = container.querySelector('button[aria-label="Book cart — open books page"]');
+    expect(badge).not.toBeNull();
+    expect(badge!.querySelector("span")).toBeNull();
   });
 });
 

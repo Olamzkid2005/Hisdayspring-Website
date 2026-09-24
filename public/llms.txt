@@ -8,7 +8,7 @@ Services: Sundays 8:00 AM & 10:30 AM. Phone: +234-906-619-2155. Email: hello@his
 
 - [Home](https://hisdayspring.org/): service times, ministries, events, gallery and contact.
 - [Meet Our Pastors](https://hisdayspring.org/pastors): lead pastors, branch pastors and ministers.
-- [Giving](https://hisdayspring.org/giving): tithes, offerings, seeds, and pastor & ministerial giving via Paystack, Flutterwave or bank transfer.
+- [Giving](https://hisdayspring.org/giving): tithes, offerings and seeds online by card or bank transfer, plus pastor & ministerial giving sent directly to the pastor's own bank account.
 - [Ministries](https://hisdayspring.org/ministries/yofic): youth ministry (YOFIC), and other church ministries.
 - [Events](https://hisdayspring.org/#events): conferences, crusades and special services.
 - [Live Stream](https://hisdayspring.org/live): watch Sunday services live on YouTube.

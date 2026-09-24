@@ -274,6 +274,8 @@ export interface PaymentResponse {
   success: boolean;
   reference?: string;
   authorizationUrl?: string;
+  /** Bachs checkout session id (`chk_...`), used to confirm the payment. */
+  checkoutId?: string;
   message?: string;
 }
 

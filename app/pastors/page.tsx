@@ -167,8 +167,8 @@ export default function PastorsPage() {
     <>
       <section className="relative min-h-[50vh] flex items-end overflow-hidden bg-surface-container-low">
         <Image
-          src="/images/gallery/DSC01528.jpg"
-          alt="Hisdayspring pastors"
+          src="/images/gallery/DSC_0356.jpg"
+          alt="Hisdayspring church congregation"
           fill
           sizes="100vw"
           className="absolute inset-0 w-full h-full object-cover"

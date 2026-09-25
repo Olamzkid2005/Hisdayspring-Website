@@ -165,15 +165,7 @@ function LeadPastorCard({ member }: { member: WorkforceMember }) {
 export default function PastorsPage() {
   return (
     <>
-      <section className="relative min-h-[50vh] flex items-end overflow-hidden bg-surface-container-low">
-        <Image
-          src="/images/pastors/Pastor-Blessing-Web-1.webp"
-          alt="Pastor Blessing Olamijulo — General Overseer and Lead Pastor"
-          fill
-          sizes="100vw"
-          className="absolute inset-0 w-full h-full object-cover object-[center_30%]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent" />
+      <section className="relative min-h-[50vh] flex items-end overflow-hidden bg-gradient-to-t from-primary via-primary/85 to-primary/60">
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-24 pb-12 md:pb-16">
           <div className="mb-6">
             <BackButton />

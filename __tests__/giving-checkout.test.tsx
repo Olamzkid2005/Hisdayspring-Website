@@ -218,7 +218,9 @@ describe("/giving checkout flow", () => {
     const fetchMock = mockFetch({
       ok: true,
       status: 200,
-      body: { success: false, status: "open" },
+      // A terminal failure — no amount of retrying can complete it, so the
+      // page must give up after one verify.
+      body: { success: false, status: "cancelled" },
     });
 
     setUrl("?checkout_id=chk_fake");

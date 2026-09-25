@@ -112,21 +112,24 @@ export default function GivingPage() {
 
     let cancelled = false;
     void (async () => {
+      // Retries internally through the redirect race (Bachs bounces the donor
+      // back a beat before the checkout session settles).
       const verified = await verifyDonation(checkoutId);
       if (cancelled) return;
 
-      // Strip the parameter only once confirmed, so a refresh cannot replay
-      // the confirmation — and so a double-invoked effect (React strict mode)
-      // reads the same id rather than racing and stripping it from under
-      // itself.
+      // Strip the parameter only once settled, so a pending checkout (bank
+      // transfer not yet reflected) survives a refresh and can be re-verified
+      // — while a confirmed one cannot be replayed.
       window.history.replaceState({}, "", window.location.pathname);
 
-      if (verified) {
+      if (verified.success) {
         setSuccessReference(checkoutId);
         setShowSuccess(true);
       } else {
         setError(
-          "We could not confirm this payment. If you were charged, please contact us and quote the reference from your receipt."
+          verified.pending
+            ? "Your payment has not reflected yet — bank transfers can take a few minutes. If you have completed the transfer, check back shortly or contact us with your receipt reference."
+            : "We could not confirm this payment. If you were charged, please contact us and quote the reference from your receipt."
         );
       }
     })();

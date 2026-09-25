@@ -28,7 +28,14 @@ import {
   MessageCircle,
 } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
-import { verifyBookOrder, type VerifiedBookOrder } from "@/lib/api/bachs";
+import {
+  verifyBookOrder,
+  type VerifiedBookOrder,
+} from "@/lib/api/bachs";
+import {
+  CART_STORAGE_KEY,
+  notifyCartChanged,
+} from "@/hooks/useBookCartCount";
 import { config } from "@/lib/config/env";
 
 const CHURCH_NAME = "Hisdayspring Evangelical Ministry International";
@@ -49,6 +56,23 @@ type ReceiptState =
   | { kind: "verified"; order: VerifiedBookOrder; checkoutId: string; reference?: string; paymentMethod?: string }
   | { kind: "unpaid"; message: string }
   | { kind: "invalid" };
+
+/**
+ * A paid order means the cart's job is done — empty it so the buyer does not
+ * walk around with stale items (and so the nav badge resets). Safe to run
+ * repeatedly: the receipt page is the one place a checkout_id legitimately
+ * lands twice (redirect + share link).
+ */
+function clearPaidCart(): void {
+  try {
+    if (window.localStorage.getItem(CART_STORAGE_KEY)) {
+      window.localStorage.removeItem(CART_STORAGE_KEY);
+      notifyCartChanged();
+    }
+  } catch {
+    // Storage unavailable — the cart simply persists; not worth blocking.
+  }
+}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleString("en-NG", {
@@ -102,9 +126,12 @@ export default function BookReceiptPage() {
 
     let cancelled = false;
     void (async () => {
+      // The helper retries internally through the redirect race (Bachs bounces
+      // the buyer back a beat before the session settles).
       const result = await verifyBookOrder(checkoutId);
       if (cancelled) return;
       if (result.success) {
+        clearPaidCart();
         setState({
           kind: "verified",
           order: result.order,
@@ -121,6 +148,34 @@ export default function BookReceiptPage() {
       cancelled = true;
     };
   }, []);
+
+  /**
+   * Manual re-check for bank transfers, which can settle well after the
+   * buyer reached this page. Reuses the same verify path; the loading state
+   * is shown inline so the buyer sees something is happening.
+   */
+  const recheckPayment = () => {
+    const checkoutId = new URLSearchParams(window.location.search).get(
+      "checkout_id"
+    );
+    if (!checkoutId) return;
+    setState({ kind: "loading" });
+    void (async () => {
+      const result = await verifyBookOrder(checkoutId, { retries: 2 });
+      if (result.success) {
+        clearPaidCart();
+        setState({
+          kind: "verified",
+          order: result.order,
+          checkoutId,
+          reference: result.reference,
+          paymentMethod: result.paymentMethod,
+        });
+      } else {
+        setState({ kind: "unpaid", message: result.message });
+      }
+    })();
+  };
 
   const receiptText = useMemo(() => {
     if (state.kind !== "verified") return "";
@@ -302,7 +357,21 @@ export default function BookReceiptPage() {
               ? "Check the link you were sent — it should look like /books/receipt?checkout_id=chk_..."
               : state.message}
           </p>
-          <a href="/books" className={buttonClasses("primary")}>
+          {state.kind === "unpaid" && (
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-4">
+              <button
+                type="button"
+                onClick={recheckPayment}
+                className={buttonClasses("primary")}
+              >
+                Check again
+              </button>
+              <span className="text-sm text-on-surface-variant">
+                Bank transfers can take a few minutes to reflect.
+              </span>
+            </div>
+          )}
+          <a href="/books" className={buttonClasses(state.kind === "unpaid" ? "outline" : "primary")}>
             Back to books
           </a>
         </div>

@@ -135,9 +135,14 @@ export default function BooksClient() {
 
     let cancelled = false;
     void (async () => {
+      // Retries internally through the redirect race (Bachs bounces the buyer
+      // back a beat before the checkout session settles).
       const result = await verifyBookOrder(checkoutId);
-      window.history.replaceState({}, "", window.location.pathname);
       if (cancelled) return;
+
+      // Strip the parameter only once settled, so an unpaid/pending checkout
+      // survives a refresh and can be re-verified after the fact.
+      window.history.replaceState({}, "", window.location.pathname);
 
       if (result.success) {
         // The order is paid — the cart's job is done. Empty it now (the

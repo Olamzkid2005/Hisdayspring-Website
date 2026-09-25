@@ -127,7 +127,10 @@ describe("bachs browser adapter", () => {
       })
     ).resolves.toEqual({ success: false, message: "Provider unavailable" });
 
-    await expect(verifyDonation("bad id")).resolves.toBe(false);
+    await expect(verifyDonation("bad id")).resolves.toMatchObject({
+      success: false,
+      pending: false,
+    });
   });
 
   it("verifies a checkout by id", async () => {
@@ -137,7 +140,11 @@ describe("bachs browser adapter", () => {
       body: { success: true, status: "completed" },
     });
 
-    await expect(verifyDonation("chk_test123")).resolves.toBe(true);
+    await expect(verifyDonation("chk_test123")).resolves.toMatchObject({
+      success: true,
+      pending: false,
+      status: "completed",
+    });
 
     const payload = sentPayload(fetchMock);
     expect(payload.checkoutId).toBe("chk_test123");
@@ -156,7 +163,10 @@ describe("bachs browser adapter", () => {
     });
     jest.spyOn(console, "error").mockImplementation(() => {});
 
-    await expect(verifyDonation("chk_test123")).resolves.toBe(false);
+    await expect(verifyDonation("chk_test123")).resolves.toMatchObject({
+      success: false,
+      pending: false,
+    });
     await expect(
       initializeDonation({
         email: "donor@example.com",
@@ -170,5 +180,55 @@ describe("bachs browser adapter", () => {
       success: false,
       message: "Unable to connect to the payment service",
     });
+  });
+
+  it("retries while the checkout is still open and reports pending", async () => {
+    // The redirect race: Bachs bounces the buyer back before the session
+    // settles, so the first verify sees `open` and a later one sees success.
+    const fetchMock = mockFetch(
+      { ok: true, status: 200, body: { success: false, status: "open" } },
+      { ok: true, status: 200, body: { success: false, status: "open" } },
+      { ok: true, status: 200, body: { success: true, status: "completed" } }
+    );
+
+    await expect(
+      verifyDonation("chk_race", { delayMs: 1 })
+    ).resolves.toMatchObject({ success: true, status: "completed" });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("reports pending without retrying past the cap", async () => {
+    const fetchMock = mockFetch(
+      ...Array.from({ length: 5 }, () => ({
+        ok: true,
+        status: 200,
+        body: { success: false, status: "open" },
+      }))
+    );
+
+    // Default cap: 4 retries + the first attempt = 5 calls.
+    await expect(
+      verifyDonation("chk_stuck", { delayMs: 1 })
+    ).resolves.toMatchObject({
+      success: false,
+      pending: true,
+      status: "open",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(5);
+  });
+
+  it("does not retry terminal states", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      body: { success: false, status: "expired" },
+    });
+
+    await expect(verifyDonation("chk_dead")).resolves.toMatchObject({
+      success: false,
+      pending: false,
+      status: "expired",
+    });
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

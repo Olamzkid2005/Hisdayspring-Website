@@ -101,7 +101,11 @@ export async function POST(request: Request) {
     phone,
     purpose: "book-order",
     corridors,
-    successUrl: `${new URL(request.url).origin}/books`,
+    // Land the buyer straight on their receipt: it verifies the payment
+    // server-side before rendering, so the URL is safe to share, and it works
+    // for both fulfillment modes — pickup orders get their reference, PDF
+    // orders their download links.
+    successUrl: `${new URL(request.url).origin}/books/receipt`,
     cancelUrl: `${new URL(request.url).origin}/books`,
     idempotencyKey: `checkout_${reference}`,
     reference,

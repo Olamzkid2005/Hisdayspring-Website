@@ -71,12 +71,69 @@ export async function initializeDonation(
 
 /**
  * Confirm a checkout after the donor returns from the hosted page.
+ *
+ * Retries through the redirect race — see `verifyBookOrder`. Returns a small
+ * status so the giving page can offer a manual re-check for bank transfers,
+ * which settle slower than cards.
  */
-export async function verifyDonation(checkoutId: string): Promise<boolean> {
-  const result = await postPaymentRoute("/api/payments/bachs/verify", {
-    checkoutId,
-  });
-  return result.success;
+export type DonationVerifyResult = {
+  success: boolean;
+  /** True when the checkout exists but has not settled yet (worth re-checking). */
+  pending: boolean;
+  status?: string;
+};
+
+export async function verifyDonation(
+  checkoutId: string,
+  options: { retries?: number; delayMs?: number } = {}
+): Promise<DonationVerifyResult> {
+  try {
+    const maxAttempts = (options.retries ?? 4) + 1;
+    const delayMs = options.delayMs ?? 800;
+    let last: DonationVerifyResult = { success: false, pending: false };
+
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0) {
+        await new Promise((resolve) => setTimeout(resolve, attempt * delayMs));
+      }
+
+      let response: Response;
+      try {
+        response = await fetch("/api/payments/bachs/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ checkoutId }),
+        });
+      } catch {
+        // Transport-level failure — the manual re-check covers these; do not
+        // grind through retries against a dead connection.
+        return { success: false, pending: false };
+      }
+
+      let data: {
+        success?: boolean;
+        status?: string;
+        message?: string;
+      };
+      try {
+        data = (await response.json()) as typeof data;
+      } catch {
+        return { success: false, pending: false };
+      }
+
+      const status = data.status;
+      // Only the "exists but not settled yet" race is worth retrying.
+      // Expired/cancelled are terminal; a bogus id never returns a status.
+      const pending = status === "open";
+      last = { success: data.success === true, pending, status };
+
+      if (last.success || !pending) break;
+    }
+
+    return last;
+  } catch {
+    return { success: false, pending: false };
+  }
 }
 
 export interface BookOrderLineView {
@@ -98,9 +155,16 @@ export interface VerifiedBookOrder {
 /**
  * Confirm a book-order checkout and get the paid order details back
  * (titles, quantities, fulfillment choice) for the success and staff screens.
+ *
+ * Retries through the redirect race: Bachs bounces the buyer back the moment
+ * the payment succeeds, a beat before the checkout session flips to
+ * `completed`, so the first verify can legitimately come back unpaid. Retries
+ * are capped, with a growing delay, and only when the checkout is not yet
+ * terminal — a genuinely unpaid or bogus id fails fast.
  */
 export async function verifyBookOrder(
-  checkoutId: string
+  checkoutId: string,
+  options: { retries?: number; delayMs?: number } = {}
 ): Promise<
   | {
       success: true;
@@ -112,34 +176,64 @@ export async function verifyBookOrder(
   | { success: false; message: string }
 > {
   try {
-    const response = await fetch("/api/payments/bachs/verify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ checkoutId }),
-    });
-    const data = (await response.json()) as {
-      success: boolean;
-      message?: string;
-      checkoutId?: string;
-      reference?: string;
-      paymentMethod?: string;
-      order?: VerifiedBookOrder;
-    };
+    const maxAttempts = (options.retries ?? 4) + 1;
+    const delayMs = options.delayMs ?? 800;
+    let lastMessage = "We could not confirm this payment.";
 
-    if (!response.ok || !data.success || !data.order) {
-      return {
-        success: false,
-        message: data.message || "We could not confirm this payment.",
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      if (attempt > 0) {
+        // 800ms, 1.6s, 2.4s… — long enough for the session to settle, short
+        // enough that the buyer barely notices the spinner.
+        await new Promise((resolve) => setTimeout(resolve, attempt * delayMs));
+      }
+
+      let response: Response;
+      try {
+        response = await fetch("/api/payments/bachs/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ checkoutId }),
+        });
+      } catch {
+        // Transport-level failure — do not grind through retries against a
+        // dead connection; the manual re-check covers these.
+        break;
+      }
+
+      let data: {
+        success: boolean;
+        message?: string;
+        checkoutId?: string;
+        reference?: string;
+        paymentMethod?: string;
+        status?: string;
+        order?: VerifiedBookOrder;
       };
+      try {
+        data = (await response.json()) as typeof data;
+      } catch {
+        break;
+      }
+
+      if (response.ok && data.success && data.order) {
+        return {
+          success: true,
+          checkoutId: data.checkoutId ?? checkoutId,
+          reference: data.reference,
+          paymentMethod: data.paymentMethod,
+          order: data.order,
+        };
+      }
+
+      lastMessage = data.message || "We could not confirm this payment.";
+
+      // Only the "exists but not settled yet" race is worth retrying.
+      // Expired and cancelled are terminal — retrying cannot change them, and
+      // a bogus id never returns a status at all.
+      if (data.status !== "open") break;
     }
 
-    return {
-      success: true,
-      checkoutId: data.checkoutId ?? checkoutId,
-      reference: data.reference,
-      paymentMethod: data.paymentMethod,
-      order: data.order,
-    };
+    return { success: false, message: lastMessage };
   } catch {
     return {
       success: false,

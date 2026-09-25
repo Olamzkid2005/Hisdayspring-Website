@@ -281,7 +281,11 @@ describe("/books ordering", () => {
     mockFetch({
       ok: true,
       status: 200,
-      body: { success: false, message: "This checkout has not been completed" },
+      body: {
+        success: false,
+        status: "cancelled",
+        message: "This checkout has not been completed",
+      },
     });
 
     setUrl("?checkout_id=chk_fake");
@@ -540,7 +544,11 @@ describe("/books receipt page", () => {
     mockFetch({
       ok: true,
       status: 200,
-      body: { success: false, message: "This checkout has not been completed" },
+      body: {
+        success: false,
+        status: "cancelled",
+        message: "This checkout has not been completed",
+      },
     });
 
     setUrl("?checkout_id=chk_fake");
@@ -552,6 +560,54 @@ describe("/books receipt page", () => {
       { timeout: 3000 }
     );
     expect(screen.queryByText(/Payment received/i)).not.toBeInTheDocument();
+  });
+
+  it("recovers when the session settles after the redirect (race)", async () => {
+    // Bachs bounces the buyer back a beat before the checkout flips to
+    // `completed` — the first verify must not hard-fail the page.
+    mockFetch(
+      {
+        ok: true,
+        status: 200,
+        body: { success: false, status: "open", message: "This checkout has not been completed" },
+      },
+      verifyResponse()
+    );
+
+    setUrl("?checkout_id=chk_race");
+    render(<BookReceiptPage />);
+
+    await waitFor(
+      () => expect(screen.getByText(/Payment received/i)).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
+  });
+
+  it("offers a manual re-check for pending bank transfers", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      body: { success: false, status: "open", message: "This checkout has not been completed" },
+    });
+
+    setUrl("?checkout_id=chk_pending");
+    render(<BookReceiptPage />);
+
+    await waitFor(
+      () => expect(screen.getByRole("button", { name: /check again/i })).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
+    expect(screen.queryByText(/Payment received/i)).not.toBeInTheDocument();
+
+    // The buyer pays the transfer before it reflects; re-checking after the
+    // settlement shows the receipt.
+    fetchMock.mockResolvedValueOnce({ ok: true, status: 200, json: async () => verifyResponse().body });
+    fireEvent.click(screen.getByRole("button", { name: /check again/i }));
+
+    await waitFor(
+      () => expect(screen.getByText(/Payment received/i)).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
   });
 
   it("shows the invalid state for a malformed link", async () => {

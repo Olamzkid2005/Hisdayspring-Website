@@ -142,6 +142,13 @@ bookstand) and a **PDF** option (download links shown right after payment).
 The cart is priced server-side from `data/books.ts` — clients send only book
 IDs and quantities.
 
+After paying, Bachs redirects the buyer to `/books/receipt?checkout_id=…` for
+**both** fulfillment modes: pickup orders get their bookstand reference, PDF
+orders their download links. The receipt verifies the payment server-side
+(with retries — Bachs can bounce the buyer back before the checkout session
+settles), clears the book cart, and offers a manual **Check again** for bank
+transfers that reflect late.
+
 Setup and notes:
 
 1. **PDF delivery** uses Cloudinary. Upload each PDF as

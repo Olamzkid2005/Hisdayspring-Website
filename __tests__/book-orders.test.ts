@@ -218,7 +218,9 @@ describe("book-order initialize route", () => {
       items: "made-to-be-whole:2",
       fulfillment: "pickup",
     });
-    // The success URL lands the buyer back on /books.
-    expect(payload.success_url).toBe(`${ORIGIN}/books`);
+    // The success URL lands the buyer on their receipt (pickup reference and
+    // PDF download links both live there); cancel returns to the store.
+    expect(payload.success_url).toBe(`${ORIGIN}/books/receipt`);
+    expect(payload.cancel_url).toBe(`${ORIGIN}/books`);
   });
 });

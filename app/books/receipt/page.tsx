@@ -10,7 +10,7 @@
  * chrome are removed by print styles in globals.css.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { toPng } from "html-to-image";
@@ -34,10 +34,7 @@ import {
   verifyBookOrder,
   type VerifiedBookOrder,
 } from "@/lib/api/bachs";
-import {
-  CART_STORAGE_KEY,
-  notifyCartChanged,
-} from "@/hooks/useBookCartCount";
+import { getCartSnapshot, writeCart } from "@/lib/book-cart";
 import { config } from "@/lib/config/env";
 import { formatLagosDateTime } from "@/lib/lagos-time";
 
@@ -74,58 +71,72 @@ type ReceiptState =
  * lands twice (redirect + share link).
  */
 function clearPaidCart(): void {
+  // The guard keeps a re-verified receipt (share link, refresh) from
+  // announcing an empty cart it never had.
+  if (Object.keys(getCartSnapshot()).length === 0) return;
+  writeCart({});
+}
+
+/** Capabilities do not change while the page is open, so there is nothing to
+ *  subscribe to - React only needs stable snapshots to compare. */
+const subscribeToNothing = () => () => {};
+const falseOnServer = () => false;
+
+function detectTextShare(): boolean {
+  return typeof navigator !== "undefined" && typeof navigator.share === "function";
+}
+
+/** Memoised: the probe allocates a File, so it runs once per page load. */
+let fileShareProbe: boolean | null = null;
+function detectFileShare(): boolean {
+  if (fileShareProbe !== null) return fileShareProbe;
+  if (!detectTextShare()) return (fileShareProbe = false);
   try {
-    if (window.localStorage.getItem(CART_STORAGE_KEY)) {
-      window.localStorage.removeItem(CART_STORAGE_KEY);
-      notifyCartChanged();
-    }
+    const nav = navigator as Navigator & {
+      canShare?: (data: ShareData) => boolean;
+    };
+    const probe = new File(
+      [new Blob([""], { type: "image/png" })],
+      "probe.png",
+      { type: "image/png" }
+    );
+    fileShareProbe = Boolean(nav.canShare?.({ files: [probe] }));
   } catch {
-    // Storage unavailable — the cart simply persists; not worth blocking.
+    fileShareProbe = false;
   }
+  return fileShareProbe;
 }
 
 export default function BookReceiptPage() {
   const [state, setState] = useState<ReceiptState>({ kind: "loading" });
   const [copied, setCopied] = useState(false);
-  const [canShare, setCanShare] = useState(false);
-  const [canShareFiles, setCanShareFiles] = useState(false);
   const [savingImage, setSavingImage] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
   const receiptRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    // Feature-detect both text sharing and file sharing (the receipt image)
-    // so the right buttons appear on each device.
-    const nav = navigator as Navigator & {
-      canShare?: (data: ShareData) => boolean;
-    };
-    setCanShare(typeof nav.share === "function");
-    try {
-      const probe = new File(
-        [new Blob([""], { type: "image/png" })],
-        "probe.png",
-        { type: "image/png" }
-      );
-      setCanShareFiles(
-        Boolean(typeof nav.share === "function" && nav.canShare?.({ files: [probe] }))
-      );
-    } catch {
-      setCanShareFiles(false);
-    }
-  }, []);
+  // Feature-detect text sharing and file sharing (the receipt image) so the
+  // right buttons appear on each device. Read as snapshots rather than set from
+  // an effect: the server snapshot is false, so hydration matches and React
+  // re-renders with the real answer.
+  const canShare = useSyncExternalStore(subscribeToNothing, detectTextShare, falseOnServer);
+  const canShareFiles = useSyncExternalStore(subscribeToNothing, detectFileShare, falseOnServer);
 
   useEffect(() => {
     // From the URL when shared/linked directly, else the id stashed before we
     // navigated to the hosted checkout (the sandbox redirects to the bare
     // success_url without any parameter).
     const checkoutId = resolveReturnedCheckoutId();
-    if (!checkoutId) {
-      setState({ kind: "invalid" });
-      return;
-    }
 
     let cancelled = false;
     void (async () => {
+      // Decided inside the async body so the "invalid" case is not a
+      // synchronous setState during the effect. Nothing is awaited before it,
+      // so it still applies on the same tick as before.
+      if (!checkoutId) {
+        setState({ kind: "invalid" });
+        return;
+      }
+
       // The helper retries internally through the redirect race (Bachs bounces
       // the buyer back a beat before the session settles).
       const result = await verifyBookOrder(checkoutId);

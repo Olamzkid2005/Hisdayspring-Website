@@ -37,10 +37,8 @@ import {
   verifyBookOrder,
   type VerifiedBookOrder,
 } from "@/lib/api/bachs";
-import {
-  notifyCartChanged,
-  CART_STORAGE_KEY,
-} from "@/hooks/useBookCartCount";
+import { useBookCart } from "@/hooks/useBookCartCount";
+import { writeCart } from "@/lib/book-cart";
 import type { BookOrderFulfillment } from "@/types";
 
 type Stage = "browse" | "checkout" | "paid";
@@ -49,14 +47,14 @@ const DOWNLOAD_URL = "/api/payments/bachs/book-order/download";
 
 
 export default function BooksClient() {
-  const [cart, setCart] = useState<Record<string, number>>({});
   /**
-   * The cart survives refreshes and navigation via localStorage. Rendering
-   * starts empty (matching the server markup), then the stored cart is read
-   * after mount — writes are suppressed until that read is done so the
-   * initial empty state never overwrites what was saved.
+   * The cart survives refreshes and navigation via localStorage, so it is read
+   * from that external store rather than mirrored into state: the server
+   * renders the empty cart, hydration matches, and React re-renders with the
+   * stored cart. Every mutation goes through `writeCart`, which persists and
+   * notifies the nav badge.
    */
-  const [cartHydrated, setCartHydrated] = useState(false);
+  const cart = useBookCart();
   const [stage, setStage] = useState<Stage>("browse");
   const [fulfillment, setFulfillment] = useState<BookOrderFulfillment>("pickup");
   const [buyerName, setBuyerName] = useState("");
@@ -85,47 +83,6 @@ export default function BooksClient() {
   const cartTotal = cartLines.reduce((sum, line) => sum + line.lineTotal, 0);
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0);
 
-  // Restore the saved cart once after mount. Only known titles in valid
-  // quantity bounds are accepted, so stale entries (a book since removed
-  // from the catalogue, hand-edited storage) are dropped silently.
-  useEffect(() => {
-    try {
-      const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as Record<string, unknown>;
-        const restored: Record<string, number> = {};
-        for (const [bookId, quantity] of Object.entries(parsed)) {
-          if (
-            books.some((book) => book.id === bookId) &&
-            typeof quantity === "number" &&
-            Number.isInteger(quantity) &&
-            quantity >= 1 &&
-            quantity <= MAX_QUANTITY_PER_TITLE
-          ) {
-            restored[bookId] = quantity;
-          }
-        }
-        setCart(restored);
-      }
-    } catch {
-      // Corrupted or unavailable storage — an empty cart is the safe state.
-    }
-    setCartHydrated(true);
-  }, []);
-
-  // Persist on every change after the initial read, and tell the nav badge
-  // (same tab; other tabs hear it via the storage event).
-  useEffect(() => {
-    if (!cartHydrated) return;
-    try {
-      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
-    } catch {
-      // Storage full or blocked (private mode) — the cart still works in
-      // memory for this visit, it just will not survive a refresh.
-    }
-    notifyCartChanged();
-  }, [cart, cartHydrated]);
-
   // Bachs returns the buyer to /books?checkout_id=... — confirm server-side
   // before showing anything paid. The parameter is stripped once handled so a
   // refresh cannot replay the confirmation (and so a double-invoked effect in
@@ -150,10 +107,10 @@ export default function BooksClient() {
       window.history.replaceState({}, "", window.location.pathname);
 
       if (result.success) {
-        // The order is paid — the cart's job is done. Empty it now (the
-        // persistence effect saves the empty cart too) so the buyer does not
-        // walk around with a stale cart of books they already bought.
-        setCart({});
+        // The order is paid — the cart's job is done. Empty it (and persist
+        // that) so the buyer does not walk around with a stale cart of books
+        // they already bought.
+        writeCart({});
         setPaidOrder(result.order);
         setPaidReference(result.reference ?? result.checkoutId);
         setPaidCheckoutId(result.checkoutId);
@@ -170,26 +127,24 @@ export default function BooksClient() {
 
   const addToCart = (bookId: string) => {
     setError(null);
-    setCart((prev) => ({
-      ...prev,
-      [bookId]: Math.min((prev[bookId] ?? 0) + 1, MAX_QUANTITY_PER_TITLE),
-    }));
-  };
-
-  const setQuantity = (bookId: string, quantity: number) => {
-    setCart((prev) => {
-      const next = { ...prev };
-      if (quantity <= 0) {
-        delete next[bookId];
-      } else {
-        next[bookId] = Math.min(quantity, MAX_QUANTITY_PER_TITLE);
-      }
-      return next;
+    writeCart({
+      ...cart,
+      [bookId]: Math.min((cart[bookId] ?? 0) + 1, MAX_QUANTITY_PER_TITLE),
     });
   };
 
+  const setQuantity = (bookId: string, quantity: number) => {
+    const next = { ...cart };
+    if (quantity <= 0) {
+      delete next[bookId];
+    } else {
+      next[bookId] = Math.min(quantity, MAX_QUANTITY_PER_TITLE);
+    }
+    writeCart(next);
+  };
+
   const clearCart = () => {
-    setCart({});
+    writeCart({});
     setError(null);
   };
 
@@ -345,7 +300,7 @@ export default function BooksClient() {
               variant="secondary"
               onClick={() => {
                 setStage("browse");
-                setCart({});
+                writeCart({});
                 setPaidOrder(null);
                 setPaidReference(null);
                 setPaidCheckoutId(null);

@@ -85,8 +85,17 @@ export async function POST(request: Request) {
 
   const order = priceBookOrder(body.items, body.fulfillment);
   if (!order) {
+    // Distinguish the one case the buyer can actually fix. The old single
+    // message said "Invalid or empty book order" even for a full, valid cart
+    // that simply exceeded a cap, which left buyers with no idea what to do.
+    const isEmpty = !Array.isArray(body.items) || body.items.length === 0;
     return NextResponse.json(
-      { success: false, message: "Invalid or empty book order" },
+      {
+        success: false,
+        message: isEmpty
+          ? "Your order is empty. Add at least one book and try again."
+          : "We could not price this order. An item may no longer be available, so please refresh the page and try again.",
+      },
       { status: 400 }
     );
   }

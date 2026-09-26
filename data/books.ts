@@ -23,12 +23,6 @@ export function bookPdfUrl(book: Book): string {
  */
 export const MAX_QUANTITY_PER_TITLE = 20;
 
-/**
- * Hard cap on the number of distinct titles in one order. Bachs metadata is
- * capped at 10 KB; orders beyond this cannot be represented reliably.
- */
-export const MAX_DISTINCT_TITLES = 10;
-
 export const books: Book[] = [
   {
     id: "100-days-devotional",
@@ -189,6 +183,19 @@ export const books: Book[] = [
 ];
 
 export const featuredBooks = books.filter((book) => book.price < 1000);
+
+/**
+ * Ceiling on the number of *distinct titles* in one order, derived from the
+ * catalog so it can never drift below it: ordering the whole shelf at once is a
+ * legitimate purchase and must stay possible.
+ *
+ * This was once a hardcoded 10 while the catalog holds 13 titles, so "select
+ * every book" was rejected server-side with the misleading message "Invalid or
+ * empty book order". Copies per title are bounded by `MAX_QUANTITY_PER_TITLE`,
+ * and the checkout-metadata size guard in `lib/server/book-orders.ts` is what
+ * actually protects the Bachs payload.
+ */
+export const MAX_DISTINCT_TITLES = books.length;
 
 export const getBookById = (id: string) => {
   return books.find((book) => book.id === id);

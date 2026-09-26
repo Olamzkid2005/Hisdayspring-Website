@@ -41,6 +41,14 @@ export interface DecodedBookOrder {
 
 const MAX_TOKEN_LENGTH = 4000; // safely inside Bachs' 10 KB metadata budget
 
+/**
+ * Ceiling on raw cart entries, checked before any per-item work. The client
+ * sends one entry per distinct title, so a genuine order never comes near this
+ * — it exists only to bound the work a hostile payload can ask for. The real
+ * limits are the catalog size (distinct titles) and `MAX_QUANTITY_PER_TITLE`.
+ */
+const MAX_CART_ENTRIES = 100;
+
 function parseItemEntry(entry: unknown): BookOrderItem | null {
   if (!entry || typeof entry !== "object") return null;
   const value = entry as Record<string, unknown>;
@@ -71,7 +79,7 @@ export function priceBookOrder(
   const fulfillment = parseFulfillment(rawFulfillment);
   if (!fulfillment) return null;
   if (!Array.isArray(rawItems) || rawItems.length === 0) return null;
-  if (rawItems.length > MAX_DISTINCT_TITLES) return null;
+  if (rawItems.length > MAX_CART_ENTRIES) return null;
 
   // Merge duplicates first, then clamp the merged total — clamping per entry
   // would let 20 entries of 1 each slip past the cap, or a 1 + 50 split end up
@@ -85,6 +93,11 @@ export function priceBookOrder(
 
     quantities.set(item.bookId, (quantities.get(item.bookId) ?? 0) + item.quantity);
   }
+
+  // Checked after merging so duplicates do not count against the cap: 26
+  // entries collapsing to 13 titles is a 13-title order, and the whole catalog
+  // must remain orderable in one go.
+  if (quantities.size > MAX_DISTINCT_TITLES) return null;
 
   const items: BookOrderItem[] = [...quantities.entries()].map(
     ([bookId, quantity]) => ({

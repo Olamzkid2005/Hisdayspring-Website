@@ -102,13 +102,56 @@ describe("priceBookOrder", () => {
     expect(priceBookOrder("nonsense", "pickup")).toBeNull();
   });
 
-  it("rejects more distinct titles than the metadata budget allows", () => {
-    const tooMany = books.slice(0, 11).map((book) => ({
+  // Regression: the distinct-title cap was hardcoded to 10 while the catalog
+  // holds more than that, so "select every book" was rejected with a message
+  // claiming the order was invalid or empty.
+  it("accepts an order for every title in the catalog", () => {
+    const everything = books.map((book) => ({ bookId: book.id, quantity: 1 }));
+    const order = priceBookOrder(everything, "pickup");
+
+    expect(order).not.toBeNull();
+    expect(order!.items).toHaveLength(books.length);
+    expect(order!.total).toBe(books.reduce((sum, book) => sum + book.price, 0));
+  });
+
+  it("accepts several copies spread across every title", () => {
+    const mixed = books.map((book, index) => ({
       bookId: book.id,
+      quantity: (index % 3) + 1,
+    }));
+    const order = priceBookOrder(mixed, "pdf");
+
+    expect(order).not.toBeNull();
+    expect(order!.items).toHaveLength(books.length);
+    expect(order!.total).toBe(
+      books.reduce(
+        (sum, book, index) => sum + book.price * ((index % 3) + 1),
+        0
+      )
+    );
+  });
+
+  it("does not count duplicate entries against the title cap", () => {
+    // Twice the catalog in raw entries, but only catalog-many distinct titles.
+    const doubled = books.flatMap((book) => [
+      { bookId: book.id, quantity: 1 },
+      { bookId: book.id, quantity: 1 },
+    ]);
+
+    const order = priceBookOrder(doubled, "pickup");
+
+    expect(order).not.toBeNull();
+    expect(order!.items).toHaveLength(books.length);
+    expect(order!.items.every((item) => item.quantity === 2)).toBe(true);
+  });
+
+  it("still rejects absurdly large payloads", () => {
+    const hostile = Array.from({ length: 5000 }, () => ({
+      bookId: "made-to-be-whole",
       quantity: 1,
     }));
 
-    expect(priceBookOrder(tooMany, "pickup")).toBeNull();
+    expect(priceBookOrder(hostile, "pickup")).toBeNull();
   });
 });
 

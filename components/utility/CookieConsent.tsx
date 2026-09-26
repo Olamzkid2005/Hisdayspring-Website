@@ -65,14 +65,15 @@ export function CookieConsent() {
           className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
         >
           <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
-            <div className="p-6 md:p-8">
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+            {/* Tighter padding on phones: the card used to cover ~half a 844px screen. */}
+            <div className="p-4 md:p-8">
+              <div className="flex items-start gap-3 md:gap-4">
+                <div className="hidden sm:flex flex-shrink-0 w-12 h-12 rounded-full bg-secondary-container items-center justify-center">
                   <Cookie className="w-6 h-6 text-secondary" />
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-serif font-bold text-lg text-on-surface">
+                    <h3 className="font-serif font-bold text-base md:text-lg text-on-surface">
                       We value your privacy
                     </h3>
                     <button
@@ -83,7 +84,15 @@ export function CookieConsent() {
                       <X className="w-5 h-5" />
                     </button>
                   </div>
-                  <p className="text-on-surface-variant text-sm leading-relaxed mb-4">
+                  {/* Phones get a single line; the full explanation returns from md
+                      up. The banner used to cover ~half an 844px screen. */}
+                  <p className="md:hidden text-on-surface-variant text-sm leading-relaxed mb-3">
+                    We use cookies to improve your experience.{" "}
+                    <Link href="/privacy" className="text-secondary hover:underline">
+                      Privacy Policy
+                    </Link>
+                  </p>
+                  <p className="hidden md:block text-on-surface-variant text-sm leading-relaxed mb-3 md:mb-4">
                     We use cookies to enhance your browsing experience, serve personalized
                     content, and analyze our traffic. By clicking &quot;Accept&quot;, you consent
                     to our use of cookies. You can manage your preferences or learn more
@@ -96,22 +105,29 @@ export function CookieConsent() {
                     </Link>
                     .
                   </p>
-                  <div className="flex flex-col sm:flex-row gap-3">
+                  {/* One row with short labels on phones, stacked full labels from
+                      md up. aria-label keeps the accessible name stable and still
+                      contains the visible word (WCAG 2.5.3). */}
+                  <div className="flex flex-row sm:gap-3 gap-2">
                     <Button
                       variant="primary"
                       size="md"
                       onClick={handleAccept}
+                      aria-label="Accept all cookies"
                       className="flex-1"
                     >
-                      Accept All Cookies
+                      <span className="md:hidden">Accept</span>
+                      <span className="hidden md:inline">Accept All Cookies</span>
                     </Button>
                     <Button
                       variant="outline"
                       size="md"
                       onClick={handleDecline}
+                      aria-label="Decline non-essential cookies"
                       className="flex-1"
                     >
-                      Decline Non-Essential
+                      <span className="md:hidden">Decline</span>
+                      <span className="hidden md:inline">Decline Non-Essential</span>
                     </Button>
                   </div>
                 </div>

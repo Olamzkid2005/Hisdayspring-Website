@@ -55,7 +55,9 @@ describe("CookieConsent", () => {
     });
     expect(screen.getByText("We value your privacy")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "Accept All Cookies" }));
+    // The label shortens to "Accept" on phones, so the button carries a stable
+    // aria-label of "Accept all cookies" and is matched case-insensitively.
+    fireEvent.click(screen.getByRole("button", { name: /accept all cookies/i }));
     expect(JSON.parse(localStorage.getItem("hisdayspring_cookie_consent")!)).toMatchObject({
       analytics: true,
       marketing: true,

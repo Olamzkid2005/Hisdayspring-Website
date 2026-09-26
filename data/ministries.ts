@@ -66,7 +66,10 @@ export const ministries: Ministry[] = [
     founded: "18+ years",
     icon: "Compass",
     imageUrl:
-      "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=1200&q=80",
+      // Real photo from the Teens Talk '26 shoot (camera original on the CDN),
+      // replacing the Unsplash stock that read as generic next to the other
+      // ministry cards.
+      "/images/gallery/teens talk 26 shoot/DSC_4455.jpg",
     gallery: [
       "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?w=800&q=80",
       "https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&q=80",

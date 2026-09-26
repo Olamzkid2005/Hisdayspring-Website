@@ -2,10 +2,15 @@
 
 Production deployment to **Pxxl** with the custom domain **hisdayspring.org**.
 
-Current state: all code changes are local and uncommitted. The domain
-`hisdayspring.org` currently points to `45.43.14.156` (Qservers) — pointing it
-to Pxxl **replaces** that site. Make sure the old site has nothing you still
-need before continuing.
+Current state: `main` is committed and pushed (Vercel serves the same commit
+for testing). The domain `hisdayspring.org` currently points to
+`45.43.14.156` (Qservers) — pointing it to Pxxl **replaces** that site. Make
+sure the old site has nothing you still need before continuing.
+
+Tip: deploy with the **sandbox** Bachs keys first, verify the full checkout
+flow on `hisdayspring.pxxl.pro`, then swap in the `sk_live_...` keys at the
+DNS cutover (section 3 + 5). Zero code changes either way — the key prefix
+picks the API environment.
 
 ---
 

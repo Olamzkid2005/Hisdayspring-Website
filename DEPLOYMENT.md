@@ -2,15 +2,17 @@
 
 Production deployment to **Pxxl** with the custom domain **hisdayspring.org**.
 
-Current state: `main` is committed and pushed (Vercel serves the same commit
-for testing). The domain `hisdayspring.org` currently points to
-`45.43.14.156` (Qservers) — pointing it to Pxxl **replaces** that site. Make
-sure the old site has nothing you still need before continuing.
+Current state: Pxxl is **live** at `https://hisdayspring-website.pxxlspace.cv`
+(commit `ce495c8`) with sandbox Bachs keys, and both checkout endpoints plus the
+webhook signature check are verified there. Vercel serves the same commit at
+`https://hisdayspring.vercel.app` as the test mirror. The domain
+`hisdayspring.org` still points to `45.43.14.156` (Qservers) — pointing it to
+Pxxl **replaces** that site. Make sure the old site has nothing you still need
+before continuing.
 
-Tip: deploy with the **sandbox** Bachs keys first, verify the full checkout
-flow on `hisdayspring.pxxl.pro`, then swap in the `sk_live_...` keys at the
-DNS cutover (section 3 + 5). Zero code changes either way — the key prefix
-picks the API environment.
+Tip: verify the full checkout flow on the Pxxl URL before the cutover, then
+swap in the `sk_live_...` keys (section 3 + 5). Zero code changes either way —
+the key prefix picks the API environment.
 
 ---
 
@@ -36,8 +38,8 @@ Official flow per docs.pxxl.app (`Dashboard > Deploy Project`):
 3. Configure the project:
    | Field | Value |
    |---|---|
-   | Project Domain | `hisdayspring` → gives `hisdayspring.pxxl.pro` |
-   | Port Number | **3000** (`next start` reads `PORT`) |
+   | Project Domain | `hisdayspring-website` → gives `hisdayspring-website.pxxlspace.cv` |
+   | Port Number | **3000** (`next start` reads `PORT`; Pxxl also injects `PORT` and `EXPOSE_PORT`) |
    | GitHub Branch | `main` |
 4. **Environment Variables — add BEFORE clicking Deploy** (see section 3).
    The container will start but payments/live APIs return 503 without them.
@@ -47,7 +49,7 @@ Official flow per docs.pxxl.app (`Dashboard > Deploy Project`):
    | Install command | `npm ci` |
    | Build command | `npm run build` |
    | Start command | `npm start` |
-   | Runtime version | Node 20+ |
+   | Runtime version | Node 26 (locked by Pxxl — the `node-npm:26` buildpack pins it) |
    | Package manager | npm |
 6. **Server and Scaling**: the default tier is fine — images are served from
    the Cloudinary CDN, not the app. Enable **Build cache**.
@@ -57,7 +59,41 @@ Official flow per docs.pxxl.app (`Dashboard > Deploy Project`):
    - Blue-green deployment: enable if your plan supports it (zero-downtime releases)
 8. Click **Deploy Project**, watch **Project → Deployments** and
    **Project → Live Logs** until the build finishes.
-9. Verify: `https://hisdayspring.pxxl.pro` loads the homepage.
+9. Verify: `https://hisdayspring-website.pxxlspace.cv` loads the homepage.
+
+### Redeploying — and the env-var trap
+
+Two things bite here, both learned the hard way:
+
+- **Changing an env var does nothing until you rebuild.** Pxxl applies
+  variables while it builds the image, so after adding or editing one, open
+  **Overview → Redeploy** and wait for the build to go green.
+- **A variable is only read if the deployed commit reads it.** Compare the
+  commit on the Overview card against `git log --oneline -1` before debugging a
+  "still broken" deploy: a fix that is pushed but not deployed looks exactly
+  like a fix that does not work.
+
+To redeploy: **Overview → Redeploy → Deploy `<commit>`** (the dialog defaults to
+the latest commit on `main`). A clean build takes ~2.5 minutes and the runtime
+rolls over with no downtime.
+
+Sanity-check the payment endpoints after every deploy:
+
+```bash
+BASE=https://hisdayspring-website.pxxlspace.cv
+
+curl -s -X POST $BASE/api/payments/bachs/initialize \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"test@example.com","amount":1000,"paymentMethod":"card-payment","metadata":{"name":"Test","phone":"+2348077829444","purpose":"tithes","type":"donation"}}'
+
+curl -s -X POST $BASE/api/payments/bachs/book-order/initialize \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Test","email":"test@example.com","phone":"+2348077829444","paymentMethod":"card-payment","fulfillment":"pickup","items":[{"bookId":"100-days-devotional","quantity":1}]}'
+```
+
+Both must return **200** with a `chk_...` id and a `sandbox-checkout.bachs.io`
+URL (`checkout.bachs.io` once live keys are in). A **502** means `SITE_URL` is
+missing or wrong, or the deployed commit predates the fix.
 
 ---
 
@@ -90,13 +126,45 @@ Pxxl hosts globally with managed SSL; your DNS just needs to point at it.
    - `hisdayspring.org`
    - `www.hisdayspring.org`
    - Pxxl shows its A-record IP and/or CNAME target — copy those values.
-2. Log in to **Qservers** (your DNS/ns provider: `ns3.qservers.net` etc.)
-   and edit DNS for `hisdayspring.org`:
+2. Log in to the **Qservers client area**
+   (<https://process.qservers.net/clientarea.php>) → **Domains → My Domains** →
+   open the dropdown beside `hisdayspring.org` → **Domain DNS Manager**.
+
+   Do **not** change the nameservers (`ns3.qservers.net`, `ns4.qservers.net`,
+   `ns3.qserverscloud.com`, `ns4.qserverscloud.com`) — edit the records only.
+
+   Set the two mail rows **first** (see the warning below), then the website
+   rows:
 
    | Type | Name | Value | TTL | Notes |
    |---|---|---|---|---|
-   | A | `@` | **Pxxl's IPv4** (from dashboard) | 3600 | replaces `45.43.14.156` |
-   | CNAME | `www` | `hisdayspring.pxxl.pro` | 3600 | |
+   | MX | `@` | `1.qservers.net` | 300 | priority `0` — keeps email alive |
+   | CNAME | `mail` | `1.qservers.net` | 300 | keeps `mail.hisdayspring.org` working |
+   | A | `@` | **Pxxl's IPv4** (from the Domains panel) | 300 | replaces `45.43.14.156` |
+   | CNAME | `www` | Pxxl's CNAME target (e.g. `hisdayspring-website.pxxlspace.cv`) | 300 | |
+
+   Leave `webmail`, `cpanel`, the SPF `TXT` and `_dmarc` alone. A short TTL
+   (300) through the cutover makes a rollback take minutes instead of hours.
+
+   **Why the mail rows must change first.** The zone at the last audit was:
+
+   ```
+   MX    0 hisdayspring.org.        <- mail follows the apex A record
+   A     45.43.14.156               <- Qservers box, also runs Exim 1.qservers.net
+   CNAME mail -> hisdayspring.org   <- also follows the apex
+   ```
+
+   The mail server and the old website are the **same host**, and MX points at
+   the apex rather than at the mail host. Repointing `A @` at Pxxl would send
+   `@hisdayspring.org` mail to a server with no mail service, so the church's
+   inbox would silently stop receiving. Pin MX and `mail` to `1.qservers.net`,
+   confirm with `dig +short hisdayspring.org MX`, and only then move the
+   website records.
+
+   Optional hardening: the SPF record contains `+a`, which after the cutover
+   would authorise Pxxl's IP to send mail as `hisdayspring.org`. The Qservers
+   host is already covered by `ip4:45.43.14.156` and `+mx`, so dropping `+a` is
+   safe and tidier.
 
 3. Wait for propagation — usually minutes, up to a few hours.
    Check with:
@@ -104,11 +172,16 @@ Pxxl hosts globally with managed SSL; your DNS just needs to point at it.
    ```bash
    dig +short hisdayspring.org A
    dig +short www.hisdayspring.org CNAME
+   dig +short hisdayspring.org MX     # must be 1.qservers.net, not hisdayspring.org
    ```
 
 4. SSL certificates are issued automatically by Pxxl once DNS resolves.
    Both `https://hisdayspring.org` and `https://www.hisdayspring.org` must
    serve the site over HTTPS.
+5. **After** DNS resolves, update `SITE_URL` to `https://hisdayspring.org` on
+   Pxxl and **redeploy** — otherwise Bachs keeps sending buyers back to the old
+   `…pxxlspace.cv` host. Then re-point the Bachs webhook (section 5) at the new
+   domain.
 
 Note: security headers (including HSTS) activate automatically over HTTPS —
 they are already configured in `next.config.ts`.
@@ -129,6 +202,10 @@ Webhook-verified fulfilment needs this:
 2. Subscribe to the **Checkout** and **Payments** events — at minimum
    `collection.succeeded` (the source of truth for fulfilment) and
    `checkout.completed`.
+
+   Until the custom domain is live, point this at whichever host is serving
+   production (right now `https://hisdayspring.vercel.app`); switch it to
+   `https://hisdayspring.org` immediately after the DNS cutover.
 
 3. Copy the endpoint's **signing secret** into `BACHS_WEBHOOK_SECRET` (section 3).
    Deliveries are signed with HMAC-SHA256 over `"{timestamp}.{raw_body}"` and
@@ -257,7 +334,9 @@ See https://docs.bachs.io/connect/split-payments/destination
 
 Run through this after DNS + deploy:
 
+- [ ] Pxxl **Overview shows the latest `main` commit** (`git log --oneline -1`) — a stale commit silently disables every fix
 - [ ] `https://hisdayspring.org` and `https://www.hisdayspring.org` load over HTTPS (no cert warnings)
+- [ ] Both checkout endpoints on the live domain return 200 with a `chk_...` id (commands in section 2)
 - [ ] All nav pages render: `/pastors`, `/giving`, `/books`, `/radio`, `/live`, `/welfare`, `/crusade`, `/testimonials`, `/prayer`, `/privacy`, `/ministries/yofic`
 - [ ] `/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/.well-known/security.txt`, `/site.webmanifest` all return 200
 - [ ] Browser tab shows the church logo favicon; `curl -I https://hisdayspring.org` shows `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
@@ -322,5 +401,5 @@ Targets: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO �
 If a deploy misbehaves:
 
 1. Pxxl Dashboard → Project → **Deployments** → open the previous good deploy → **Redeploy/Rollback**
-2. Domain/DNS problems: revert the Qservers A record to `45.43.14.156` (old host) — propagates in minutes
+2. Domain/DNS problems: revert the Qservers `A @` record to `45.43.14.156` (old host) — propagates in minutes. **Leave MX pointed at `1.qservers.net`** either way; that is what keeps email working
 3. Payment problems: pastoral giving is transfer-only and never touches Bachs, so it keeps working; for a full freeze of the online checkout, remove `BACHS_SECRET_KEY` on Pxxl (donations return a clean 503 message instead of charging)

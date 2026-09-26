@@ -8,6 +8,52 @@
 
 import type { PaymentMethod, PaymentResponse } from "@/types";
 
+/**
+ * Remembers the checkout we are about to send the buyer to.
+ *
+ * Bachs' hosted page is supposed to append `?checkout_id=` to the success
+ * redirect, but the sandbox currently redirects to the bare `success_url`.
+ * The initialize response tells us the id before we navigate away, so stash
+ * it and let the return pages fall back to it when the URL carries no param.
+ * sessionStorage (not localStorage): per-tab, dies with the tab, and never
+ * holds anything sensitive — just an opaque checkout reference.
+ */
+const LAST_CHECKOUT_KEY = "hds-last-checkout-id";
+
+export function stashLastCheckoutId(checkoutId: string): void {
+  try {
+    window.sessionStorage.setItem(LAST_CHECKOUT_KEY, checkoutId);
+  } catch {
+    // Storage unavailable (private mode) — the redirect param is the primary
+    // path anyway; this is only the fallback.
+  }
+}
+
+/**
+ * The checkout id a buyer just came back with: from the URL when Bachs
+ * appended it, otherwise the one stashed before we navigated away.
+ */
+export function resolveReturnedCheckoutId(): string | null {
+  const fromUrl = new URLSearchParams(window.location.search).get("checkout_id");
+  if (fromUrl && /^[A-Za-z0-9._:-]{1,200}$/.test(fromUrl)) return fromUrl;
+  try {
+    const stashed = window.sessionStorage.getItem(LAST_CHECKOUT_KEY);
+    if (stashed && /^[A-Za-z0-9._:-]{1,200}$/.test(stashed)) return stashed;
+  } catch {
+    // Storage unavailable — no fallback to offer.
+  }
+  return null;
+}
+
+/** Drop the stash once the return page has consumed it. */
+export function clearLastCheckoutId(): void {
+  try {
+    window.sessionStorage.removeItem(LAST_CHECKOUT_KEY);
+  } catch {
+    // Nothing to clean up.
+  }
+}
+
 async function postPaymentRoute(
   path: string,
   body: Record<string, unknown>

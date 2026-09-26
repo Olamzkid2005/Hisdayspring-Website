@@ -23,7 +23,13 @@ import {
   MIN_DONATION_AMOUNT,
 } from "@/data/donations";
 import { useCopyToClipboard } from "@/hooks";
-import { initializeDonation, verifyDonation } from "@/lib/api/bachs";
+import {
+  clearLastCheckoutId,
+  initializeDonation,
+  resolveReturnedCheckoutId,
+  stashLastCheckoutId,
+  verifyDonation,
+} from "@/lib/api/bachs";
 import type { DonationPurpose, PaymentMethod } from "@/types";
 
 const PRESET_AMOUNTS = [1000, 2500, 5000, 10000];
@@ -105,9 +111,10 @@ export default function GivingPage() {
   // The redirect is not proof of payment (the tab can close, and the query
   // string is editable), so confirm it server-side before thanking anyone.
   useEffect(() => {
-    const checkoutId = new URLSearchParams(window.location.search).get(
-      "checkout_id"
-    );
+    // From the URL when Bachs appended it, else the id stashed before we
+    // navigated to the hosted checkout (the sandbox redirects to the bare
+    // success_url without any parameter).
+    const checkoutId = resolveReturnedCheckoutId();
     if (!checkoutId) return;
 
     let cancelled = false;
@@ -117,9 +124,10 @@ export default function GivingPage() {
       const verified = await verifyDonation(checkoutId);
       if (cancelled) return;
 
-      // Strip the parameter only once settled, so a pending checkout (bank
-      // transfer not yet reflected) survives a refresh and can be re-verified
-      // — while a confirmed one cannot be replayed.
+      // Consume the stash and strip the parameter only once settled, so a
+      // pending checkout (bank transfer not yet reflected) survives a refresh
+      // and can be re-verified — while a confirmed one cannot be replayed.
+      clearLastCheckoutId();
       window.history.replaceState({}, "", window.location.pathname);
 
       if (verified.success) {
@@ -222,6 +230,9 @@ export default function GivingPage() {
     setIsSubmitting(false);
 
     if (result.success && result.authorizationUrl) {
+      // Stash the id — Bachs' hosted page should append ?checkout_id= on the
+      // way back, but currently redirects to the bare success_url.
+      if (result.checkoutId) stashLastCheckoutId(result.checkoutId);
       window.location.assign(result.authorizationUrl);
     } else {
       setError(result.message || "Payment initialization failed. Please try again.");

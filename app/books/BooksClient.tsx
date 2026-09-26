@@ -31,6 +31,9 @@ import { Button, buttonClasses } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { books, MAX_QUANTITY_PER_TITLE } from "@/data/books";
 import {
+  clearLastCheckoutId,
+  resolveReturnedCheckoutId,
+  stashLastCheckoutId,
   verifyBookOrder,
   type VerifiedBookOrder,
 } from "@/lib/api/bachs";
@@ -128,9 +131,10 @@ export default function BooksClient() {
   // refresh cannot replay the confirmation (and so a double-invoked effect in
   // strict mode reads the same id rather than racing itself).
   useEffect(() => {
-    const checkoutId = new URLSearchParams(window.location.search).get(
-      "checkout_id"
-    );
+    // From the URL when Bachs appended it, else the id stashed before we
+    // navigated to the hosted checkout (the sandbox redirects to the bare
+    // success_url without any parameter).
+    const checkoutId = resolveReturnedCheckoutId();
     if (!checkoutId) return;
 
     let cancelled = false;
@@ -140,8 +144,9 @@ export default function BooksClient() {
       const result = await verifyBookOrder(checkoutId);
       if (cancelled) return;
 
-      // Strip the parameter only once settled, so an unpaid/pending checkout
-      // survives a refresh and can be re-verified after the fact.
+      // Consume the stash and strip the parameter only once settled, so an
+      // unpaid/pending checkout survives a refresh and can be re-verified.
+      clearLastCheckoutId();
       window.history.replaceState({}, "", window.location.pathname);
 
       if (result.success) {
@@ -229,10 +234,15 @@ export default function BooksClient() {
       const data = (await response.json()) as {
         success: boolean;
         message?: string;
+        checkoutId?: string;
         authorizationUrl?: string;
       };
 
       if (data.success && data.authorizationUrl) {
+        // Bachs' hosted page should append ?checkout_id= on the way back, but
+        // currently redirects to the bare success_url — stash the id so the
+        // receipt page can still identify this checkout.
+        if (data.checkoutId) stashLastCheckoutId(data.checkoutId);
         window.location.assign(data.authorizationUrl);
         return;
       }

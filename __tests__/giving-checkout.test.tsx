@@ -67,7 +67,10 @@ function chooseGift() {
 }
 
 describe("/giving checkout flow", () => {
-  beforeEach(() => setUrl(""));
+  beforeEach(() => {
+    window.sessionStorage.clear();
+    setUrl("");
+  });
   afterEach(() => jest.restoreAllMocks());
 
   it("posts the donation to the Bachs route and sends the donor to checkout", async () => {
@@ -240,7 +243,10 @@ describe("/giving checkout flow", () => {
 });
 
 describe("/giving pastor & ministerial giving", () => {
-  beforeEach(() => setUrl(""));
+  beforeEach(() => {
+    window.sessionStorage.clear();
+    setUrl("");
+  });
   afterEach(() => jest.restoreAllMocks());
 
   function mockClipboard() {

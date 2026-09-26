@@ -54,8 +54,10 @@ function fillBuyer() {
 describe("/books ordering", () => {
   beforeEach(() => {
     // The cart persists in localStorage across renders — clear it so each
-    // test starts from an empty cart like a first-time visitor.
+    // test starts from an empty cart like a first-time visitor. The checkout
+    // stash lives in sessionStorage; same isolation reasoning.
     window.localStorage.clear();
+    window.sessionStorage.clear();
     setUrl("");
   });
   afterEach(() => jest.restoreAllMocks());
@@ -87,6 +89,36 @@ describe("/books ordering", () => {
     expect(url).toBe("/api/payments/bachs/book-order/initialize");
     expect(payload.items).toEqual([{ bookId: sample.id, quantity: 1 }]);
     expect(payload.fulfillment).toBe("pickup");
+    errorSpy.mockRestore();
+  });
+
+  it("stashes the checkout id before redirecting to the hosted checkout", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      body: {
+        success: true,
+        checkoutId: "chk_stashme",
+        authorizationUrl: "https://checkout.bachs.io/c/x",
+      },
+    });
+    const errorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(<BooksClient />);
+    addToCart();
+    fireEvent.click(screen.getByRole("button", { name: /Checkout/ }));
+    fillBuyer();
+    fireEvent.click(screen.getByRole("button", { name: /Pay ₦/ }));
+
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    // The sandbox redirects back without ?checkout_id=, so the return page
+    // identifies the checkout from this stash.
+    expect(window.sessionStorage.getItem("hds-last-checkout-id")).toBe(
+      "chk_stashme"
+    );
     errorSpy.mockRestore();
   });
 
@@ -390,7 +422,10 @@ describe("/books clear cart", () => {
 });
 
 describe("/books receipt page", () => {
-  beforeEach(() => setUrl(""));
+  beforeEach(() => {
+    window.sessionStorage.clear();
+    setUrl("");
+  });
   afterEach(() => jest.restoreAllMocks());
 
   function mockClipboard() {
@@ -560,6 +595,24 @@ describe("/books receipt page", () => {
       { timeout: 3000 }
     );
     expect(screen.queryByText(/Payment received/i)).not.toBeInTheDocument();
+  });
+
+  it("recovers when the sandbox redirects back without a checkout_id", async () => {
+    // Bachs' hosted page currently returns to the bare success_url. The
+    // receipt falls back to the id stashed before the redirect.
+    window.sessionStorage.setItem("hds-last-checkout-id", "chk_stashed");
+    mockFetch(verifyResponse({ checkoutId: "chk_stashed" }));
+
+    setUrl("");
+    render(<BookReceiptPage />);
+
+    await waitFor(
+      () => expect(screen.getByText(/Payment received/i)).toBeInTheDocument(),
+      { timeout: 3000 }
+    );
+    expect(screen.getByText(/hisdayspring-book-abc/i)).toBeInTheDocument();
+    // The stash is consumed once verified.
+    expect(window.sessionStorage.getItem("hds-last-checkout-id")).toBeNull();
   });
 
   it("recovers when the session settles after the redirect (race)", async () => {

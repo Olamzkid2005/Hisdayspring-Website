@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 import { buttonClasses } from "@/components/ui/Button";
 import {
+  clearLastCheckoutId,
+  resolveReturnedCheckoutId,
   verifyBookOrder,
   type VerifiedBookOrder,
 } from "@/lib/api/bachs";
@@ -116,10 +118,11 @@ export default function BookReceiptPage() {
   }, []);
 
   useEffect(() => {
-    const checkoutId = new URLSearchParams(window.location.search).get(
-      "checkout_id"
-    );
-    if (!checkoutId || !/^[A-Za-z0-9._:-]{1,200}$/.test(checkoutId)) {
+    // From the URL when shared/linked directly, else the id stashed before we
+    // navigated to the hosted checkout (the sandbox redirects to the bare
+    // success_url without any parameter).
+    const checkoutId = resolveReturnedCheckoutId();
+    if (!checkoutId) {
       setState({ kind: "invalid" });
       return;
     }
@@ -132,6 +135,9 @@ export default function BookReceiptPage() {
       if (cancelled) return;
       if (result.success) {
         clearPaidCart();
+        // Consumed — a refresh of a verified receipt re-verifies from the URL
+        // the buyer can copy from the address bar instead.
+        clearLastCheckoutId();
         setState({
           kind: "verified",
           order: result.order,
@@ -140,6 +146,8 @@ export default function BookReceiptPage() {
           paymentMethod: result.paymentMethod,
         });
       } else {
+        // Keep the stash: a pending bank transfer can be re-checked (button
+        // below, or a refresh) until it settles.
         setState({ kind: "unpaid", message: result.message });
       }
     })();
@@ -155,15 +163,14 @@ export default function BookReceiptPage() {
    * is shown inline so the buyer sees something is happening.
    */
   const recheckPayment = () => {
-    const checkoutId = new URLSearchParams(window.location.search).get(
-      "checkout_id"
-    );
+    const checkoutId = resolveReturnedCheckoutId();
     if (!checkoutId) return;
     setState({ kind: "loading" });
     void (async () => {
       const result = await verifyBookOrder(checkoutId, { retries: 2 });
       if (result.success) {
         clearPaidCart();
+        clearLastCheckoutId();
         setState({
           kind: "verified",
           order: result.order,

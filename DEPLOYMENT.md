@@ -378,8 +378,21 @@ Targets: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO �
 
 ## 9. Known follow-ups (not blockers)
 
-- **4 lint warnings** (`<img>` in `app/radio`, `app/books`,
-  `SermonsSection` ×2) — YouTube thumbnails / background images; harmless.
+- **3 lint warnings** (`<img>` for YouTube thumbnails, and one unused var in
+  `scripts/upload-images-to-cdn.mjs`) — harmless. `npm run lint` is otherwise
+  clean, and `npm audit` reports **0 vulnerabilities**.
+- **Pxxl's dependency scan lists packages that are not ours.** The build log
+  flags `tar`, `brace-expansion`, `ip-address`, `undici` and the Alpine trio
+  `openssl`/`libssl3`/`libcrypto3`. Evidence they are not from this repo:
+  `ip-address` appears **nowhere in `package-lock.json`**, and the reported
+  versions (`tar` 7.5.16, `brace-expansion` 5.0.6, `ip-address` 10.2.0,
+  `undici` 6.26.0) match neither our lock nor our installed tree — they line up
+  with the npm bundled inside Pxxl's Node 26 buildpack (npm's own
+  `node_modules` contains the same four packages at adjacent patch versions).
+  The `openssl` findings are the builder image's OS packages. Neither can be
+  fixed from `package.json`; ask Pxxl to refresh their Node/npm buildpack image
+  if a clean scan is required. Our own tree was cleaned in
+  `Drop the unused Vercel CLI and pin patched transitive dependencies`.
 - **Update `public/.well-known/security.txt` `Expires:` field yearly**.
 - **`security.txt` contact** — currently `hello@hisdayspring.org`; consider a
   dedicated `security@hisdayspring.org` later.

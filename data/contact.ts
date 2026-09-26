@@ -1,22 +1,14 @@
 /**
  * Contact information data
- * PLACEHOLDER - Church to provide actual addresses
  */
 
 import type { ContactInfo, BranchAddress } from "@/types";
 
 export const branchAddresses: BranchAddress[] = [
   {
-    branch: "Ipaja",
-    address: "Gowon Estate, Ipaja",
-    city: "Lagos",
-    state: "Lagos State",
-    country: "Nigeria",
-  },
-  {
-    branch: "Ikeja",
-    address: "Ikeja, Lagos",
-    city: "Lagos",
+    branch: "Headquarters — Ipaja",
+    address: "Plot 200, 21 Road, Beside Faith Academy, Gate Bus Stop, Gowon Estate",
+    city: "Ipaja, Lagos",
     state: "Lagos State",
     country: "Nigeria",
   },

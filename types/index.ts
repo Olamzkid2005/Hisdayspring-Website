@@ -184,7 +184,8 @@ export interface GalleryPhoto {
 // =============================================================================
 
 export interface BranchAddress {
-  branch: Branch;
+  /** Free-form branch label — not tied to the service-time Branch union. */
+  branch: string;
   address: string;
   city: string;
   state: string;

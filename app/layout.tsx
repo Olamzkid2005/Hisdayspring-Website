@@ -56,12 +56,21 @@ export const metadata: Metadata = {
     title: "Hisdayspring Ministries International",
     description:
       "Raising holy, healthy and wealthy people with a sense of dominion and world evangelism.",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Hisdayspring Ministries International — Raising holy, healthy and wealthy people",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Hisdayspring Ministries International",
     description:
       "Raising holy, healthy and wealthy people with a sense of dominion and world evangelism.",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,

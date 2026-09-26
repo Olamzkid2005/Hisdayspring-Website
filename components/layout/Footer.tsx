@@ -61,6 +61,12 @@ export function Footer() {
           >
             Privacy Policy
           </Link>
+          <Link
+            href="/terms"
+            className="text-on-surface-variant hover:text-secondary transition-colors"
+          >
+            Terms and Conditions
+          </Link>
         </div>
 
         <p className="text-on-surface-variant text-sm tracking-wide">

@@ -83,7 +83,7 @@ export function HeroSection() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4 text-center"
+            className="hidden md:block absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4 text-center"
           >
             <span className="inline-block px-5 py-2.5 rounded-full bg-secondary-container/95 text-on-secondary-container text-sm font-bold shadow-lg">
               {heroSlides[currentImage].caption}
@@ -96,13 +96,19 @@ export function HeroSection() {
             <button
               key={index}
               onClick={() => setCurrentImage(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentImage
-                  ? "bg-white w-6"
-                  : "bg-white/40 hover:bg-white/60"
-              }`}
+              // 24x24 hit area (WCAG 2.5.8); the visible dot stays 8px tall.
+              className="-m-2 flex h-6 w-6 items-center justify-center p-2"
               aria-label={`Go to slide ${index + 1}`}
-            />
+              aria-current={index === currentImage}
+            >
+              <span
+                className={`block h-2 rounded-full transition-all ${
+                  index === currentImage
+                    ? "w-6 bg-white"
+                    : "w-2 bg-white/40 hover:bg-white/60"
+                }`}
+              />
+            </button>
           ))}
         </div>
       </div>
@@ -117,7 +123,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="mb-8"
+            className="hidden md:block mb-8"
           >
             <span className="inline-block px-6 py-2.5 rounded-full bg-secondary-container text-on-secondary-container uppercase tracking-widest text-xs font-bold">
               Welcome to Hisdayspring Ministries
@@ -128,7 +134,7 @@ export function HeroSection() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="font-headline text-4xl md:text-[5rem] leading-tight text-white mb-6"
+            className="font-headline text-3xl md:text-[5rem] leading-snug md:leading-tight text-white mb-5 md:mb-6"
           >
             Raising holy, healthy and{" "}
             <em className="text-secondary-container">Wealthy People</em>
@@ -158,7 +164,8 @@ export function HeroSection() {
             </button>
             <button
               onClick={() => scrollToSection("services")}
-              className="inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-white/30 text-white font-bold text-sm uppercase tracking-wide backdrop-blur-sm transition-colors hover:bg-white/10"
+              // Only one call to action on a phone (this one returns from md up).
+              className="hidden md:inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-white/30 text-white font-bold text-sm uppercase tracking-wide backdrop-blur-sm transition-colors hover:bg-white/10"
             >
               Plan Your Visit
             </button>
@@ -170,7 +177,7 @@ export function HeroSection() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5, duration: 0.5 }}
-        className="absolute bottom-16 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
+        className="hidden md:flex absolute bottom-16 left-1/2 -translate-x-1/2 flex-col items-center gap-2"
       >
         <motion.div
           animate={{ scale: [1, 1.15, 1] }}
@@ -178,7 +185,7 @@ export function HeroSection() {
         >
           <ChevronDown className="w-6 h-6 text-white/40" />
         </motion.div>
-        <span className="text-white/30 text-[10px] font-label uppercase tracking-widest">Scroll</span>
+        <span className="text-white/65 text-xs font-label uppercase tracking-widest">Scroll</span>
       </motion.div>
     </section>
   );

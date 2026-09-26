@@ -30,16 +30,23 @@ import {
   stashLastCheckoutId,
   verifyDonation,
 } from "@/lib/api/bachs";
+import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
 import type { DonationPurpose, PaymentMethod } from "@/types";
 
 const PRESET_AMOUNTS = [1000, 2500, 5000, 10000];
 
+/**
+ * Decorative header artwork sits under a heavy dark scrim, so these are pulled
+ * through Cloudinary at a modest width instead of the raw 1920px Unsplash JPEG
+ * (which cost ~750KB per image on a phone). Cloudinary's fetch proxy serves
+ * WebP/AVIF via f_auto - roughly 14x lighter for the same visual result.
+ */
 const bgImages = [
   "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80",
   "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=1920&q=80",
   "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1920&q=80",
   "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80",
-];
+].map((src) => cloudinaryLoader({ src, width: 1080, quality: 70 }));
 
 export default function GivingClient() {
   const [amount, setAmount] = useState<number>(0);
@@ -369,7 +376,7 @@ export default function GivingClient() {
         >
           <Link
             href="/"
-            className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm font-medium"
+            className="inline-flex min-h-[44px] items-center gap-2 text-white/70 hover:text-white transition-colors text-sm font-medium"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to Home
@@ -805,7 +812,7 @@ export default function GivingClient() {
                 <button
                   type="button"
                   onClick={() => setPaymentMethod("bank-transfer")}
-                  className="text-secondary font-semibold text-sm underline underline-offset-4 hover:text-secondary/80 transition-colors"
+                  className="inline-flex min-h-[44px] items-center text-secondary font-semibold text-sm underline underline-offset-4 hover:text-secondary/80 transition-colors"
                 >
                   Use bank transfer instead
                 </button>

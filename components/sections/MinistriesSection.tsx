@@ -35,12 +35,14 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className={`flex-none w-[280px] md:w-80 snap-center ${stagger ? "mt-12" : ""}`}
+      // Narrower cards and no vertical stagger on phones: the offset made the
+      // row look ragged, and 300px-tall cards wasted most of the screen.
+      className={`flex-none w-[78vw] md:w-80 snap-center ${stagger ? "md:mt-12" : ""}`}
     >
       <Link
         href={ministryHref(ministry.id)}
         aria-label={`Learn more about ${ministry.name}`}
-        className="block h-[300px] md:h-[400px] relative rounded-2xl overflow-hidden group focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+        className="block h-[210px] md:h-[400px] relative rounded-2xl overflow-hidden group focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
       >
         {src ? (
           <Image
@@ -56,14 +58,16 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
           </div>
         )}
         <div className={`absolute inset-0 bg-gradient-to-t ${gradientOverlays[index % gradientOverlays.length]} to-transparent`} />
-        <div className="absolute bottom-0 left-0 right-0 p-6">
-          <h3 className="font-headline text-2xl text-white mb-2">
+        <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+          <h3 className="font-headline text-xl md:text-2xl text-white mb-1 md:mb-2">
             {ministry.name}
           </h3>
-          <p className="text-white/80 text-sm line-clamp-3">
+          <p className="hidden md:block text-white/80 text-sm line-clamp-3">
             {ministry.description}
           </p>
-          <span className="inline-flex items-center gap-2 mt-4 text-white/90 text-sm font-semibold opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          {/* Touch devices never fire :hover, so the affordance was invisible on
+              a phone. Visible by default there; hover-reveal from md up. */}
+          <span className="inline-flex items-center gap-2 mt-2 md:mt-4 text-white/90 text-sm font-semibold md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
             Learn More <ArrowRight className="w-4 h-4" />
           </span>
         </div>

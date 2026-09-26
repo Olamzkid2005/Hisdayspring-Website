@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { MapPin, Phone, Mail, Heart } from "lucide-react";
 import { Input, Button } from "@/components/ui";
@@ -49,21 +50,21 @@ export function ContactSection() {
   const firstAddress = contactInfo.addresses[0];
 
   return (
-    <section id="contact" ref={ref} className="py-12 md:py-16 bg-surface text-on-surface">
+    <section id="contact" ref={ref} className="py-10 md:py-16 bg-surface text-on-surface">
       <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-10">
         <motion.div
           initial={{ opacity: 0, x: -30 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-headline text-2xl md:text-4xl text-primary mb-6 md:mb-8">
+          <h2 className="font-headline text-2xl md:text-4xl text-primary mb-5 md:mb-8">
             Get in Touch
           </h2>
 
-          <div className="space-y-8">
-            <div className="flex gap-6">
-              <span className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
-                <MapPin className="w-6 h-6" />
+          <div className="space-y-6 md:space-y-8">
+            <div className="flex gap-4 md:gap-6">
+              <span className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
+                <MapPin className="w-5 h-5 md:w-6 md:h-6" />
               </span>
               <div>
                 <h3 className="font-headline text-lg font-semibold text-on-surface">Main Sanctuary</h3>
@@ -75,37 +76,53 @@ export function ContactSection() {
               </div>
             </div>
 
-            <div className="flex gap-6">
-              <span className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
-                <Phone className="w-6 h-6" />
+            <div className="flex gap-4 md:gap-6">
+              <span className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
+                <Phone className="w-5 h-5 md:w-6 md:h-6" />
               </span>
               <div>
                 <h3 className="font-headline text-lg font-semibold text-on-surface">Office Lines</h3>
-                <a href={`tel:${contactInfo.phone.replace(/\s/g, "")}`} className="text-on-surface-variant mt-1 block hover:text-primary transition-colors">
+                <a href={`tel:${contactInfo.phone.replace(/\s/g, "")}`} className="flex min-h-[44px] items-center text-on-surface-variant hover:text-primary transition-colors">
                   {contactInfo.phone}
                 </a>
                 {contactInfo.phoneAlt && (
-                  <a href={`tel:${contactInfo.phoneAlt.replace(/\s/g, "")}`} className="text-on-surface-variant mt-1 block hover:text-primary transition-colors">
+                  <a href={`tel:${contactInfo.phoneAlt.replace(/\s/g, "")}`} className="flex min-h-[44px] items-center text-on-surface-variant hover:text-primary transition-colors">
                     {contactInfo.phoneAlt}
                   </a>
                 )}
               </div>
             </div>
 
-            <div className="flex gap-6">
-              <span className="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
-                <Mail className="w-6 h-6" />
+            <div className="flex gap-4 md:gap-6">
+              <span className="w-11 h-11 md:w-12 md:h-12 rounded-xl bg-secondary-container flex items-center justify-center text-secondary flex-shrink-0">
+                <Mail className="w-5 h-5 md:w-6 md:h-6" />
               </span>
               <div>
                 <h3 className="font-headline text-lg font-semibold text-on-surface">Email Support</h3>
-                <a href={`mailto:${contactInfo.email}`} className="text-on-surface-variant mt-1 block hover:text-primary transition-colors">
+                <a href={`mailto:${contactInfo.email}`} className="flex min-h-[44px] items-center text-on-surface-variant hover:text-primary transition-colors">
                   {contactInfo.email}
                 </a>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 md:mt-10 h-48 md:h-56 w-full bg-surface-container-high rounded-3xl overflow-hidden grayscale">
+          {/* The embed is a heavy iframe and ~400px tall, which is a lot of a
+              phone screen for a map nobody scrolls. Mobile gets a one-tap
+              link; the embed returns from md up. */}
+          <a
+            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+              firstAddress
+                ? `${firstAddress.address}, ${firstAddress.city}`
+                : "Hisdayspring Church, Ipaja, Lagos"
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="md:hidden mt-6 inline-flex min-h-[44px] items-center gap-2 px-5 py-3 rounded-full border border-outline-variant text-on-surface font-medium hover:bg-surface-container-low transition-colors"
+          >
+            <MapPin className="w-4 h-4" />
+            Open in Google Maps
+          </a>
+          <div className="hidden md:block mt-8 md:mt-10 h-48 md:h-56 w-full bg-surface-container-high rounded-3xl overflow-hidden grayscale">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.3!2d3.3!3d6.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzAnMDAuMCJOIDPCsDE4JzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1600000000000!5m2!1sen!2sng"
               width="100%"
@@ -125,9 +142,9 @@ export function ContactSection() {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-col gap-6"
         >
-          <h3 className="font-headline text-2xl text-on-surface mb-8">Send us a Message</h3>
-          <form onSubmit={contactForm.handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <h3 className="font-headline text-2xl text-on-surface mb-5 md:mb-8">Send us a Message</h3>
+          <form onSubmit={contactForm.handleSubmit} className="space-y-5 md:space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-6">
               <Input label="First Name" name="firstName" value={contactForm.values.firstName} onChange={contactForm.handleChange} error={contactForm.errors.firstName} required placeholder="John" />
               <Input label="Last Name" name="lastName" value={contactForm.values.lastName} onChange={contactForm.handleChange} error={contactForm.errors.lastName} required placeholder="Doe" />
             </div>
@@ -159,14 +176,25 @@ export function ContactSection() {
           transition={{ duration: 0.6, delay: 0.3 }}
           className="bg-surface-container-lowest p-6 md:p-8 rounded-3xl border border-outline-variant/10"
         >
-          <div className="flex items-center gap-3 mb-6">
-            <span className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center"><Heart className="w-5 h-5 text-primary" /></span>
+          <div className="flex items-start gap-3 mb-4 md:mb-6">
+            {/* shrink-0 matters: without it the flex row squeezed this 40px
+                circle into a narrow oval beside the long paragraph. */}
+            <span className="w-10 h-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center"><Heart className="w-5 h-5 text-primary" /></span>
             <div>
               <h3 className="font-headline text-xl text-on-surface">How can we pray for you?</h3>
               <p className="text-sm text-on-surface-variant">This opens WhatsApp so you can send your request directly to our prayer team. Please avoid sharing highly sensitive information.</p>
             </div>
           </div>
-          <form onSubmit={prayerForm.handleSubmit} className="space-y-4">
+          {/* Two full forms on one phone screen is a lot of scrolling, and the
+              dedicated /prayer page already carries the full request form. */}
+          <Link
+            href="/prayer"
+            className="md:hidden inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-4 font-body font-bold text-on-primary transition-colors hover:bg-primary/90"
+          >
+            <Heart className="w-4 h-4" />
+            Send a prayer request
+          </Link>
+          <form onSubmit={prayerForm.handleSubmit} className="hidden md:block space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Input label="Your Name" name="name" value={prayerForm.values.name} onChange={prayerForm.handleChange} error={prayerForm.errors.name} required placeholder="John Doe" />
               <Input label="Email Address" name="email" type="email" value={prayerForm.values.email} onChange={prayerForm.handleChange} error={prayerForm.errors.email} required placeholder="john@example.com" />

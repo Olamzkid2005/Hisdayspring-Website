@@ -278,3 +278,9 @@ h1, h2, h3, h4, h5, h6 {
     margin: 16mm;
   }
 }
+
+/* Anchored sections have to clear the fixed header. Without this, links like
+   /#ministries scroll the heading underneath the nav. */
+section[id] {
+  scroll-margin-top: 5.5rem;
+}

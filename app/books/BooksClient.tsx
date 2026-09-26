@@ -379,7 +379,7 @@ export default function BooksClient() {
           <button
             type="button"
             onClick={() => setStage("browse")}
-            className="inline-flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium mb-8"
+            className="inline-flex min-h-[44px] items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium mb-8"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to books

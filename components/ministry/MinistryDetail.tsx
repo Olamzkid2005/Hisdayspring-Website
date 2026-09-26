@@ -64,7 +64,7 @@ export function MinistryDetail({
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-24 pb-12 md:pb-16">
           <Link
             href={backHref}
-            className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm font-medium mb-6"
+            className="inline-flex min-h-[44px] items-center gap-2 text-white/70 hover:text-white transition-colors text-sm font-medium mb-6"
           >
             <ArrowLeft className="w-4 h-4" />
             {backLabel}
@@ -283,7 +283,7 @@ export function MinistryDetail({
               </div>
               <Link
                 href="/#gallery"
-                className="inline-flex items-center gap-2 text-primary font-medium text-sm hover:underline"
+                className="inline-flex min-h-[44px] items-center gap-2 text-primary font-medium text-sm hover:underline"
               >
                 View Full Church Gallery <ArrowRight className="w-4 h-4" />
               </Link>

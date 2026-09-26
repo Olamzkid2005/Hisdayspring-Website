@@ -20,7 +20,8 @@ const variantStyles: Record<ButtonVariant, string> = {
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
-  sm: "px-4 py-2 text-sm rounded-lg",
+  // min-h keeps small buttons tappable on phones (>=44px, Apple HIG).
+  sm: "min-h-[44px] px-4 py-2 text-sm rounded-lg",
   md: "px-6 py-2.5 text-base rounded-full",
   lg: "px-8 py-4 text-lg rounded-full",
 };

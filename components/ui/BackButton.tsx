@@ -11,7 +11,7 @@ export function BackButton({
   return (
     <Link
       href={href}
-      className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-semibold hover:bg-white hover:text-primary transition-colors"
+      className="inline-flex min-h-[44px] items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white text-sm font-semibold hover:bg-white hover:text-primary transition-colors"
     >
       <ArrowLeft className="w-4 h-4" />
       {label}

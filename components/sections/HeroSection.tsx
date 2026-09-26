@@ -5,8 +5,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlayCircle, ChevronDown } from "lucide-react";
 import { galleryPhotos } from "@/data/gallery";
+import type { GalleryPhoto } from "@/types";
 
 const HERO_COUNT = 12;
+/** Slides 1 and 2 are fixed (see below), the rest come from the gallery. */
+const HERO_GALLERY_SLIDES = HERO_COUNT - 2;
 const FIRST_HERO = "/images/Very good hero.JPG";
 
 /**
@@ -26,22 +29,88 @@ interface HeroSlide {
   caption?: string;
 }
 
+/**
+ * Slide 3 onwards: photos spread across the whole gallery.
+ *
+ * This used to be `galleryPhotos.slice(0, 10)`, which took the first ten
+ * entries in file order — ten consecutive frames from one shoot, so the
+ * carousel showed the same event over and over and never reached the other
+ * 386 photos. Each category is now sampled with an even stride and the
+ * categories are then interleaved, so ten slides cover the year's events.
+ */
+function pickGallerySlides(count: number): GalleryPhoto[] {
+  const byCategory = new Map<string, GalleryPhoto[]>();
+  for (const photo of galleryPhotos) {
+    const bucket = byCategory.get(photo.category);
+    if (bucket) bucket.push(photo);
+    else byCategory.set(photo.category, [photo]);
+  }
+
+  // Split the slots evenly across the categories, then take each category's
+  // share with an even stride. The split stops Sunday services crowding out
+  // the smaller ministries; the stride stops consecutive slides being
+  // neighbouring frames from the same moment, which is what read as one photo
+  // on repeat.
+  const categories = [...byCategory.values()];
+  const share = Math.floor(count / categories.length);
+  const remainder = count % categories.length;
+
+  const buckets = categories.map((photos, index) => {
+    const take = Math.min(share + (index < remainder ? 1 : 0), photos.length);
+    return Array.from({ length: take }, (_, i) =>
+      photos[Math.floor((i * photos.length) / take)]
+    );
+  });
+
+  // One from each category in turn, so the order alternates ministries rather
+  // than playing three Sunday services back to back.
+  const picks: GalleryPhoto[] = [];
+  for (let round = 0; picks.length < count; round++) {
+    let tookOne = false;
+    for (const bucket of buckets) {
+      if (picks.length >= count) break;
+      if (round < bucket.length) {
+        picks.push(bucket[round]);
+        tookOne = true;
+      }
+    }
+    if (!tookOne) break;
+  }
+  return picks;
+}
+
+function heroSlideFrom(photo: GalleryPhoto): HeroSlide {
+  return {
+    image: photo.imageUrl,
+    // The gallery captions are camera filenames ("U3A7207", "DSC 0358"), which
+    // is what a screen reader used to announce. The event name is what the
+    // photo actually shows.
+    alt: photo.eventName
+      ? `${photo.eventName} at Hisdayspring Ministries`
+      : "Hisdayspring Ministries",
+  };
+}
+
 export function HeroSection() {
   const [heroSlides] = useState<HeroSlide[]>(() => [
     { image: FIRST_HERO, alt: "Hisdayspring Ministries" },
     FEATURED_EVENT_SLIDE,
-    ...galleryPhotos
-      .filter((p) => p.imageUrl !== FIRST_HERO)
-      .slice(0, HERO_COUNT - 2)
-      .map((p) => ({ image: p.imageUrl, alt: p.caption || "Hisdayspring Ministries" })),
+    ...pickGallerySlides(HERO_GALLERY_SLIDES).map(heroSlideFrom),
   ]);
   const [currentImage, setCurrentImage] = useState(0);
 
-  // Auto-advance to a random image every 8s
+  // Auto-advance every 8s to a random slide that is not the one already up.
+  // A plain uniform pick landed on the current index about once every twelve
+  // ticks, and because the picture is keyed on the index nothing re-rendered —
+  // so the carousel silently stalled for 8 seconds. Offsetting by 1..n-1 over
+  // the remaining slides keeps it unpredictable but always a change.
   useEffect(() => {
-    if (heroSlides.length === 0) return;
+    if (heroSlides.length < 2) return;
     const interval = setInterval(() => {
-      setCurrentImage(Math.floor(Math.random() * heroSlides.length));
+      setCurrentImage((current) => {
+        const offset = 1 + Math.floor(Math.random() * (heroSlides.length - 1));
+        return (current + offset) % heroSlides.length;
+      });
     }, 8000);
     return () => clearInterval(interval);
   }, [heroSlides.length]);
@@ -56,7 +125,10 @@ export function HeroSection() {
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-surface-container-low">
-        <AnimatePresence mode="wait">
+        {/* No mode="wait": the incoming slide now mounts (and starts loading)
+            while the outgoing one fades, instead of waiting out the whole 0.8s
+            exit first and showing the backdrop in between. */}
+        <AnimatePresence>
           <motion.div
             key={currentImage}
             initial={{ opacity: 0 }}
@@ -70,6 +142,8 @@ export function HeroSection() {
               alt={heroSlides[currentImage].alt}
               fill
               sizes="100vw"
+              // The opening slide is the LCP image, so it must not be lazy.
+              priority={currentImage === 0}
               className="w-full h-full object-cover object-center"
             />
           </motion.div>

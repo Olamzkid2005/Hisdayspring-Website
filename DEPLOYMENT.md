@@ -67,6 +67,7 @@ Add these in the Environment Variables panel **before deploying**.
 
 | Variable | Where to get it | Required |
 |---|---|---|
+| `SITE_URL` | The public site origin **with scheme**, e.g. `https://hisdayspring.org` (or the Pxxl URL pre-cutover). Build into the redirect URLs Bachs is sent — behind Pxxl's proxy the request URL is the internal container address, and Bachs rejects localhost success URLs with a 502. **Required on Pxxl.** | yes |
 | `BACHS_SECRET_KEY` | Bachs dashboard → Developer Portal → API keys. `sk_live_...` for production, `sk_sandbox_...` for sandbox | yes (donations) |
 | `BACHS_WEBHOOK_SECRET` | Bachs Developer Portal → Webhooks → your endpoint's signing secret | yes (webhooks) |
 | `YOUTUBE_API_KEY` | Google Cloud Console → YouTube Data API v3 credential | no (live page degrades gracefully) |

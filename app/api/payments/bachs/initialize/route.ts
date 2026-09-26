@@ -11,6 +11,7 @@ import {
   isBachsConfigured,
   type BachsCorridor,
 } from "@/lib/server/bachs";
+import { getSiteOrigin } from "@/lib/server/site-url";
 import type { PaymentMethod } from "@/types";
 
 /**
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
   }
 
   const metadata: PaymentMetadata = body.metadata;
-  const origin = new URL(request.url).origin;
+  const origin = getSiteOrigin(request.url);
 
   // Ties the reference and the idempotency key to one logical checkout, so a
   // transport retry inside the client cannot mint a second session.

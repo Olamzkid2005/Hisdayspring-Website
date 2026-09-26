@@ -7,6 +7,7 @@ import {
   type BachsCorridor,
 } from "@/lib/server/bachs";
 import { priceBookOrder } from "@/lib/server/book-orders";
+import { getSiteOrigin } from "@/lib/server/site-url";
 import type { PaymentMethod } from "@/types";
 
 /**
@@ -105,8 +106,8 @@ export async function POST(request: Request) {
     // server-side before rendering, so the URL is safe to share, and it works
     // for both fulfillment modes — pickup orders get their reference, PDF
     // orders their download links.
-    successUrl: `${new URL(request.url).origin}/books/receipt`,
-    cancelUrl: `${new URL(request.url).origin}/books`,
+    successUrl: `${getSiteOrigin(request.url)}/books/receipt`,
+    cancelUrl: `${getSiteOrigin(request.url)}/books`,
     idempotencyKey: `checkout_${reference}`,
     reference,
     type: "book-order",

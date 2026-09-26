@@ -63,17 +63,18 @@ export function PastorSection() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="relative"
           >
-            <div className="relative aspect-[16/10] md:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
+            <div className="relative aspect-[16/10] md:aspect-[3/2] rounded-2xl overflow-hidden shadow-lg">
               <Image
                 src="/images/pastors/Lead-Pastors-Olamijulo.jpg"
                 alt="Pastor Blessing Olamijulo, General Overseer and Lead Pastor, and Pastor (Mrs) Adebamigbe Olamijulo, Resident Pastor"
                 fill
                 sizes="(max-width: 768px) 100vw, 50vw"
-                // The photo is a 4:5 portrait: it fills the desktop frame
-                // exactly, but the 16:10 mobile frame only shows half its
-                // height, and a centre crop takes the tops of their heads off.
-                // Anchoring to the top keeps both faces in frame on phones.
-                className="w-full h-full object-cover object-top md:object-center"
+                // The photo is a 3:2 landscape. The desktop frame matches it
+                // exactly so nothing is cropped; the 16:10 mobile frame is a
+                // shade wider, which only trims a sliver off the top and
+                // bottom. Both faces sit above centre, so a centre crop keeps
+                // them whole.
+                className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
               <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">

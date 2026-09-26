@@ -1,13 +1,25 @@
 "use client";
 
 import Image from "next/image";
-import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import {
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { X, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { galleryPhotos, galleryCategories } from "@/data/gallery";
 import { testimonials } from "@/data/testimonials";
 import type { GalleryCategory } from "@/types";
+
+/** Once-only client detection; there is nothing to subscribe to. */
+const subscribeToNothing = () => () => {};
+const trueOnClient = () => true;
+const falseOnServer = () => false;
 
 const featuredTestimonials = testimonials.slice(0, 3);
 
@@ -19,14 +31,20 @@ const bentoSizes = [
   "md:col-span-1 md:row-span-1",
 ];
 
-/** Fisher-Yates shuffle – returns a new array. */
-function shuffleArray<T>(arr: T[]): T[] {
+/**
+ * Fisher-Yates shuffle – returns a new array. `rotateBy` shifts the result, so
+ * the auto-shuffle timer leads with a different photo even when two shuffles
+ * happen to land on the same order.
+ */
+function shuffleArray<T>(arr: T[], rotateBy = 0): T[] {
   const shuffled = [...arr];
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
-  return shuffled;
+  if (rotateBy <= 0 || shuffled.length === 0) return shuffled;
+  const shift = rotateBy % shuffled.length;
+  return [...shuffled.slice(shift), ...shuffled.slice(0, shift)];
 }
 
 export function GallerySection() {
@@ -34,8 +52,14 @@ export function GallerySection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [activeCategory, setActiveCategory] = useState<GalleryCategory | "all">("all");
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
-  const [lightboxLoaded, setLightboxLoaded] = useState(false);
-  const [shuffledPhotos, setShuffledPhotos] = useState<typeof galleryPhotos>([]);
+  /** Id of the photo the lightbox has finished loading (see below). */
+  const [loadedPhoto, setLoadedPhoto] = useState<string | null>(null);
+  const [shuffleTick, setShuffleTick] = useState(0);
+
+  // False during SSR and the hydration render, true afterwards. The shuffle is
+  // random, so running it on the server would produce a different order than
+  // the client and the grid markup would not match on hydration.
+  const isClient = useSyncExternalStore(subscribeToNothing, trueOnClient, falseOnServer);
 
   const filteredPhotos = useMemo(
     () =>
@@ -45,21 +69,27 @@ export function GallerySection() {
     [activeCategory]
   );
 
-  // Seed shuffled on mount and when category changes
-  useEffect(() => {
-    setShuffledPhotos(shuffleArray(filteredPhotos));
-  }, [filteredPhotos]);
+  // Derived rather than mirrored into state: re-derives on mount, when the
+  // category changes, and on every tick of the interval below.
+  const shuffledPhotos = useMemo(
+    () => (isClient ? shuffleArray(filteredPhotos, shuffleTick) : []),
+    [isClient, filteredPhotos, shuffleTick]
+  );
 
   // Auto-shuffle every 8 seconds while in view
   useEffect(() => {
     if (!isInView || filteredPhotos.length <= 5) return;
-    const interval = setInterval(() => {
-      setShuffledPhotos(shuffleArray(filteredPhotos));
-    }, 8000);
+    const interval = setInterval(() => setShuffleTick((tick) => tick + 1), 8000);
     return () => clearInterval(interval);
   }, [isInView, filteredPhotos]);
 
   const bentoPhotos = shuffledPhotos.slice(0, 5);
+
+  // Deriving this means changing photo resets the skeleton on its own, with no
+  // effect to keep in sync.
+  const currentPhotoId =
+    selectedPhoto === null ? null : filteredPhotos[selectedPhoto]?.id ?? null;
+  const lightboxLoaded = currentPhotoId !== null && loadedPhoto === currentPhotoId;
 
   const goToPrev = useCallback(() => {
     setSelectedPhoto((prev) =>
@@ -86,13 +116,7 @@ export function GallerySection() {
   const openFilteredIndex = (photoId: string) => {
     const idx = filteredPhotos.findIndex((p) => p.id === photoId);
     setSelectedPhoto(idx >= 0 ? idx : 0);
-    setLightboxLoaded(false);
   };
-
-  // Reset loading state when lightbox photo changes
-  useEffect(() => {
-    setLightboxLoaded(false);
-  }, [selectedPhoto]);
 
   return (
     <section id="gallery" ref={ref} className="py-10 md:py-16 px-6 md:px-12 max-w-7xl mx-auto">
@@ -349,7 +373,7 @@ export function GallerySection() {
                     alt=""
                     fill
                     sizes="100vw"
-                    onLoad={() => setLightboxLoaded(true)}
+                    onLoad={() => setLoadedPhoto(currentPhotoId)}
                     className={`object-contain rounded-sm transition-opacity duration-300 ${
                       lightboxLoaded ? "opacity-100" : "opacity-0"
                     }`}

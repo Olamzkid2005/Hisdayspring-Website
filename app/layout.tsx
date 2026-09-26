@@ -107,7 +107,7 @@ export default function RootLayout({
     address: [
       {
         "@type": "PostalAddress",
-        streetAddress: "20 Road, Close to Police Station",
+        streetAddress: "Plot 200, 21 Road, Beside Faith Academy, Gate Bus Stop, Gowon Estate",
         addressLocality: "Ipaja",
         addressRegion: "Lagos",
         postalCode: "100278",

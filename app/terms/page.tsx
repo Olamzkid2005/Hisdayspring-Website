@@ -26,12 +26,14 @@ export default function TermsPage() {
           <h2 className="font-serif text-xl font-semibold text-on-surface mb-4">
             Table of Contents
           </h2>
-          <ul className="space-y-2">
+          <ul className="space-y-0.5">
             {termsOfService.sections.map((section, index) => (
               <li key={index}>
+                {/* A 21px-tall link fails the 24px minimum tap target, so these
+                    rows carry a comfortable hit area on touch screens. */}
                 <a
                   href={`#section-${index}`}
-                  className="text-primary hover:text-on-surface hover:underline transition-colors"
+                  className="inline-flex min-h-[36px] items-center text-primary transition-colors hover:text-on-surface hover:underline"
                 >
                   {index + 1}. {section.title}
                 </a>

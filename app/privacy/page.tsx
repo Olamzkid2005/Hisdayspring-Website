@@ -27,12 +27,14 @@ export default function PrivacyPage() {
           <h2 className="font-serif text-xl font-semibold text-on-surface mb-4">
             Table of Contents
           </h2>
-          <ul className="space-y-2">
+          <ul className="space-y-0.5">
             {privacyPolicy.sections.map((section, index) => (
               <li key={index}>
+                {/* Comfortable tap area: a 21px-tall link is below the 24px
+                    minimum usable target on a phone. */}
                 <a
                   href={`#section-${index}`}
-                  className="text-primary hover:text-on-surface hover:underline transition-colors"
+                  className="inline-flex min-h-[36px] items-center text-primary transition-colors hover:text-on-surface hover:underline"
                 >
                   {index + 1}. {section.title}
                 </a>

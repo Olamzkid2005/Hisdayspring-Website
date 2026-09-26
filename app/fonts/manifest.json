@@ -1,4 +1,5 @@
 {
+  "_note": "Source URLs the woff2 files were built from. The downloaded files were then SUBSET to the glyphs this site renders (see scripts/subset-fonts.mjs) - the raw Google sources are ~10x larger (2.1MB vs 244KB total). Do not re-download these raw files and commit them unsubsetted, and do not replace them with next/font/google: Pxxl's build sandbox has no network.",
   "noto": [
     {
       "url": "https://fonts.gstatic.com/s/notoserif/v33/ga6saw1J5X9T9RW6j9bNfFIMZhhWnFTyNZIQD1-_FXP0RgnaOg9MYBNLg8cP.ttf",

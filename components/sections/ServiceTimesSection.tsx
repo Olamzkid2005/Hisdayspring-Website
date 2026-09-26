@@ -105,12 +105,17 @@ export function ServiceTimesSection() {
                 </div>
               </motion.div>
 
+              {/* The midweek and Tuesday cards share the same surface token as
+                  the Sunday and other cards. They used
+                  surface-container-highest (#e2e2e2) while the rest used -low
+                  (#f3f3f4), so stacked on a phone the top of the list looked
+                  like a different component. */}
               {midweekServices.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="bg-surface-container-highest p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
+                  className="bg-surface-container-low p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
                   <div className="rounded-lg bg-primary/10 p-3 flex-shrink-0">
                     <BookOpen className="w-6 h-6 text-primary" />
@@ -131,7 +136,7 @@ export function ServiceTimesSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.25 }}
-                  className="bg-surface-container-highest p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
+                  className="bg-surface-container-low p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
                   <div className="rounded-lg bg-secondary/10 p-3 flex-shrink-0">
                     <Sunrise className="w-6 h-6 text-secondary" />

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Noto_Serif, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Navigation } from "@/components/layout/Navigation";
 import { Footer } from "@/components/layout/Footer";
@@ -7,17 +7,31 @@ import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { CookieConsent } from "@/components/utility/CookieConsent";
 import { Analytics } from "@vercel/analytics/react";
 
-const notoSerif = Noto_Serif({
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  style: ["normal", "italic"],
+// Self-hosted fonts (app/fonts/). The Google Fonts provider downloads from
+// fonts.gstatic.com at build time, which Pxxl's gVisor build sandbox cannot
+// reach — the deploy failed with "Module not found:
+// @vercel/turbopack-next/internal/font/google/font". Local files also remove
+// the runtime dependency on Google's CDN for a church site in Nigeria.
+const notoSerif = localFont({
+  src: [
+    { path: "./fonts/noto-serif-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/noto-serif-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/noto-serif-400-italic.woff2", weight: "400", style: "italic" },
+    { path: "./fonts/noto-serif-700-italic.woff2", weight: "700", style: "italic" },
+  ],
   variable: "--font-headline",
   display: "swap",
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+const plusJakartaSans = localFont({
+  src: [
+    { path: "./fonts/plus-jakarta-sans-300-normal.woff2", weight: "300", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans-500-normal.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans-600-normal.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans-700-normal.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/plus-jakarta-sans-800-normal.woff2", weight: "800", style: "normal" },
+  ],
   variable: "--font-body",
   display: "swap",
 });

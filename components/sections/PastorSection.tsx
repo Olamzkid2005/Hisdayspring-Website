@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Heart, Users, Home } from "lucide-react";
+import { ReadMore } from "@/components/ui/ReadMore";
 
 const leadMessage = {
   name: "Pastor Blessing Olamijulo",
@@ -40,7 +41,7 @@ export function PastorSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="flex items-end gap-4 md:gap-8 mb-12 md:mb-24"
+          className="flex items-end gap-4 md:gap-8 mb-8 md:mb-24"
         >
           <div className="max-w-2xl">
             <h2
@@ -62,7 +63,7 @@ export function PastorSection() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="relative"
           >
-            <div className="relative aspect-[4/3] md:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
+            <div className="relative aspect-[16/10] md:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg">
               <Image
                 src="/images/pastors/Main Pastors.jpg"
                 alt="Hisdayspring Ministries family gathering"
@@ -100,12 +101,12 @@ export function PastorSection() {
               <p className="font-label text-secondary font-bold tracking-widest uppercase text-xs mb-4">
                 {leadMessage.title}
               </p>
-              <p className="text-on-surface-variant leading-relaxed mb-4">
-                {leadMessage.greeting}
-              </p>
-              <p className="text-on-surface-variant leading-relaxed">
-                {leadMessage.message}
-              </p>
+              {/* Both paragraphs collapse as one block on phones: the two
+                  letters together ran to ~1650px on a 390px screen. */}
+              <ReadMore clamp="line-clamp-6" className="text-on-surface-variant">
+                <p className="leading-relaxed">{leadMessage.greeting}</p>
+                <p className="leading-relaxed mt-4">{leadMessage.message}</p>
+              </ReadMore>
             </motion.div>
 
             {/* Resident Pastor */}
@@ -126,12 +127,10 @@ export function PastorSection() {
               <p className="font-label text-secondary font-bold tracking-widest uppercase text-xs mb-4">
                 {residentMessage.title}
               </p>
-              <p className="text-on-surface-variant leading-relaxed mb-4">
-                {residentMessage.greeting}
-              </p>
-              <p className="text-on-surface-variant leading-relaxed">
-                {residentMessage.message}
-              </p>
+              <ReadMore clamp="line-clamp-6" className="text-on-surface-variant">
+                <p className="leading-relaxed">{residentMessage.greeting}</p>
+                <p className="leading-relaxed mt-4">{residentMessage.message}</p>
+              </ReadMore>
             </motion.div>
           </div>
         </div>

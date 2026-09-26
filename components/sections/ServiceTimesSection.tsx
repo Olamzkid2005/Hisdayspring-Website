@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Clock, BookOpen, Sunrise, Church, Flower2 } from "lucide-react";
 import { serviceTimes } from "@/data";
+import { ReadMore } from "@/components/ui/ReadMore";
 
 const servicePhotos = [
   {
@@ -57,11 +58,12 @@ export function ServiceTimesSection() {
           <h2 className="font-headline text-3xl md:text-5xl text-on-surface mt-4 leading-tight">
             Sacred Gatherings &amp; Service Times
           </h2>
-          <p className="text-on-surface-variant text-base md:text-lg mt-6 leading-relaxed max-w-3xl">
-            We gather throughout the week in various settings — from Sunday worship
-            celebrations to Tuesday revelation hours and Wednesday word studies. Come
-            and experience the presence of God with us.
-          </p>
+          <ReadMore
+            clamp="line-clamp-2"
+            className="mt-6 max-w-3xl"
+            textClassName="text-on-surface-variant text-base md:text-lg leading-relaxed"
+            text="We gather throughout the week in various settings — from Sunday worship celebrations to Tuesday revelation hours and Wednesday word studies. Come and experience the presence of God with us."
+          />
         </motion.div>
 
         {/* Service times cards (left) + Gallery (right) side by side */}
@@ -75,7 +77,7 @@ export function ServiceTimesSection() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6 }}
-                className="bg-surface-container-low p-4 md:p-8 rounded-xl md:col-span-2 relative overflow-hidden"
+                className="bg-surface-container-low p-5 md:p-8 rounded-xl md:col-span-2 relative overflow-hidden"
               >
                 <Church className="absolute -right-4 -bottom-4 w-32 h-32 text-primary/[0.04] pointer-events-none" />
 
@@ -108,7 +110,7 @@ export function ServiceTimesSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.2 }}
-                  className="bg-surface-container-highest p-6 rounded-xl flex items-center gap-3 md:gap-6"
+                  className="bg-surface-container-highest p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
                   <div className="rounded-lg bg-primary/10 p-3 flex-shrink-0">
                     <BookOpen className="w-6 h-6 text-primary" />
@@ -129,7 +131,7 @@ export function ServiceTimesSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.25 }}
-                  className="bg-surface-container-highest p-6 rounded-xl flex items-center gap-3 md:gap-6"
+                  className="bg-surface-container-highest p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
                   <div className="rounded-lg bg-secondary/10 p-3 flex-shrink-0">
                     <Sunrise className="w-6 h-6 text-secondary" />
@@ -151,13 +153,13 @@ export function ServiceTimesSection() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
                   transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
-                  className="bg-surface-container-low p-6 rounded-xl flex items-center gap-6"
+                  className="bg-surface-container-low p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
-                  <div className="rounded-lg bg-primary/10 p-3 flex-shrink-0">
+                  <div className="rounded-lg bg-primary/10 p-2 md:p-3 flex-shrink-0">
                     {service.id === "jewels" ? (
-                      <Flower2 className="w-6 h-6 text-primary" />
+                      <Flower2 className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                     ) : (
-                      <Clock className="w-6 h-6 text-primary" />
+                      <Clock className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                     )}
                   </div>
                   <div>
@@ -180,7 +182,7 @@ export function ServiceTimesSection() {
             transition={{ duration: 0.6, delay: 0.3 }}
             className="md:col-span-5"
           >
-            <div className="relative aspect-square overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm bg-surface-container-low">
+            <div className="relative aspect-[16/10] md:aspect-square overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm bg-surface-container-low">
               <button
                 type="button"
                 onClick={() => setLightbox(currentPhoto)}
@@ -217,10 +219,16 @@ export function ServiceTimesSection() {
                       type="button"
                       onClick={() => setCurrentPhoto(i)}
                       aria-label={`Show photo ${i + 1}`}
-                      className={`w-2 h-2 rounded-full transition-colors ${
-                        i === currentPhoto ? "bg-white" : "bg-white/40"
-                      }`}
-                    />
+                      aria-current={i === currentPhoto}
+                      // 24x24 hit area (WCAG 2.5.8); the visible dot stays 8px.
+                      className="-m-2 flex h-6 w-6 items-center justify-center p-2"
+                    >
+                      <span
+                        className={`block h-2 w-2 rounded-full transition-colors ${
+                          i === currentPhoto ? "bg-white" : "bg-white/40"
+                        }`}
+                      />
+                    </button>
                   ))}
                 </div>
               </div>

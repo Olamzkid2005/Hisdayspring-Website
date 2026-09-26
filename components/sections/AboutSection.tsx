@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 import { aboutContent, statistics } from "@/data";
+import { ReadMore } from "@/components/ui/ReadMore";
 import { useCounterAnimation } from "@/hooks";
 
 function AnimatedCounter({
@@ -35,7 +36,7 @@ export function AboutSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="about" ref={ref} className="py-10 md:py-14 px-6 md:px-12 bg-surface relative overflow-hidden">
+    <section id="about" ref={ref} className="py-8 md:py-14 px-6 md:px-12 bg-surface relative overflow-hidden">
       <div
         className="absolute inset-0 opacity-[0.03] pointer-events-none"
         style={{
@@ -62,9 +63,11 @@ export function AboutSection() {
             transition={{ duration: 0.6 }}
           >
             <h2 className="font-headline text-primary text-lg md:text-2xl mb-2">Our Mission</h2>
-            <p className="text-sm md:text-base text-on-surface-variant font-light leading-relaxed">
-              {aboutContent.mission}
-            </p>
+            <ReadMore
+              text={aboutContent.mission}
+              clamp="line-clamp-2"
+              textClassName="text-sm md:text-base text-on-surface-variant font-light leading-relaxed"
+            />
           </motion.div>
 
           <motion.div
@@ -73,9 +76,11 @@ export function AboutSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
           >
             <h2 className="font-headline text-secondary text-lg md:text-2xl mb-2">Our Vision</h2>
-            <p className="text-sm md:text-base text-on-surface-variant font-light leading-relaxed">
-              {aboutContent.vision}
-            </p>
+            <ReadMore
+              text={aboutContent.vision}
+              clamp="line-clamp-2"
+              textClassName="text-sm md:text-base text-on-surface-variant font-light leading-relaxed"
+            />
           </motion.div>
         </div>
 

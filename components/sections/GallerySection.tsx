@@ -116,7 +116,7 @@ export function GallerySection() {
           transition={{ duration: 0.6, delay: 0.15 }}
           // Phones get one scrollable row of filters instead of four wrapped
           // rows that pushed the photos off the screen.
-          className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 -mx-6 px-6 md:mx-0 md:w-auto md:flex-wrap md:gap-3 md:overflow-visible md:px-0 md:pb-0"
+          className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 -mx-6 px-6 md:mx-0 md:w-auto md:flex-wrap md:gap-3 md:overflow-visible md:px-0 md:pb-0"
         >
           <button
             onClick={() => setActiveCategory("all")}
@@ -234,7 +234,10 @@ export function GallerySection() {
         </div>
         {/* Phones swipe through the testimonies in one row (every card stays
             reachable) instead of stacking three of them down the page. */}
-        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 -mx-6 px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+        {/* Single-axis rail (see MinistriesSection for the measurement):
+            overflow-y-hidden stops the browser treating this as a two-axis
+            scroller, which is what swallowed vertical gestures on phones. */}
+        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 -mx-6 px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
           {featuredTestimonials.map((testimonial, index) => (
             <motion.div
               key={testimonial.id}

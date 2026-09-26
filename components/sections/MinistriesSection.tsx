@@ -94,7 +94,13 @@ export function MinistriesSection() {
         </p>
       </motion.div>
 
-      <div className="flex gap-4 md:gap-8 overflow-x-auto pb-6 md:pb-8 snap-x hide-scrollbar">
+      {/* overflow-y-hidden is load-bearing: with only overflow-x set, CSS
+          computes the other axis to auto, so the rail becomes a two-axis
+          scroll container and Android Chrome hands it vertical gestures —
+          a vertical swipe over the row moved the page 0px. Single-axis rail
+          plus overscroll-x-contain keeps swiping working and lets the page
+          keep vertical pans. */}
+      <div className="flex gap-4 md:gap-8 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-6 md:pb-8 snap-x hide-scrollbar">
         {ministries.map((ministry, index) => (
           <MinistryCard key={ministry.id} ministry={ministry} index={index} />
         ))}

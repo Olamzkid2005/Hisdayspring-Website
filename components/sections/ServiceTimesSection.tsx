@@ -117,8 +117,8 @@ export function ServiceTimesSection() {
                   transition={{ duration: 0.5, delay: 0.2 }}
                   className="bg-surface-container-low p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
-                  <div className="rounded-lg bg-primary/10 p-3 flex-shrink-0">
-                    <BookOpen className="w-6 h-6 text-primary" />
+                  <div className="rounded-lg bg-primary/10 p-2 md:p-3 flex-shrink-0">
+                    <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
                   <div>
                     <h4 className="font-label font-bold text-on-surface">
@@ -138,8 +138,11 @@ export function ServiceTimesSection() {
                   transition={{ duration: 0.5, delay: 0.25 }}
                   className="bg-surface-container-low p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
-                  <div className="rounded-lg bg-secondary/10 p-3 flex-shrink-0">
-                    <Sunrise className="w-6 h-6 text-secondary" />
+                  {/* Primary tint like every other service row: this was the
+                      only gold chip in the column, and the gold read as an
+                      accident next to three crimson ones. */}
+                  <div className="rounded-lg bg-primary/10 p-2 md:p-3 flex-shrink-0">
+                    <Sunrise className="w-5 h-5 md:w-6 md:h-6 text-primary" />
                   </div>
                   <div>
                     <h4 className="font-label font-bold text-on-surface">

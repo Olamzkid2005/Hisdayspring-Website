@@ -179,10 +179,14 @@ export const pastEvents: Event[] = [
   },
 ];
 
+// An event ends at the end of its final day *in Lagos*, so the comparison is
+// anchored to +01:00 rather than to whatever timezone the visitor (or the
+// server rendering the list) happens to be in — otherwise a US visitor keeps
+// seeing an event for hours after it finished, or loses it early.
 function getEventEndDate(event: Event): Date {
   const dates = event.dates;
   const finalDate = dates && dates.length > 0 ? dates[dates.length - 1].date : event.date;
-  return new Date(`${finalDate}T23:59:59`);
+  return new Date(`${finalDate}T23:59:59+01:00`);
 }
 
 /** Return only events that have not ended as of the supplied date. */

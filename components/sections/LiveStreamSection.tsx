@@ -3,7 +3,16 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Play, Calendar, Clock } from "lucide-react";
+import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
+import { nextSundayServiceLabel } from "@/lib/lagos-time";
 import type { LiveStreamStatus } from "@/types";
+
+/** Offline fallback artwork - Cloudinary-optimized rather than the raw 1920px JPEG. */
+const FALLBACK_ART = cloudinaryLoader({
+  src: "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80",
+  width: 1080,
+  quality: 70,
+});
 
 export function LiveStreamSection() {
   const ref = useRef<HTMLElement>(null);
@@ -32,23 +41,13 @@ export function LiveStreamSection() {
     return () => clearInterval(interval);
   }, []);
 
-  const getNextService = () => {
-    const now = new Date();
-    const dayOfWeek = now.getDay();
-    const daysUntilSunday = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
-    const nextSunday = new Date(now);
-    nextSunday.setDate(now.getDate() + daysUntilSunday);
-
-    return {
-      name: "Sunday Service",
-      date: nextSunday.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric",
-      }),
-      time: "8:00 AM",
-    };
-  };
+  const getNextService = () => ({
+    name: "Sunday Service",
+    // Resolved in Lagos time: on a Saturday night in the US it is already
+    // Sunday morning at the church, so the next service is *that* Sunday.
+    date: nextSundayServiceLabel(),
+    time: "8:00 AM (Lagos)",
+  });
 
   const nextService = getNextService();
   const isLive = liveStatus?.isLive ?? false;
@@ -78,7 +77,7 @@ export function LiveStreamSection() {
             <>
               <div
                 className="absolute inset-0 bg-cover bg-center opacity-60"
-                style={{ backgroundImage: "url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80')" }}
+                style={{ backgroundImage: `url('${FALLBACK_ART}')` }}
               />
               <div className="absolute top-6 left-6 flex items-center gap-2 bg-error text-on-error px-4 py-1.5 rounded-full font-bold tracking-widest text-xs">
                 <span className="w-2 h-2 rounded-full bg-white animate-pulse" />

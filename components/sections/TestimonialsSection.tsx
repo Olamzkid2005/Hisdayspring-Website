@@ -4,6 +4,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Quote } from "lucide-react";
 import { testimonials } from "@/data/testimonials";
+import { calendarMonthYear } from "@/lib/calendar-date";
 
 function Avatar({ name }: { name: string }) {
   return (
@@ -26,10 +27,7 @@ function CardLight({ testimonial }: { testimonial: typeof testimonials[0] }) {
           <p className="font-bold text-on-surface">{testimonial.name}</p>
           {testimonial.date && (
             <p className="text-sm text-on-surface-variant">
-              {new Date(testimonial.date).toLocaleDateString("en-US", {
-                month: "short",
-                year: "numeric",
-              })}
+              {calendarMonthYear(testimonial.date)}
             </p>
           )}
         </div>
@@ -49,12 +47,7 @@ function CardBrand({ testimonial }: { testimonial: typeof testimonials[0] }) {
         <div>
           <p className="font-bold">{testimonial.name}</p>
           {testimonial.date && (
-            <p className="text-sm opacity-70">
-              {new Date(testimonial.date).toLocaleDateString("en-US", {
-                month: "short",
-                year: "numeric",
-              })}
-            </p>
+            <p className="text-sm opacity-70">{calendarMonthYear(testimonial.date)}</p>
           )}
         </div>
       </div>

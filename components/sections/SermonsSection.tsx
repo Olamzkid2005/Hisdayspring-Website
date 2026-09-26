@@ -5,6 +5,7 @@ import { motion, useInView } from "framer-motion";
 import { Play, ArrowRight } from "lucide-react";
 import { fetchSermons } from "@/lib/api/youtube";
 import { Modal } from "@/components/ui";
+import { LAGOS_TIME_ZONE } from "@/lib/lagos-time";
 import type { YouTubeVideo, LiveStreamStatus } from "@/types";
 
 function formatDuration(duration: string): string {
@@ -22,11 +23,13 @@ function formatDuration(duration: string): string {
 }
 
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("en-US", {
+  // YouTube returns a real instant; show the day the sermon was published at
+  // the church, not the day it happened to land on in the visitor's timezone.
+  return new Date(dateString).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
+    timeZone: LAGOS_TIME_ZONE,
   });
 }
 
@@ -93,17 +96,17 @@ export function SermonsSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
-          className="flex justify-between items-end mb-6 md:mb-8"
+          className="mb-5 flex flex-col items-start gap-2 md:mb-8 md:flex-row md:items-end md:justify-between md:gap-0"
         >
           <div>
             <h2 className="font-headline text-2xl md:text-4xl text-on-surface">Recent Sermons</h2>
-            <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary-container mt-4 rounded-full" />
+            <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary-container mt-3 md:mt-4 rounded-full" />
           </div>
           <a
             href="https://www.youtube.com/@hisdayspring"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-medium"
+            className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-primary md:text-base"
           >
             View All Archives
             <ArrowRight className="w-4 h-4" />
@@ -114,7 +117,7 @@ export function SermonsSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.5 }}
-          className="flex flex-wrap items-center gap-4 justify-between bg-surface-container-lowest border border-outline-variant/20 rounded-2xl px-5 md:px-8 py-4 md:py-5 mb-8"
+          className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest px-4 py-3 md:mb-8 md:gap-4 md:px-8 md:py-5"
         >
           <div className="flex items-center gap-3">
             {isLive ? (
@@ -135,7 +138,7 @@ export function SermonsSection() {
           <div className="flex items-center gap-3 md:gap-4">
             <a
               href="/live"
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-error hover:bg-error text-on-error rounded-full font-semibold text-sm transition-colors"
+              className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-error px-4 py-2.5 text-sm font-semibold text-on-error transition-colors hover:bg-error md:px-5"
             >
               <Play className="w-4 h-4 fill-white" />
               Watch Live on YouTube
@@ -144,22 +147,24 @@ export function SermonsSection() {
         </motion.div>
 
         {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
             <div className="md:col-span-2 animate-pulse">
-              <div className="h-[250px] md:h-[450px] rounded-xl bg-surface-container-highest" />
+              <div className="h-[200px] md:h-[450px] rounded-xl bg-surface-container-highest" />
             </div>
-            <div className="space-y-8 animate-pulse">
+            <div className="space-y-3 animate-pulse md:space-y-8">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="bg-surface-container-lowest p-4 rounded-xl">
-                  <div className="aspect-video rounded-lg bg-surface-container-highest mb-3" />
-                  <div className="h-5 bg-surface-container-highest rounded w-3/4 mb-2" />
-                  <div className="h-3 bg-surface-container-highest rounded w-1/2" />
+                <div key={i} className="flex gap-3 rounded-xl bg-surface-container-lowest p-3 md:block md:p-4">
+                  <div className="relative aspect-video w-28 flex-none rounded-lg bg-surface-container-highest md:mb-3 md:w-full" />
+                  <div>
+                    <div className="h-5 bg-surface-container-highest rounded w-3/4 mb-2" />
+                    <div className="h-3 bg-surface-container-highest rounded w-1/2" />
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3 md:gap-8">
             {featured && (
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
@@ -168,7 +173,7 @@ export function SermonsSection() {
                 className="md:col-span-2"
               >
                 <div
-                  className="relative h-[250px] md:h-[450px] rounded-xl overflow-hidden group cursor-pointer"
+                  className="relative h-[200px] md:h-[450px] rounded-xl overflow-hidden group cursor-pointer"
                   onClick={() => setSelectedVideo(featured)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -209,17 +214,19 @@ export function SermonsSection() {
               </motion.div>
             )}
 
-            <div className="space-y-8">
+            {/* Phones get compact rows (thumbnail beside the details) instead
+                of three full-width 16:9 cards stacked down the screen. */}
+            <div className="space-y-3 md:space-y-8">
               {others.map((video, index) => (
                 <motion.div
                   key={video.id}
                   initial={{ opacity: 0, x: 20 }}
                   animate={isInView ? { opacity: 1, x: 0 } : {}}
                   transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
-                  className="bg-surface-container-lowest p-4 rounded-xl shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
+                  className="group flex cursor-pointer gap-3 rounded-xl bg-surface-container-lowest p-3 shadow-sm transition-shadow hover:shadow-md md:block md:p-4"
                   onClick={() => setSelectedVideo(video)}
                 >
-                  <div className="aspect-video rounded-lg overflow-hidden mb-3 relative">
+                  <div className="relative aspect-video w-28 flex-none overflow-hidden rounded-lg md:mb-3 md:w-full">
                     <img
                       src={video.thumbnailUrl}
                       alt={video.title}
@@ -234,12 +241,14 @@ export function SermonsSection() {
                       </div>
                     )}
                   </div>
-                  <h4 className="font-headline text-sm text-on-surface font-semibold line-clamp-2 mb-1 group-hover:text-primary transition-colors">
-                    {video.title}
-                  </h4>
-                  <p className="text-on-surface-variant text-xs">
-                    {formatDate(video.publishedAt)}
-                  </p>
+                  <div className="min-w-0">
+                    <h4 className="font-headline text-sm text-on-surface font-semibold line-clamp-2 mb-1 transition-colors group-hover:text-primary">
+                      {video.title}
+                    </h4>
+                    <p className="text-on-surface-variant text-xs">
+                      {formatDate(video.publishedAt)}
+                    </p>
+                  </div>
                 </motion.div>
               ))}
             </div>

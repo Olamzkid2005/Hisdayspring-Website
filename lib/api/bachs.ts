@@ -217,6 +217,8 @@ export async function verifyBookOrder(
       checkoutId: string;
       reference?: string;
       paymentMethod?: string;
+      /** ISO instant the processor recorded the payment; render in Lagos time. */
+      paidAt?: string;
       order: VerifiedBookOrder;
     }
   | { success: false; message: string }
@@ -252,6 +254,7 @@ export async function verifyBookOrder(
         checkoutId?: string;
         reference?: string;
         paymentMethod?: string;
+        paidAt?: string;
         status?: string;
         order?: VerifiedBookOrder;
       };
@@ -267,6 +270,7 @@ export async function verifyBookOrder(
           checkoutId: data.checkoutId ?? checkoutId,
           reference: data.reference,
           paymentMethod: data.paymentMethod,
+          paidAt: data.paidAt,
           order: data.order,
         };
       }

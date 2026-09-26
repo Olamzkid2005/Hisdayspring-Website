@@ -41,6 +41,8 @@ export interface BachsCheckoutSession {
   reference: string | null;
   expiresAt?: string;
   createdAt?: string;
+  /** Set once the checkout is paid — used as the receipt's payment time. */
+  completedAt?: string;
   /** Metadata echoed back by the API; used to decode book orders. */
   metadata?: Record<string, unknown>;
   /** Payment corridor used, when the API reports it (e.g. `NGN_CARD`). */
@@ -174,6 +176,15 @@ function toCheckoutSession(data: unknown): BachsCheckoutSession | null {
     reference: typeof value.reference === "string" ? value.reference : null,
     expiresAt: typeof value.expires_at === "string" ? value.expires_at : undefined,
     createdAt: typeof value.created_at === "string" ? value.created_at : undefined,
+    // The top-level field is normally populated; the charge carries its own
+    // copy, so fall back to it rather than printing an empty payment date.
+    completedAt:
+      typeof value.completed_at === "string"
+        ? value.completed_at
+        : value.charge && typeof value.charge === "object" &&
+            typeof (value.charge as Record<string, unknown>).completed_at === "string"
+          ? ((value.charge as Record<string, unknown>).completed_at as string)
+          : undefined,
     metadata:
       value.metadata && typeof value.metadata === "object"
         ? (value.metadata as Record<string, unknown>)

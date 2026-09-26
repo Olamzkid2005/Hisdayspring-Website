@@ -78,6 +78,9 @@ export async function POST(request: Request) {
     reference: result.data.reference ?? undefined,
     status: result.data.status,
     paymentMethod: result.data.paymentMethod,
+    // When the session was paid (ISO instant). The receipt renders this in
+    // Lagos time, not the buyer's timezone.
+    paidAt: result.data.completedAt,
     message: isSuccessful
       ? "Payment verified"
       : "This checkout has not been completed",

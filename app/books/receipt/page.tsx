@@ -39,6 +39,7 @@ import {
   notifyCartChanged,
 } from "@/hooks/useBookCartCount";
 import { config } from "@/lib/config/env";
+import { formatLagosDateTime } from "@/lib/lagos-time";
 
 const CHURCH_NAME = "Hisdayspring Evangelical Ministry International";
 const CHURCH_PHONE = "+234 807 782 9444";
@@ -55,7 +56,14 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
 
 type ReceiptState =
   | { kind: "loading" }
-  | { kind: "verified"; order: VerifiedBookOrder; checkoutId: string; reference?: string; paymentMethod?: string }
+  | {
+      kind: "verified";
+      order: VerifiedBookOrder;
+      checkoutId: string;
+      reference?: string;
+      paymentMethod?: string;
+      paidAt?: string;
+    }
   | { kind: "unpaid"; message: string }
   | { kind: "invalid" };
 
@@ -74,17 +82,6 @@ function clearPaidCart(): void {
   } catch {
     // Storage unavailable — the cart simply persists; not worth blocking.
   }
-}
-
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("en-NG", {
-    weekday: "short",
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
 }
 
 export default function BookReceiptPage() {
@@ -144,6 +141,7 @@ export default function BookReceiptPage() {
           checkoutId,
           reference: result.reference,
           paymentMethod: result.paymentMethod,
+          paidAt: result.paidAt,
         });
       } else {
         // Keep the stash: a pending bank transfer can be re-checked (button
@@ -177,6 +175,7 @@ export default function BookReceiptPage() {
           checkoutId,
           reference: result.reference,
           paymentMethod: result.paymentMethod,
+          paidAt: result.paidAt,
         });
       } else {
         setState({ kind: "unpaid", message: result.message });
@@ -387,7 +386,7 @@ export default function BookReceiptPage() {
   }
 
   // ---------- Verified receipt ----------
-  const { order, checkoutId, reference, paymentMethod } = state;
+  const { order, checkoutId, reference, paymentMethod, paidAt } = state;
   const isPickup = order.fulfillment === "pickup";
 
   return (
@@ -397,7 +396,7 @@ export default function BookReceiptPage() {
         <div className="no-print mb-6 flex flex-wrap items-center justify-between gap-3">
           <a
             href="/books"
-            className="inline-flex items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
+            className="inline-flex min-h-[44px] items-center gap-2 text-on-surface-variant hover:text-on-surface transition-colors text-sm font-medium"
           >
             ← Back to books
           </a>
@@ -564,6 +563,16 @@ export default function BookReceiptPage() {
                 {reference ?? checkoutId}
               </p>
             </div>
+            {paidAt && (
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">
+                  Paid on
+                </p>
+                {/* Church time, not the buyer's clock — staff reconcile the
+                    bookstand against Nigerian records. */}
+                <p className="text-on-surface">{formatLagosDateTime(paidAt)}</p>
+              </div>
+            )}
             {order.buyer?.name && (
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant mb-1">

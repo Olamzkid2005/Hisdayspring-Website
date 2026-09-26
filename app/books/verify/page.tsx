@@ -17,6 +17,7 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { verifyBookOrder, type VerifiedBookOrder } from "@/lib/api/bachs";
+import { formatLagosDateTime } from "@/lib/lagos-time";
 
 /** Accept a bare checkout id, or a URL pasted straight off a phone. */
 function extractCheckoutId(input: string): string | null {
@@ -44,6 +45,7 @@ export default function BookVerifyPage() {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<VerifiedBookOrder | null>(null);
   const [reference, setReference] = useState<string | null>(null);
+  const [paidAt, setPaidAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
 
@@ -51,6 +53,7 @@ export default function BookVerifyPage() {
     setError(null);
     setResult(null);
     setReference(null);
+    setPaidAt(null);
 
     const checkoutId = extractCheckoutId(query);
     if (!checkoutId) {
@@ -66,6 +69,7 @@ export default function BookVerifyPage() {
       if (response.success) {
         setResult(response.order);
         setReference(response.reference ?? response.checkoutId);
+        setPaidAt(response.paidAt ?? null);
       } else {
         setError(response.message);
       }
@@ -150,12 +154,23 @@ export default function BookVerifyPage() {
                 </div>
               </div>
 
-              {(result.buyer?.name || result.buyer?.phone) && (
-                <p className="text-sm text-on-surface-variant mb-4">
-                  {[result.buyer?.name, result.buyer?.phone]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
+              {(result.buyer?.name || result.buyer?.phone || paidAt) && (
+                <div className="mb-4 text-sm text-on-surface-variant">
+                  {(result.buyer?.name || result.buyer?.phone) && (
+                    <p>
+                      {[result.buyer?.name, result.buyer?.phone]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  )}
+                  {/* Staff hand books over on the strength of this screen, so
+                      the paid time is shown in church time. */}
+                  {paidAt && (
+                    <p className="text-xs mt-1">
+                      Paid {formatLagosDateTime(paidAt)}
+                    </p>
+                  )}
+                </div>
               )}
 
               <div className="space-y-2">

@@ -3,6 +3,14 @@
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Radio, ExternalLink } from "lucide-react";
+import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
+
+/** Section artwork - Cloudinary-optimized rather than the raw 1920px JPEG. */
+const SECTION_ART = cloudinaryLoader({
+  src: "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80",
+  width: 1080,
+  quality: 70,
+});
 
 export function RadioSection() {
   const ref = useRef<HTMLElement>(null);
@@ -12,7 +20,7 @@ export function RadioSection() {
     <section id="radio" ref={ref} className="relative py-16 px-4 md:py-24 md:px-8">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: "url('https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80')" }}
+        style={{ backgroundImage: `url('${SECTION_ART}')` }}
       />
       <div className="absolute inset-0 bg-primary/70" />
 

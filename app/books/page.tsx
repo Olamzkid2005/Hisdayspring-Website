@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { BookOpen } from "lucide-react";
 import { BackButton } from "@/components/ui";
 import BooksClient from "./BooksClient";
@@ -13,10 +14,16 @@ export default function BooksPage() {
   return (
     <>
       <section className="relative min-h-[45vh] flex items-end overflow-hidden bg-surface-container-low">
-        <img
+        {/* Through next/image + the Cloudinary loader this is served as
+            WebP/AVIF at the right width; the raw Unsplash 1920px JPEG was
+            ~750KB on a phone and was this page's LCP element. */}
+        <Image
           src="https://images.unsplash.com/photo-1493552152660-f915ab47ae9d?w=1920&q=80"
           alt="Books"
-          className="absolute inset-0 w-full h-full object-cover"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-primary/90 to-transparent" />
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 md:px-8 pt-16 md:pt-24 pb-12 md:pb-16">

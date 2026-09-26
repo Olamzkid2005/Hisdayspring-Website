@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { ExternalLink, Radio } from "lucide-react";
 import { BackButton } from "@/components/ui";
 
@@ -12,10 +13,15 @@ export default function RadioPage() {
   return (
     <>
       <section className="relative min-h-[60vh] flex items-end overflow-hidden bg-surface-container-low">
-        <img
+        {/* Served through next/image + the Cloudinary loader (WebP/AVIF at the
+            right width) instead of the raw 1920px Unsplash JPEG. */}
+        <Image
           src="https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80"
           alt="Hisdayspring Radio"
-          className="absolute inset-0 w-full h-full object-cover"
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
         <div className="absolute inset-0 bg-primary/70" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />

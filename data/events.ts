@@ -22,7 +22,9 @@ const scheduledEvents: Event[] = [
     location: "Open Venue, Plot 200, 21 Road, Gate Busstop, Gowon Estate, Lagos",
     description:
       "Theme: SHINE. Intense worship and soul-lifting praise under the open sky — for we are not ashamed of the gospel of Christ (Romans 1:16).",
-    imageUrl: "/images/events/young-yielded-concert.webp",
+    // ?v= is the Cloudinary asset version — bump it whenever this photo is
+    // replaced in place, else browsers serve the cached old file.
+    imageUrl: "/images/events/young-yielded-concert.webp?v=1790286525",
     category: "youth",
     isFeatured: true,
   },

@@ -12,7 +12,9 @@ export const workforce: WorkforceMember[] = [
     title: "General Overseer and Lead Pastor",
     role: "lead-pastor",
     biography: "",
-    imageUrl: "/images/pastors/Pastor-Blessing-Web-1.webp",
+    // ?v= is the Cloudinary asset version — bump it whenever the photo file is
+    // replaced in place, otherwise browsers keep serving the cached old image.
+    imageUrl: "/images/pastors/Pastor-Blessing-Web-1.webp?v=1790300017",
     education: [
       "CAC Theological Seminary",
       "Christian Theological Seminary",
@@ -29,7 +31,9 @@ export const workforce: WorkforceMember[] = [
     title: "Resident Pastor of Ipaja",
     role: "branch-pastor",
     biography: "",
-    imageUrl: "/images/pastors/pastor mrs.jpeg",
+    // ?v= is the Cloudinary asset version — bump it whenever the photo file is
+    // replaced in place, otherwise browsers keep serving the cached old image.
+    imageUrl: "/images/pastors/pastor mrs.jpeg?v=1790436693",
     branch: "Ipaja",
     spouse: "Pastor Blessing Olamijulo",
   },

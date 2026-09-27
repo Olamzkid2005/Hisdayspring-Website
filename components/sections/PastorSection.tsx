@@ -65,7 +65,9 @@ export function PastorSection() {
           >
             <div className="relative aspect-[16/10] md:aspect-square rounded-2xl overflow-hidden shadow-lg">
               <Image
-                src="/images/pastors/Lead-Pastors-Olamijulo.jpg"
+                // ?v= is the Cloudinary asset version — bump it whenever this
+                // photo is replaced in place, else browsers serve the old file.
+                src="/images/pastors/Lead-Pastors-Olamijulo.jpg?v=1790436687"
                 alt="Pastor Blessing Olamijulo, General Overseer and Lead Pastor, and Pastor (Mrs) Adebamigbe Olamijulo, Resident Pastor"
                 fill
                 // The desktop frame is square, so the image is scaled to its

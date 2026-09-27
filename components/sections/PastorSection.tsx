@@ -55,7 +55,13 @@ export function PastorSection() {
         </motion.div>
 
         {/* Content — image + messages */}
-        <div className="grid md:grid-cols-2 gap-10 md:gap-16 items-start">
+        {/* Two columns only from xl (1280px). Below that the text column is too
+            narrow for the two pastor letters: at md (768px) the column was
+            ~304px wide against ~1345px of text, so a square image filled just
+            23% of it, and splitting at lg still left only 42% at 1024px. No
+            aspect ratio can close that gap, so the image stays full width
+            until there is genuinely room to sit beside the text. */}
+        <div className="grid xl:grid-cols-2 gap-10 xl:gap-16 items-start">
           {/* Left — welcoming image */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
@@ -63,18 +69,19 @@ export function PastorSection() {
             transition={{ duration: 0.7, delay: 0.15 }}
             className="relative"
           >
-            <div className="relative aspect-[16/10] md:aspect-square rounded-2xl overflow-hidden shadow-lg">
+            <div className="relative aspect-[16/10] xl:aspect-square rounded-2xl overflow-hidden shadow-lg">
               <Image
                 // ?v= is the Cloudinary asset version — bump it whenever this
                 // photo is replaced in place, else browsers serve the old file.
                 src="/images/pastors/Lead-Pastors-Olamijulo.jpg?v=1790436687"
                 alt="Pastor Blessing Olamijulo, General Overseer and Lead Pastor, and Pastor (Mrs) Adebamigbe Olamijulo, Resident Pastor"
                 fill
-                // The desktop frame is square, so the image is scaled to its
-                // height and the sides are cropped away: it needs to arrive
-                // about 1.5x wider than the slot to stay sharp. On phones the
-                // frame is wider than the photo, so the slot width is enough.
-                sizes="(max-width: 768px) 100vw, 75vw"
+                // The desktop (xl+) frame is square, so the image is scaled to
+                // its height and the sides are cropped away: it needs to arrive
+                // about 1.5x wider than the slot to stay sharp. Below xl the
+                // frame is full width and wider than the photo, so the slot
+                // width is enough.
+                sizes="(max-width: 1280px) 100vw, 75vw"
                 // The photo is a 3:2 landscape but the desktop column is taller
                 // than it is wide, so a flat landscape frame left two thirds of
                 // the column empty. A square frame fills most of it while still

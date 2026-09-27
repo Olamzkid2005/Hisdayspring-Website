@@ -94,8 +94,11 @@ export const metadata: Metadata = {
     canonical: "/",
   },
   icons: {
+    // app/favicon.ico is picked up by the file convention, which Next links
+    // with a content hash (?favicon.<hash>.ico). Listing it here as well would
+    // emit a plain /favicon.ico that browsers can satisfy from a cached copy of
+    // whatever icon used to be there.
     icon: [
-      { url: "/favicon.ico", sizes: "48x48" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],

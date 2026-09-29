@@ -8,110 +8,115 @@ import { aboutContent, statistics } from "@/data";
 import { ReadMore } from "@/components/ui/ReadMore";
 import { useCounterAnimation } from "@/hooks";
 
+const EYEBROW =
+  "font-label text-xs font-bold uppercase tracking-[0.3em] text-secondary";
+const STAT_LABEL =
+  "font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant";
+
 function AnimatedCounter({
   value,
   suffix = "",
-  colorClass,
+  className = "",
 }: {
   value: number;
   suffix?: string;
-  colorClass: string;
+  className?: string;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const count = useCounterAnimation(value, isInView, { duration: 3000 });
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-60px" });
+  const count = useCounterAnimation(value, isInView, { duration: 2200 });
 
   return (
-    <div ref={ref}>
-      <span className={`text-3xl md:text-4xl font-headline ${colorClass}`}>
-        {count}
-        {suffix}
-      </span>
-    </div>
+    <span ref={ref} className={className}>
+      {count}
+      {suffix}
+    </span>
   );
 }
 
 export function AboutSection() {
   const ref = useRef<HTMLElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const isInView = useInView(ref, { once: true, margin: "-80px" });
+
+  const reveal = (delay = 0) => ({
+    initial: { opacity: 0, y: 24 },
+    animate: isInView ? { opacity: 1, y: 0 } : {},
+    transition: { duration: 0.55, delay },
+  });
 
   return (
-    <section id="about" ref={ref} className="py-8 md:py-14 px-6 md:px-12 bg-surface relative overflow-hidden">
-      <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: "repeat",
-        }}
-      />
-
+    <section
+      id="about"
+      ref={ref}
+      className="relative overflow-hidden bg-surface px-6 py-8 md:px-12 md:py-14"
+    >
+      {/* Corner mark rather than a centred watermark: the crest art is only
+          144x150, so at full width it was the softest thing on the page, and
+          dead centre put it straight under the Vision copy. */}
       <Image
         src="/images/logo/logo crop.jpg"
         alt=""
         aria-hidden="true"
         width={800}
         height={400}
-        sizes="(max-width: 768px) 70vw, 40vw"
-        className="absolute top-1/2 left-1/2 w-[clamp(20rem,40vw,50rem)] max-w-[70vw] -translate-x-1/2 -translate-y-1/2 object-contain opacity-20 select-none pointer-events-none"
+        sizes="(max-width: 768px) 40vw, 30vw"
+        className="pointer-events-none absolute right-0 bottom-0 hidden w-[clamp(14rem,28vw,30rem)] translate-x-1/4 translate-y-1/4 object-contain opacity-[0.08] select-none md:block"
       />
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-10 relative">
-        <div className="md:col-span-7 grid sm:grid-cols-2 gap-6 md:gap-8 relative">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6 }}
-          >
-            <h2 className="font-headline text-primary text-lg md:text-2xl mb-2">Our Mission</h2>
-            <ReadMore
-              text={aboutContent.mission}
-              clamp="line-clamp-2"
-              textClassName="text-sm md:text-base text-on-surface-variant font-light leading-relaxed"
-            />
-          </motion.div>
+      <div className="relative mx-auto max-w-7xl">
+        <motion.p {...reveal()} className={EYEBROW}>
+          Who we are
+        </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.6, delay: 0.1 }}
-          >
-            <h2 className="font-headline text-secondary text-lg md:text-2xl mb-2">Our Vision</h2>
-            <ReadMore
-              text={aboutContent.vision}
-              clamp="line-clamp-2"
-              textClassName="text-sm md:text-base text-on-surface-variant font-light leading-relaxed"
-            />
-          </motion.div>
-        </div>
+        {/* 7 + 5 = 12. This used to be 7 + 1 (divider) + 5 = 13, which pushed the
+            stat cards onto a second row under Mission only and left the divider
+            floating beside Vision with nothing to divide. */}
+        <div className="mt-6 grid grid-cols-1 gap-8 md:grid-cols-12 md:gap-10">
+          <div className="grid gap-6 sm:grid-cols-2 md:col-span-7 md:gap-8 md:border-r md:border-outline-variant/50 md:pr-10">
+            <motion.div {...reveal(0.05)}>
+              <span className="mb-3 block h-0.5 w-8 bg-primary/60" />
+              <h2 className="font-headline mb-2 text-lg text-primary md:text-2xl">
+                Our Mission
+              </h2>
+              <ReadMore
+                text={aboutContent.mission}
+                clamp="line-clamp-2"
+                textClassName="text-sm md:text-base text-on-surface-variant font-light leading-relaxed"
+              />
+            </motion.div>
 
-        <div className="hidden md:flex items-stretch">
-          <div className="w-px bg-secondary/20 relative">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-secondary/40" />
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-secondary/40" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-secondary/60" />
+            <motion.div {...reveal(0.1)}>
+              <span className="mb-3 block h-0.5 w-8 bg-secondary/60" />
+              <h2 className="font-headline mb-2 text-lg text-secondary md:text-2xl">
+                Our Vision
+              </h2>
+              <ReadMore
+                text={aboutContent.vision}
+                clamp="line-clamp-2"
+                textClassName="text-sm md:text-base text-on-surface-variant font-light leading-relaxed"
+              />
+            </motion.div>
           </div>
-        </div>
 
-        <div className="md:col-span-5">
-          <div className="grid grid-cols-2 gap-4">
-            {statistics.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.4, delay: 0.3 + index * 0.1 }}
-                className="group bg-surface-container-lowest p-4 md:p-6 rounded-xl flex flex-col justify-center items-center text-center border-l-4 border-transparent hover:border-l-secondary transition-all duration-300"
-              >
-                <AnimatedCounter
-                  value={stat.value}
-                  suffix={stat.suffix}
-                  colorClass={index % 2 === 0 ? "text-primary" : "text-secondary"}
-                />
-                <span className="font-label text-on-surface-variant tracking-widest uppercase text-xs font-bold mt-3">
-                  {stat.label}
-                </span>
-              </motion.div>
-            ))}
+          <div className="flex items-center md:col-span-5">
+            <div className="grid w-full grid-cols-2 gap-4">
+              {statistics.map((stat, index) => (
+                <motion.div
+                  key={stat.label}
+                  {...reveal(0.2 + index * 0.08)}
+                  className="group flex flex-col items-center justify-center rounded-xl bg-surface-container-lowest p-4 text-center shadow-sm ring-1 ring-black/5 transition-all duration-300 hover:ring-primary/20 md:p-6"
+                >
+                  <AnimatedCounter
+                    value={stat.value}
+                    suffix={stat.suffix}
+                    className={`font-headline text-3xl md:text-4xl ${
+                      index % 2 === 0 ? "text-primary" : "text-secondary"
+                    }`}
+                  />
+                  <span className={`mt-3 ${STAT_LABEL}`}>{stat.label}</span>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

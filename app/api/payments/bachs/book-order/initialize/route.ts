@@ -7,6 +7,7 @@ import {
   type BachsCorridor,
 } from "@/lib/server/bachs";
 import { priceBookOrder } from "@/lib/server/book-orders";
+import { PDF_DELIVERY_ENABLED } from "@/data/books";
 import { getSiteOrigin } from "@/lib/server/site-url";
 import type { PaymentMethod } from "@/types";
 
@@ -79,6 +80,19 @@ export async function POST(request: Request) {
   ) {
     return NextResponse.json(
       { success: false, message: "Invalid order details" },
+      { status: 400 }
+    );
+  }
+
+  // PDF fulfilment is gated until the files exist on the CDN. The UI hides the
+  // option, but a hand-built request would otherwise pay for a missing file.
+  if (body.fulfillment === "pdf" && !PDF_DELIVERY_ENABLED) {
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          "PDF copies are not available yet — please choose pick up in church.",
+      },
       { status: 400 }
     );
   }

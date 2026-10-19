@@ -29,7 +29,11 @@ import {
 } from "lucide-react";
 import { Button, buttonClasses } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { books, MAX_QUANTITY_PER_TITLE } from "@/data/books";
+import {
+  books,
+  MAX_QUANTITY_PER_TITLE,
+  PDF_DELIVERY_ENABLED,
+} from "@/data/books";
 import {
   clearLastCheckoutId,
   resolveReturnedCheckoutId,
@@ -345,7 +349,9 @@ export default function BooksClient() {
               Book order
             </h1>
             <p className="text-sm text-on-surface-variant mb-8">
-              Paid securely through Bachs — collect in church or download PDFs.
+              {PDF_DELIVERY_ENABLED
+                ? "Paid securely through Bachs — collect in church or download PDFs."
+                : "Paid securely through Bachs — collect your copies in church."}
             </p>
 
             {/* Order summary */}
@@ -415,40 +421,45 @@ export default function BooksClient() {
                   </span>
                 </span>
               </button>
-              <button
-                type="button"
-                onClick={() => setFulfillment("pdf")}
-                aria-pressed={fulfillment === "pdf"}
-                className={`p-4 rounded-xl border-2 flex items-start gap-3 text-left transition-all ${
-                  fulfillment === "pdf"
-                    ? "border-secondary bg-secondary-container/20"
-                    : "border-outline-variant hover:border-secondary"
-                }`}
-              >
-                <div
-                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+              {/* Hidden while `PDF_DELIVERY_ENABLED` is false: the PDFs are
+                  not on the CDN yet, and the charge happens before the
+                  download route could refuse politely. */}
+              {PDF_DELIVERY_ENABLED && (
+                <button
+                  type="button"
+                  onClick={() => setFulfillment("pdf")}
+                  aria-pressed={fulfillment === "pdf"}
+                  className={`p-4 rounded-xl border-2 flex items-start gap-3 text-left transition-all ${
                     fulfillment === "pdf"
-                      ? "bg-secondary text-on-secondary"
-                      : "bg-surface-container-high"
+                      ? "border-secondary bg-secondary-container/20"
+                      : "border-outline-variant hover:border-secondary"
                   }`}
                 >
-                  <Download className="w-5 h-5" />
-                </div>
-                <span>
-                  <span
-                    className={`block font-semibold ${
+                  <div
+                    className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
                       fulfillment === "pdf"
-                        ? "text-secondary"
-                        : "text-on-surface"
+                        ? "bg-secondary text-on-secondary"
+                        : "bg-surface-container-high"
                     }`}
                   >
-                    PDF copies
+                    <Download className="w-5 h-5" />
+                  </div>
+                  <span>
+                    <span
+                      className={`block font-semibold ${
+                        fulfillment === "pdf"
+                          ? "text-secondary"
+                          : "text-on-surface"
+                      }`}
+                    >
+                      PDF copies
+                    </span>
+                    <span className="block text-xs text-on-surface-variant mt-1">
+                      Download links appear immediately after payment.
+                    </span>
                   </span>
-                  <span className="block text-xs text-on-surface-variant mt-1">
-                    Download links appear immediately after payment.
-                  </span>
-                </span>
-              </button>
+                </button>
+              )}
             </div>
 
             {/* Buyer details */}

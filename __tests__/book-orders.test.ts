@@ -24,7 +24,7 @@ import {
   priceBookOrder,
   decodeBookOrder,
 } from "@/lib/server/book-orders";
-import { books } from "@/data/books";
+import { books, PDF_DELIVERY_ENABLED } from "@/data/books";
 
 const ORIGIN = "https://hisdayspring.org";
 
@@ -238,6 +238,26 @@ describe("book-order initialize route", () => {
     );
     expect(response.status).toBe(400);
   });
+
+  // While `PDF_DELIVERY_ENABLED` is false the UI hides the option, but the
+  // route has to refuse it too: a hand-built request would otherwise create a
+  // real charge for a file that answers 404. Skipped (not deleted) so the
+  // assertion is revisited the day the gate opens.
+  (PDF_DELIVERY_ENABLED ? it.skip : it)(
+    "refuses PDF fulfilment while the PDFs are not on the CDN",
+    async () => {
+      const fetchMock = mockFetch({});
+
+      const response = await bookOrderInitialize(
+        makeRequest(orderBody({ fulfillment: "pdf" }))
+      );
+      const body = await response.json();
+
+      expect(response.status).toBe(400);
+      expect(body.message).toMatch(/PDF copies are not available yet/i);
+      expect(fetchMock).not.toHaveBeenCalled();
+    }
+  );
 
   it("prices server-side and records the order in metadata", async () => {
     const fetchMock = mockFetch({

@@ -3,11 +3,13 @@ import Image from "next/image";
 import { BookOpen } from "lucide-react";
 import { BackButton } from "@/components/ui";
 import BooksClient from "./BooksClient";
+import { PDF_DELIVERY_ENABLED } from "@/data/books";
 
 export const metadata: Metadata = {
   title: "Books",
-  description:
-    "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online, pick up in church or download PDF copies.",
+  description: PDF_DELIVERY_ENABLED
+    ? "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online, pick up in church or download PDF copies."
+    : "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online and pick up in church.",
 };
 
 export default function BooksPage() {
@@ -39,8 +41,8 @@ export default function BooksPage() {
           </h1>
           <p className="text-white/80 text-base md:text-lg mt-4 max-w-2xl leading-relaxed">
             Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe
-            Olamijulo — order online and pick up in church, or get instant PDF
-            copies.
+            Olamijulo — order online and pick up in church.
+            {PDF_DELIVERY_ENABLED && " PDF copies are available for instant download."}
           </p>
         </div>
       </section>

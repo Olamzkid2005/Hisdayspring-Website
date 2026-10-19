@@ -204,10 +204,14 @@ Webhook-verified fulfilment needs this:
    `checkout.completed`.
 
    Until the custom domain is live, point this at whichever host is serving
-   production (right now `https://hisdayspring.vercel.app`); switch it to
-   `https://hisdayspring.org` immediately after the DNS cutover.
+   production (right now `https://hisdayspring-website.pxxlspace.cv` — the
+   `hisdayspring.vercel.app` mirror is stale and no longer deployed); switch it
+   to `https://hisdayspring.org` immediately after the DNS cutover.
 
 3. Copy the endpoint's **signing secret** into `BACHS_WEBHOOK_SECRET` (section 3).
+   Live and sandbox destinations have **different** signing secrets, so this has
+   to be swapped in the same deploy as `BACHS_SECRET_KEY` — a live secret key
+   paired with the sandbox signing secret rejects every delivery with a 401.
    Deliveries are signed with HMAC-SHA256 over `"{timestamp}.{raw_body}"` and
    sent as `X-Bachs-Signature-V2`; the route rejects anything unsigned or older
    than 5 minutes.

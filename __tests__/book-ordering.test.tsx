@@ -12,7 +12,7 @@ import BookVerifyPage from "@/app/books/verify/page";
 import BookReceiptPage from "@/app/books/receipt/page";
 import { Navigation } from "@/components/layout/Navigation";
 import { useBookCartCount, notifyCartChanged } from "@/hooks/useBookCartCount";
-import { books } from "@/data/books";
+import { books, PDF_DELIVERY_ENABLED } from "@/data/books";
 
 jest.setTimeout(15000);
 
@@ -91,6 +91,26 @@ describe("/books ordering", () => {
     expect(payload.fulfillment).toBe("pickup");
     errorSpy.mockRestore();
   });
+
+  // The PDFs are not on the CDN yet, so paying for "PDF copies" would buy a
+  // 404. Pickup must be the only choice until `PDF_DELIVERY_ENABLED` flips.
+  (PDF_DELIVERY_ENABLED ? it.skip : it)(
+    "does not offer PDF copies while the files are not uploaded",
+    () => {
+      mockFetch();
+
+      render(<BooksClient />);
+      addToCart();
+      fireEvent.click(screen.getByRole("button", { name: /Checkout/ }));
+
+      expect(
+        screen.getByRole("button", { name: /Pick up in church/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /PDF copies/i })
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("stashes the checkout id before redirecting to the hosted checkout", async () => {
     const fetchMock = mockFetch({

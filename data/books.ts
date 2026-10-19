@@ -17,6 +17,20 @@ export function bookPdfUrl(book: Book): string {
 }
 
 /**
+ * Whether buyers may choose "PDF copies" at checkout.
+ *
+ * Off until the PDFs actually exist on the CDN: the checkout is priced and
+ * charged by Bachs before the download route runs, so offering the option now
+ * would take real money for a file that answers 404 ("not available yet").
+ *
+ * Flipping this to `true` re-enables the option in the checkout UI and in
+ * `POST /api/payments/bachs/book-order/initialize` in one move — do it only
+ * after every title with `format: "ebook" | "both"` has been uploaded to
+ * Cloudinary as `books/pdf/<book id>`.
+ */
+export const PDF_DELIVERY_ENABLED = false;
+
+/**
  * Hard cap per title per order — a receipt-shown-at-the-bookstand flow has no
  * stock system behind it, so the pickup model realistically holds to the
  * physical copies the stand has on hand.

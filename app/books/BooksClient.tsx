@@ -26,6 +26,8 @@ import {
   ArrowLeft,
   Trash2,
   FileText,
+  CreditCard,
+  Banknote,
 } from "lucide-react";
 import { Button, buttonClasses } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -43,7 +45,7 @@ import {
 } from "@/lib/api/bachs";
 import { useBookCart } from "@/hooks/useBookCartCount";
 import { writeCart } from "@/lib/book-cart";
-import type { BookOrderFulfillment } from "@/types";
+import type { BookOrderFulfillment, PaymentMethod } from "@/types";
 
 type Stage = "browse" | "checkout" | "paid";
 
@@ -61,6 +63,7 @@ export default function BooksClient() {
   const cart = useBookCart();
   const [stage, setStage] = useState<Stage>("browse");
   const [fulfillment, setFulfillment] = useState<BookOrderFulfillment>("pickup");
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card-payment");
   const [buyerName, setBuyerName] = useState("");
   const [buyerEmail, setBuyerEmail] = useState("");
   const [buyerPhone, setBuyerPhone] = useState("");
@@ -181,7 +184,7 @@ export default function BooksClient() {
             name: buyerName.trim(),
             email: buyerEmail.trim(),
             phone: buyerPhone.trim(),
-            paymentMethod: "card-payment",
+            paymentMethod,
             fulfillment,
             items: cartLines.map((line) => ({
               bookId: line.book.id,
@@ -494,6 +497,69 @@ export default function BooksClient() {
               </div>
             </div>
 
+            {/* Payment method */}
+            <p className="block text-sm font-semibold text-on-surface mb-3">
+              Payment method
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("card-payment")}
+                aria-pressed={paymentMethod === "card-payment"}
+                className={`p-4 rounded-xl border-2 flex items-center gap-3 text-left transition-all ${
+                  paymentMethod === "card-payment"
+                    ? "border-secondary bg-secondary-container/20"
+                    : "border-outline-variant hover:border-secondary"
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                    paymentMethod === "card-payment"
+                      ? "bg-secondary text-on-secondary"
+                      : "bg-surface-container-high"
+                  }`}
+                >
+                  <CreditCard className="w-5 h-5" />
+                </div>
+                <span>
+                  <span className={`block font-semibold ${paymentMethod === "card-payment" ? "text-secondary" : "text-on-surface"}`}>
+                    Card payment
+                  </span>
+                  <span className="block text-xs text-on-surface-variant mt-1">
+                    Pay with Visa, Mastercard, and other cards.
+                  </span>
+                </span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentMethod("bank-transfer")}
+                aria-pressed={paymentMethod === "bank-transfer"}
+                className={`p-4 rounded-xl border-2 flex items-center gap-3 text-left transition-all ${
+                  paymentMethod === "bank-transfer"
+                    ? "border-secondary bg-secondary-container/20"
+                    : "border-outline-variant hover:border-secondary"
+                }`}
+              >
+                <div
+                  className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                    paymentMethod === "bank-transfer"
+                      ? "bg-secondary text-on-secondary"
+                      : "bg-surface-container-high"
+                  }`}
+                >
+                  <Banknote className="w-5 h-5" />
+                </div>
+                <span>
+                  <span className={`block font-semibold ${paymentMethod === "bank-transfer" ? "text-secondary" : "text-on-surface"}`}>
+                    Bank transfer
+                  </span>
+                  <span className="block text-xs text-on-surface-variant mt-1">
+                    Complete your transfer securely on Bachs.
+                  </span>
+                </span>
+              </button>
+            </div>
+
             {error && (
               <div
                 role="alert"
@@ -516,7 +582,9 @@ export default function BooksClient() {
                 : `Pay ₦${cartTotal.toLocaleString()}`}
             </Button>
             <p className="text-center text-sm text-on-surface-variant mt-4">
-              Secure payment powered by Bachs
+              {paymentMethod === "card-payment"
+                ? "Secure payment powered by Bachs"
+                : "You’ll complete your transfer on Bachs’ secure checkout"}
             </p>
           </div>
         </div>

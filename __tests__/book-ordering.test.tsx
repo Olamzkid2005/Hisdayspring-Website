@@ -89,6 +89,35 @@ describe("/books ordering", () => {
     expect(url).toBe("/api/payments/bachs/book-order/initialize");
     expect(payload.items).toEqual([{ bookId: sample.id, quantity: 1 }]);
     expect(payload.fulfillment).toBe("pickup");
+    expect(payload.paymentMethod).toBe("card-payment");
+    errorSpy.mockRestore();
+  });
+
+  it("submits a book order using the selected bank-transfer method", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      body: { success: true, authorizationUrl: "https://checkout.bachs.io/c/x" },
+    });
+    const errorSpy = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+
+    render(<BooksClient />);
+    addToCart();
+    fireEvent.click(screen.getByRole("button", { name: /Checkout/ }));
+    fillBuyer();
+
+    const transferOption = screen.getByRole("button", { name: /Bank transfer/i });
+    expect(transferOption).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(transferOption);
+    expect(transferOption).toHaveAttribute("aria-pressed", "true");
+
+    fireEvent.click(screen.getByRole("button", { name: /Pay ₦/ }));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(JSON.parse(String(init.body)).paymentMethod).toBe("bank-transfer");
     errorSpy.mockRestore();
   });
 

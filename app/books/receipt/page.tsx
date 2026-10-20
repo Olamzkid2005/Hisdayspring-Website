@@ -34,6 +34,7 @@ import {
   verifyBookOrder,
   type VerifiedBookOrder,
 } from "@/lib/api/bachs";
+import { clearCheckoutIdempotencyKey } from "@/lib/api/payment-idempotency";
 import { getCartSnapshot, writeCart } from "@/lib/book-cart";
 import { config } from "@/lib/config/env";
 import { formatLagosDateTime } from "@/lib/lagos-time";
@@ -146,6 +147,7 @@ export default function BookReceiptPage() {
         // Consumed — a refresh of a verified receipt re-verifies from the URL
         // the buyer can copy from the address bar instead.
         clearLastCheckoutId();
+        clearCheckoutIdempotencyKey("book-order");
         setState({
           kind: "verified",
           order: result.order,
@@ -155,8 +157,12 @@ export default function BookReceiptPage() {
           paidAt: result.paidAt,
         });
       } else {
-        // Keep the stash: a pending bank transfer can be re-checked (button
-        // below, or a refresh) until it settles.
+        // Keep the stash and retry key for a pending bank transfer; discard the
+        // retry key after a terminal result so a new order gets a fresh one.
+        if (result.status !== undefined && result.status !== "open") {
+          clearLastCheckoutId();
+          clearCheckoutIdempotencyKey("book-order");
+        }
         setState({ kind: "unpaid", message: result.message });
       }
     })();
@@ -180,6 +186,7 @@ export default function BookReceiptPage() {
       if (result.success) {
         clearPaidCart();
         clearLastCheckoutId();
+        clearCheckoutIdempotencyKey("book-order");
         setState({
           kind: "verified",
           order: result.order,
@@ -189,6 +196,10 @@ export default function BookReceiptPage() {
           paidAt: result.paidAt,
         });
       } else {
+        if (result.status !== undefined && result.status !== "open") {
+          clearLastCheckoutId();
+          clearCheckoutIdempotencyKey("book-order");
+        }
         setState({ kind: "unpaid", message: result.message });
       }
     })();

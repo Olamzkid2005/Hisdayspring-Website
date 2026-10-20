@@ -15,8 +15,10 @@ export interface PricedBookOrder {
   fulfillment: BookOrderFulfillment;
   /** Total in whole Naira (books are priced in whole Naira). */
   total: number;
-  /** Compact string stored in checkout metadata, e.g. "100-days-devotional:2|made-to-be-whole:1". */
+  /** Compact item ids/quantities stored in checkout metadata. */
   itemsToken: string;
+  /** Versioned title/price snapshot stored in checkout metadata for receipts. */
+  orderSnapshot: string;
 }
 
 export interface BookOrderLine {
@@ -40,6 +42,7 @@ export interface DecodedBookOrder {
 }
 
 const MAX_TOKEN_LENGTH = 4000; // safely inside Bachs' 10 KB metadata budget
+const MAX_ORDER_SNAPSHOT_LENGTH = 8000;
 
 /**
  * Ceiling on raw cart entries, checked before any per-item work. The client
@@ -57,7 +60,14 @@ function parseItemEntry(entry: unknown): BookOrderItem | null {
     typeof value.quantity === "number" && Number.isInteger(value.quantity)
       ? value.quantity
       : null;
-  if (!bookId || !quantity) return null;
+  if (
+    !bookId ||
+    !quantity ||
+    quantity < 1 ||
+    quantity > MAX_QUANTITY_PER_TITLE * MAX_CART_ENTRIES
+  ) {
+    return null;
+  }
   return { bookId, quantity };
 }
 
@@ -107,17 +117,35 @@ export function priceBookOrder(
   );
 
   let total = 0;
+  const orderLines: BookOrderLine[] = [];
   for (const item of items) {
-    const book = books.find((book) => book.id === item.bookId)!;
-    total += book.price * item.quantity;
+    const book = books.find((candidate) => candidate.id === item.bookId)!;
+    if (book.availability !== "in-stock") {
+      return null;
+    }
+    const lineTotal = book.price * item.quantity;
+    total += lineTotal;
+    orderLines.push({
+      bookId: book.id,
+      title: book.title,
+      quantity: item.quantity,
+      unitPrice: book.price,
+      lineTotal,
+    });
   }
 
   const itemsToken = items
     .map((item) => `${item.bookId}:${item.quantity}`)
     .join("|");
-  if (itemsToken.length > MAX_TOKEN_LENGTH) return null;
+  const orderSnapshot = JSON.stringify({ version: 1, lines: orderLines });
+  if (
+    itemsToken.length > MAX_TOKEN_LENGTH ||
+    orderSnapshot.length > MAX_ORDER_SNAPSHOT_LENGTH
+  ) {
+    return null;
+  }
 
-  return { items, fulfillment, total, itemsToken };
+  return { items, fulfillment, total, itemsToken, orderSnapshot };
 }
 
 /**
@@ -131,11 +159,102 @@ export function priceBookOrder(
  */
 export function decodeBookOrder(
   rawItemsToken: unknown,
-  rawFulfillment: unknown
+  rawFulfillment: unknown,
+  rawOrderSnapshot?: unknown
 ): DecodedBookOrder | null {
   const fulfillment = parseFulfillment(rawFulfillment);
-  if (!fulfillment || typeof rawItemsToken !== "string") return null;
+  if (
+    !fulfillment ||
+    typeof rawItemsToken !== "string" ||
+    rawItemsToken.length > MAX_TOKEN_LENGTH
+  ) {
+    return null;
+  }
 
+  if (rawOrderSnapshot !== undefined) {
+    if (
+      typeof rawOrderSnapshot !== "string" ||
+      rawOrderSnapshot.length > MAX_ORDER_SNAPSHOT_LENGTH
+    ) {
+      return null;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(rawOrderSnapshot);
+    } catch {
+      return null;
+    }
+    if (!parsed || typeof parsed !== "object") return null;
+    const snapshot = parsed as { version?: unknown; lines?: unknown };
+    if (snapshot.version !== 1 || !Array.isArray(snapshot.lines)) return null;
+
+    const tokenItems = rawItemsToken.split("|").map((entry) => {
+      const separator = entry.lastIndexOf(":");
+      if (separator <= 0) return null;
+      const quantityText = entry.slice(separator + 1);
+      if (!/^[1-9][0-9]*$/.test(quantityText)) return null;
+      const quantity = Number(quantityText);
+      return Number.isSafeInteger(quantity) && quantity <= MAX_QUANTITY_PER_TITLE
+        ? { bookId: entry.slice(0, separator), quantity }
+        : null;
+    });
+    if (tokenItems.length === 0 || tokenItems.some((item) => item === null)) {
+      return null;
+    }
+
+    const lines: BookOrderLine[] = [];
+    for (const rawLine of snapshot.lines) {
+      if (!rawLine || typeof rawLine !== "object") return null;
+      const line = rawLine as Record<string, unknown>;
+      const { bookId, title, quantity, unitPrice, lineTotal } = line;
+      if (
+        typeof bookId !== "string" ||
+        typeof title !== "string" ||
+        !Number.isSafeInteger(quantity) ||
+        (quantity as number) < 1 ||
+        (quantity as number) > MAX_QUANTITY_PER_TITLE ||
+        !Number.isSafeInteger(unitPrice) ||
+        (unitPrice as number) < 0 ||
+        !Number.isSafeInteger(lineTotal) ||
+        lineTotal !== (unitPrice as number) * (quantity as number)
+      ) {
+        return null;
+      }
+      lines.push({
+        bookId,
+        title,
+        quantity: quantity as number,
+        unitPrice: unitPrice as number,
+        lineTotal: lineTotal as number,
+      });
+    }
+
+    const aligned = tokenItems.length === lines.length && tokenItems.every(
+      (item, index) =>
+        item !== null &&
+        item.bookId === lines[index].bookId &&
+        item.quantity === lines[index].quantity
+    );
+    if (!aligned) return null;
+
+    const catalogMatch = lines.every((line) => {
+      const book = books.find((candidate) => candidate.id === line.bookId);
+      return (
+        book !== undefined &&
+        book.title === line.title &&
+        book.price === line.unitPrice
+      );
+    });
+    return {
+      fulfillment,
+      lines,
+      total: lines.reduce((sum, line) => sum + line.lineTotal, 0),
+      catalogMatch,
+    };
+  }
+
+  // Compatibility for checkouts created before the immutable order snapshot.
   const lines: BookOrderLine[] = [];
   let total = 0;
   let catalogMatch = true;
@@ -143,23 +262,19 @@ export function decodeBookOrder(
   for (const entry of rawItemsToken.split("|")) {
     const separator = entry.lastIndexOf(":");
     if (separator <= 0) return null;
+    const quantityText = entry.slice(separator + 1);
+    if (!/^[1-9][0-9]*$/.test(quantityText)) return null;
+    const quantity = Number(quantityText);
+    if (!Number.isSafeInteger(quantity) || quantity > MAX_QUANTITY_PER_TITLE) {
+      return null;
+    }
     const bookId = entry.slice(0, separator);
-    const quantity = Number.parseInt(entry.slice(separator + 1), 10);
-    if (!Number.isInteger(quantity) || quantity < 1) return null;
-
     const book = books.find((candidate) => candidate.id === bookId);
     if (!book) {
       catalogMatch = false;
-      lines.push({
-        bookId,
-        title: bookId,
-        quantity,
-        unitPrice: 0,
-        lineTotal: 0,
-      });
+      lines.push({ bookId, title: bookId, quantity, unitPrice: 0, lineTotal: 0 });
       continue;
     }
-
     const lineTotal = book.price * quantity;
     lines.push({
       bookId: book.id,
@@ -170,8 +285,6 @@ export function decodeBookOrder(
     });
     total += lineTotal;
   }
-
   if (lines.length === 0) return null;
-
   return { fulfillment, lines, total, catalogMatch };
 }

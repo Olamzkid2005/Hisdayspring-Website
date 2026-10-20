@@ -9,6 +9,8 @@ import {
   formatBachsAmount,
   resolveBachsBaseUrl,
   verifyBachsWebhookSignature,
+  isBachsConfigured,
+  createBachsCheckoutSession,
 } from "@/lib/server/bachs";
 
 function sign(secret: string, timestamp: number, body: string): string {
@@ -93,6 +95,67 @@ describe("bachs base url resolution", () => {
   it("honours an explicit base url override", () => {
     process.env.BACHS_API_BASE_URL = "http://localhost:4010";
     expect(resolveBachsBaseUrl("sk_live_abc123")).toBe("http://localhost:4010");
+  });
+
+  it("fails closed on sandbox and overrides for production payments", () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalKey = process.env.BACHS_SECRET_KEY;
+    const originalOverride = process.env.BACHS_API_BASE_URL;
+    process.env.NODE_ENV = "production";
+    process.env.BACHS_SECRET_KEY = "sk_sandbox_test";
+    delete process.env.BACHS_API_BASE_URL;
+    expect(isBachsConfigured()).toBe(false);
+    process.env.BACHS_SECRET_KEY = "sk_live_test";
+    process.env.BACHS_API_BASE_URL = "https://sandbox-api.bachs.io";
+    expect(isBachsConfigured()).toBe(false);
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+    if (originalKey === undefined) delete process.env.BACHS_SECRET_KEY;
+    else process.env.BACHS_SECRET_KEY = originalKey;
+    if (originalOverride === undefined) delete process.env.BACHS_API_BASE_URL;
+    else process.env.BACHS_API_BASE_URL = originalOverride;
+  });
+
+  it("rejects sandbox checkout creation in production", async () => {
+    const originalNodeEnv = process.env.NODE_ENV;
+    const originalKey = process.env.BACHS_SECRET_KEY;
+    const originalOverride = process.env.BACHS_API_BASE_URL;
+    process.env.NODE_ENV = "production";
+    process.env.BACHS_SECRET_KEY = "sk_sandbox_test";
+    delete process.env.BACHS_API_BASE_URL;
+    const fetchMock = jest.fn();
+    const originalFetch = globalThis.fetch;
+    Object.defineProperty(globalThis, "fetch", {
+      configurable: true,
+      writable: true,
+      value: fetchMock,
+    });
+    await expect(
+      createBachsCheckoutSession({
+        amount: 100,
+        name: "Test",
+        email: "test@example.com",
+        phone: "08000000000",
+        purpose: "tithes",
+        corridors: ["NGN_CARD"],
+        successUrl: "https://hisdayspring.org/giving",
+        cancelUrl: "https://hisdayspring.org/giving",
+        idempotencyKey: "checkout_test",
+        reference: "hisdayspring-tithes-test",
+      })
+    ).resolves.toMatchObject({ ok: false });
+    expect(fetchMock).not.toHaveBeenCalled();
+    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
+    else process.env.NODE_ENV = originalNodeEnv;
+    if (originalKey === undefined) delete process.env.BACHS_SECRET_KEY;
+    else process.env.BACHS_SECRET_KEY = originalKey;
+    if (originalOverride === undefined) delete process.env.BACHS_API_BASE_URL;
+    else process.env.BACHS_API_BASE_URL = originalOverride;
+    Object.defineProperty(globalThis, "fetch", {
+      configurable: true,
+      writable: true,
+      value: originalFetch,
+    });
   });
 });
 

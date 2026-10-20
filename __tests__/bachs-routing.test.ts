@@ -22,15 +22,34 @@ jest.mock("next/server", () => ({
 
 import { POST as bachsInitialize } from "@/app/api/payments/bachs/initialize/route";
 import { POST as bachsVerify } from "@/app/api/payments/bachs/verify/route";
+import { resetPaymentRateLimitsForTests } from "@/lib/server/request-guards";
 
 const ORIGIN = "https://hisdayspring.org";
+let requestSequence = 0;
+let lastIdempotencyKey = "";
 
 function makeRequest(body: unknown): Request {
+  const idempotencyKey = `test-key-${++requestSequence}`;
+  lastIdempotencyKey = idempotencyKey;
+  const bytes = new Uint8Array(Buffer.from(JSON.stringify(body)));
+  let consumed = false;
   return {
-    json: async () => body,
-    text: async () => JSON.stringify(body),
+    body: {
+      getReader: () => ({
+        read: async () => {
+          if (consumed) return { done: true, value: undefined };
+          consumed = true;
+          return { done: false, value: bytes };
+        },
+        cancel: async () => undefined,
+        releaseLock: () => undefined,
+      }),
+    },
     url: `${ORIGIN}/api/payments/bachs/initialize`,
-    headers: new Headers(),
+    headers: new Headers({
+      "cf-connecting-ip": "198.51.100.1",
+      "idempotency-key": idempotencyKey,
+    }),
   } as unknown as Request;
 }
 
@@ -67,7 +86,7 @@ function sentUrl(fetchMock: jest.Mock): string {
 
 const successResponse = {
   checkout_id: "chk_2N3o4P5q6R7s8T9u",
-  checkout_url: "https://checkout.bachs.io/c/V8xQ2mZpLj9RfTa",
+  checkout_url: "https://sandbox-checkout.bachs.io/c/V8xQ2mZpLj9RfTa",
   status: "open",
   reference: "hisdayspring-tithes-abcd",
 };
@@ -92,6 +111,8 @@ describe("bachs initialize route", () => {
   const originalBaseUrl = process.env.BACHS_API_BASE_URL;
 
   beforeEach(() => {
+    requestSequence = 0;
+    resetPaymentRateLimitsForTests();
     process.env.BACHS_SECRET_KEY = "sk_sandbox_testkey";
     delete process.env.BACHS_API_BASE_URL;
   });
@@ -141,7 +162,7 @@ describe("bachs initialize route", () => {
 
     const headers = sentHeaders(fetchMock);
     expect(headers.Authorization).toBe("Bearer sk_sandbox_testkey");
-    expect(headers["Idempotency-Key"]).toMatch(/^checkout_hisdayspring-tithes-/);
+    expect(headers["Idempotency-Key"]).toMatch(/^checkout_[a-f0-9]{64}$/);
   });
 
   it("maps the payment method to a corridor server-side", async () => {
@@ -179,7 +200,6 @@ describe("bachs initialize route", () => {
       "tithes",
       "offerings",
       "seeds-and-donations",
-      "pastoral-giving",
     ]) {
       const fetchMock = mockFetch(successResponse);
       await bachsInitialize(makeRequest(donationBody(purpose)));
@@ -220,6 +240,15 @@ describe("bachs initialize route", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("rejects direct online pastoral giving so the donor cannot misroute it", async () => {
+    const fetchMock = mockFetch(successResponse);
+    const response = await bachsInitialize(
+      makeRequest(donationBody("pastoral-giving"))
+    );
+    expect(response.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
   it("surfaces the account's real deposit limit on rejection", async () => {
     const fetchMock = mockFetch(
       {
@@ -250,7 +279,7 @@ describe("bachs initialize route", () => {
 
     expect(body.checkoutId).toBe("chk_2N3o4P5q6R7s8T9u");
     expect(body.authorizationUrl).toBe(
-      "https://checkout.bachs.io/c/V8xQ2mZpLj9RfTa"
+      "https://sandbox-checkout.bachs.io/c/V8xQ2mZpLj9RfTa"
     );
   });
 });
@@ -259,6 +288,7 @@ describe("bachs verify route", () => {
   const originalKey = process.env.BACHS_SECRET_KEY;
 
   beforeEach(() => {
+    resetPaymentRateLimitsForTests();
     process.env.BACHS_SECRET_KEY = "sk_sandbox_testkey";
     delete process.env.BACHS_API_BASE_URL;
   });
@@ -271,11 +301,15 @@ describe("bachs verify route", () => {
     jest.restoreAllMocks();
   });
 
-  it("treats only a completed checkout as paid", async () => {
+  it("treats only a fully paid checkout as paid", async () => {
     const fetchMock = mockFetch({
       checkout_id: "chk_abc",
       status: "completed",
       reference: "hisdayspring-tithes-1",
+      amount_paid: "5000.00",
+      amount_remaining: "0.00",
+      currency: "NGN",
+      metadata: { type: "donation", amount: "5000.00" },
     });
 
     const response = await bachsVerify(makeRequest({ checkoutId: "chk_abc" }));
@@ -287,9 +321,26 @@ describe("bachs verify route", () => {
     );
   });
 
+  it("does not treat checkout.completed without a collected payment as paid", async () => {
+    mockFetch({
+      checkout_id: "chk_unpaid",
+      status: "completed",
+      metadata: { type: "book-order", items: "made-to-be-whole:1", fulfillment: "pickup" },
+    });
+    const response = await bachsVerify(makeRequest({ checkoutId: "chk_unpaid" }));
+    expect((await response.json()).success).toBe(false);
+  });
+
   it("does not treat an open or expired checkout as paid", async () => {
     for (const status of ["open", "expired", "cancelled"]) {
-      mockFetch({ checkout_id: "chk_abc", status });
+      mockFetch({
+        checkout_id: "chk_abc",
+        status,
+        amount_paid: "5000.00",
+        amount_remaining: "0.00",
+        currency: "NGN",
+        metadata: { type: "donation", amount: "5000.00" },
+      });
       const response = await bachsVerify(makeRequest({ checkoutId: "chk_abc" }));
       const body = await response.json();
 

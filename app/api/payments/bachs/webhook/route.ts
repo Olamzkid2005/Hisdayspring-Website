@@ -3,6 +3,7 @@ import {
   getBachsWebhookSecret,
   verifyBachsWebhookSignature,
 } from "@/lib/server/bachs";
+import { readRequestText } from "@/lib/server/request-guards";
 
 interface BachsEventEnvelope {
   id?: string;
@@ -45,7 +46,14 @@ const HANDLED_EVENTS = new Set([
  * this project does not yet have.
  */
 export async function POST(request: Request) {
-  const rawBody = await request.text();
+  const raw = await readRequestText(request, 256 * 1024);
+  if (!raw.ok) {
+    return NextResponse.json(
+      { success: false, message: "Invalid webhook payload" },
+      { status: raw.reason === "too-large" ? 413 : 400 }
+    );
+  }
+  const rawBody = raw.text;
 
   const isValid = verifyBachsWebhookSignature({
     rawBody,

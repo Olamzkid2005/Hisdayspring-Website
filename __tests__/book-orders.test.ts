@@ -29,8 +29,20 @@ import { books, PDF_DELIVERY_ENABLED } from "@/data/books";
 const ORIGIN = "https://hisdayspring.org";
 
 function makeRequest(body: unknown): Request {
+  const bytes = new Uint8Array(Buffer.from(JSON.stringify(body)));
+  let consumed = false;
   return {
-    json: async () => body,
+    body: {
+      getReader: () => ({
+        read: async () => {
+          if (consumed) return { done: true, value: undefined };
+          consumed = true;
+          return { done: false, value: bytes };
+        },
+        cancel: async () => undefined,
+        releaseLock: () => undefined,
+      }),
+    },
     url: `${ORIGIN}/api/payments/bachs/book-order/initialize`,
     headers: new Headers(),
   } as unknown as Request;
@@ -81,11 +93,11 @@ describe("priceBookOrder", () => {
     expect(order!.itemsToken).toBe("made-to-be-whole:2");
   });
 
-  it("merges duplicate titles and clamps quantities into bounds", () => {
+  it("merges duplicate titles up to the per-title cap", () => {
     const order = priceBookOrder(
       [
         { bookId: "made-to-be-whole", quantity: 1 },
-        { bookId: "made-to-be-whole", quantity: 50 },
+        { bookId: "made-to-be-whole", quantity: 19 },
       ],
       "pdf"
     );
@@ -163,11 +175,63 @@ describe("decodeBookOrder", () => {
     );
     expect(order).not.toBeNull();
 
-    const decoded = decodeBookOrder(order!.itemsToken, "pdf");
+    const decoded = decodeBookOrder(
+      order!.itemsToken,
+      "pdf",
+      order!.orderSnapshot
+    );
     expect(decoded).not.toBeNull();
     expect(decoded!.total).toBe(madeToBeWhole.price * 3);
     expect(decoded!.lines[0].title).toBe(madeToBeWhole.title);
     expect(decoded!.catalogMatch).toBe(true);
+  });
+
+  it("preserves the checkout-time price snapshot after the catalog price changes", () => {
+    const order = priceBookOrder(
+      [{ bookId: "made-to-be-whole", quantity: 2 }],
+      "pickup"
+    );
+    expect(order).not.toBeNull();
+    const snapshot = JSON.parse(order!.orderSnapshot) as {
+      version: number;
+      lines: Array<{ unitPrice: number }>;
+    };
+    snapshot.lines[0].unitPrice = 2500;
+    snapshot.lines[0] = {
+      ...snapshot.lines[0],
+      unitPrice: 2500,
+      lineTotal: 5000,
+    } as (typeof snapshot.lines)[number];
+
+    const decoded = decodeBookOrder(
+      order!.itemsToken,
+      "pickup",
+      JSON.stringify(snapshot)
+    );
+    expect(decoded).toMatchObject({ total: 5000, catalogMatch: false });
+    expect(decoded?.lines[0].unitPrice).toBe(2500);
+  });
+
+  it("rejects malformed and inconsistent order snapshots", () => {
+    expect(decodeBookOrder("made-to-be-whole:1", "pickup", "{}" )).toBeNull();
+    expect(
+      decodeBookOrder(
+        "made-to-be-whole:1",
+        "pickup",
+        JSON.stringify({
+          version: 1,
+          lines: [
+            {
+              bookId: "made-to-be-whole",
+              title: "Made To Be Whole",
+              quantity: 2,
+              unitPrice: 2000,
+              lineTotal: 4000,
+            },
+          ],
+        })
+      )
+    ).toBeNull();
   });
 
   it("flags orders that no longer match the catalog instead of failing", () => {
@@ -262,7 +326,7 @@ describe("book-order initialize route", () => {
   it("prices server-side and records the order in metadata", async () => {
     const fetchMock = mockFetch({
       checkout_id: "chk_order123",
-      checkout_url: "https://checkout.bachs.io/c/abc",
+      checkout_url: "https://sandbox-checkout.bachs.io/c/abc",
       status: "open",
       reference: "hisdayspring-book-x",
     });

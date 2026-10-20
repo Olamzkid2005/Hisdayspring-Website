@@ -31,6 +31,10 @@ import {
   verifyDonation,
 } from "@/lib/api/bachs";
 import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
+import {
+  clearCheckoutIdempotencyKey,
+  getCheckoutIdempotencyKey,
+} from "@/lib/api/payment-idempotency";
 import type { DonationPurpose, PaymentMethod } from "@/types";
 
 const PRESET_AMOUNTS = [1000, 2500, 5000, 10000];
@@ -131,11 +135,17 @@ export default function GivingClient() {
       const verified = await verifyDonation(checkoutId);
       if (cancelled) return;
 
-      // Consume the stash and strip the parameter only once settled, so a
-      // pending checkout (bank transfer not yet reflected) survives a refresh
-      // and can be re-verified — while a confirmed one cannot be replayed.
-      clearLastCheckoutId();
-      window.history.replaceState({}, "", window.location.pathname);
+      // Keep the checkout id and idempotency key while a transfer is still
+      // pending or verification is temporarily unavailable. Clear both only
+      // after success or a terminal provider state, so retries reuse the same
+      // provider checkout but a later intentional attempt gets a fresh key.
+      const resolved = verified.success ||
+        (verified.status !== undefined && verified.status !== "open");
+      if (resolved) {
+        clearLastCheckoutId();
+        clearCheckoutIdempotencyKey("donation");
+        window.history.replaceState({}, "", window.location.pathname);
+      }
 
       if (verified.success) {
         setSuccessReference(checkoutId);
@@ -223,26 +233,38 @@ export default function GivingClient() {
     setIsSubmitting(true);
     setError(null);
 
-    // Every method completes on Bachs' hosted checkout, including bank
-    // transfer. The gateway is chosen server-side from the payment method.
-    const result = await initializeDonation({
-      email: donorEmail,
-      amount,
-      name: donorName,
-      phone: donorPhone,
-      purpose,
-      paymentMethod,
-    });
+    try {
+      // Every method completes on Bachs' hosted checkout, including bank
+      // transfer. The gateway is chosen server-side from the payment method.
+      const result = await initializeDonation({
+        idempotencyKey: await getCheckoutIdempotencyKey("donation", {
+          email: donorEmail.trim(),
+          amount,
+          name: donorName.trim(),
+          phone: donorPhone.trim(),
+          purpose,
+          paymentMethod,
+        }),
+        email: donorEmail,
+        amount,
+        name: donorName,
+        phone: donorPhone,
+        purpose,
+        paymentMethod,
+      });
 
-    setIsSubmitting(false);
-
-    if (result.success && result.authorizationUrl) {
-      // Stash the id — Bachs' hosted page should append ?checkout_id= on the
-      // way back, but currently redirects to the bare success_url.
-      if (result.checkoutId) stashLastCheckoutId(result.checkoutId);
-      window.location.assign(result.authorizationUrl);
-    } else {
-      setError(result.message || "Payment initialization failed. Please try again.");
+      if (result.success && result.authorizationUrl) {
+        // Stash the id — Bachs' hosted page should append ?checkout_id= on the
+        // way back, but currently redirects to the bare success_url.
+        if (result.checkoutId) stashLastCheckoutId(result.checkoutId);
+        window.location.assign(result.authorizationUrl);
+      } else {
+        setError(result.message || "Payment initialization failed. Please try again.");
+      }
+    } catch {
+      setError("Unable to reach the payment service. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

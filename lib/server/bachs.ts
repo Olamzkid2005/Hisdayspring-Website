@@ -45,6 +45,9 @@ export interface BachsCheckoutSession {
   completedAt?: string;
   /** Metadata echoed back by the API; used to decode book orders. */
   metadata?: Record<string, unknown>;
+  amountPaid?: number | string;
+  amountRemaining?: number | string;
+  currency?: string;
   /** Payment corridor used, when the API reports it (e.g. `NGN_CARD`). */
   paymentMethod?: string;
 }
@@ -84,7 +87,18 @@ export function resolveBachsBaseUrl(
 }
 
 export function isBachsConfigured(): boolean {
-  return Boolean(getBachsSecretKey() && resolveBachsBaseUrl());
+  const secretKey = getBachsSecretKey();
+  const baseUrl = resolveBachsBaseUrl(secretKey);
+  if (!secretKey || !baseUrl) return false;
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_SANDBOX_PAYMENTS_IN_PRODUCTION !== "true"
+  ) {
+    return secretKey.startsWith("sk_live_") && baseUrl === PRODUCTION_BASE_URL;
+  }
+
+  return true;
 }
 
 /**
@@ -163,9 +177,13 @@ function toCheckoutSession(data: unknown): BachsCheckoutSession | null {
         : undefined;
   if (!checkoutId) return null;
 
-  const status =
-    typeof value.status === "string"
-      ? (value.status as BachsCheckoutStatus)
+  const rawStatus = value.status;
+  const status: BachsCheckoutStatus =
+    rawStatus === "completed" ||
+    rawStatus === "expired" ||
+    rawStatus === "cancelled" ||
+    rawStatus === "open"
+      ? rawStatus
       : "open";
 
   return {
@@ -189,6 +207,31 @@ function toCheckoutSession(data: unknown): BachsCheckoutSession | null {
       value.metadata && typeof value.metadata === "object"
         ? (value.metadata as Record<string, unknown>)
         : undefined,
+    amountPaid:
+      typeof value.amount_paid === "number" || typeof value.amount_paid === "string"
+        ? value.amount_paid
+        : value.charge && typeof value.charge === "object" &&
+            (typeof (value.charge as Record<string, unknown>).amount_paid === "number" ||
+              typeof (value.charge as Record<string, unknown>).amount_paid === "string")
+          ? ((value.charge as Record<string, unknown>).amount_paid as number | string)
+          : undefined,
+    amountRemaining:
+      typeof value.amount_remaining === "number" || typeof value.amount_remaining === "string"
+        ? value.amount_remaining
+        : value.charge && typeof value.charge === "object" &&
+            (typeof (value.charge as Record<string, unknown>).amount_remaining === "number" ||
+              typeof (value.charge as Record<string, unknown>).amount_remaining === "string")
+          ? ((value.charge as Record<string, unknown>).amount_remaining as number | string)
+          : undefined,
+    currency:
+      typeof value.currency === "string"
+        ? value.currency
+        : typeof value.billing_currency === "string"
+          ? value.billing_currency
+          : value.pricing && typeof value.pricing === "object" &&
+              typeof (value.pricing as Record<string, unknown>).currency === "string"
+            ? ((value.pricing as Record<string, unknown>).currency as string)
+            : undefined,
     paymentMethod:
       typeof value.payment_method === "string" ? value.payment_method : undefined,
   };
@@ -216,6 +259,16 @@ export async function createBachsCheckoutSession(
   if (!secretKey || !baseUrl) {
     return { ok: false, message: "Payment system is not configured" };
   }
+  if (
+    process.env.NODE_ENV === "production" &&
+    baseUrl === SANDBOX_BASE_URL &&
+    process.env.ALLOW_SANDBOX_PAYMENTS_IN_PRODUCTION !== "true"
+  ) {
+    return {
+      ok: false,
+      message: "Sandbox payments are disabled in production",
+    };
+  }
 
   const body = JSON.stringify({
     pricing: {
@@ -235,6 +288,8 @@ export async function createBachsCheckoutSession(
       phone: input.phone,
       purpose: input.purpose,
       type: input.type ?? "donation",
+      amount: formatBachsAmount(input.amount),
+      currency: BACHS_CURRENCY,
       source: "hisdayspring-website",
       ...input.metadataExtras,
     },
@@ -252,6 +307,7 @@ export async function createBachsCheckoutSession(
     try {
       const response = await fetch(`${baseUrl}/v1/checkout-sessions`, {
         method: "POST",
+        signal: AbortSignal.timeout(10_000),
         headers: {
           Authorization: `Bearer ${secretKey}`,
           "Content-Type": "application/json",
@@ -278,10 +334,27 @@ export async function createBachsCheckoutSession(
       }
 
       const session = toCheckoutSession(data);
-      if (!session || !session.checkoutUrl) {
+      const expectedCheckoutHost =
+        baseUrl === SANDBOX_BASE_URL
+          ? "sandbox-checkout.bachs.io"
+          : "checkout.bachs.io";
+      let checkoutUrl: URL | undefined;
+      try {
+        checkoutUrl = new URL(session?.checkoutUrl ?? "");
+      } catch {
+        checkoutUrl = undefined;
+      }
+      if (
+        !session ||
+        !checkoutUrl ||
+        checkoutUrl.protocol !== "https:" ||
+        checkoutUrl.hostname !== expectedCheckoutHost ||
+        checkoutUrl.username ||
+        checkoutUrl.password
+      ) {
         return {
           ok: false,
-          message: "Payment provider returned an unexpected response",
+          message: "Payment provider returned an unexpected checkout URL",
         };
       }
 
@@ -315,6 +388,13 @@ export async function getBachsCheckoutSession(
   if (!secretKey || !baseUrl) {
     return { ok: false, message: "Payment system is not configured" };
   }
+  if (
+    process.env.NODE_ENV === "production" &&
+    process.env.ALLOW_SANDBOX_PAYMENTS_IN_PRODUCTION !== "true" &&
+    baseUrl !== PRODUCTION_BASE_URL
+  ) {
+    return { ok: false, message: "Sandbox payments are disabled in production" };
+  }
 
   try {
     const response = await fetch(
@@ -324,6 +404,7 @@ export async function getBachsCheckoutSession(
           Authorization: `Bearer ${secretKey}`,
           Accept: "application/json",
         },
+        signal: AbortSignal.timeout(10_000),
         cache: "no-store",
       }
     );

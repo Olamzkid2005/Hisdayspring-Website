@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getBachsCheckoutSession, isBachsConfigured } from "@/lib/server/bachs";
 import { decodeBookOrder } from "@/lib/server/book-orders";
+import { checkPaymentRateLimit, readJsonBody } from "@/lib/server/request-guards";
+import { PRICE_TOLERANCE_NGN } from "@/lib/server/payments";
 
 /**
  * Confirm a checkout server-side.
@@ -11,6 +13,17 @@ import { decodeBookOrder } from "@/lib/server/book-orders";
  * trusting the URL. Webhooks remain the source of truth for fulfilment.
  */
 export async function POST(request: Request) {
+  const rateLimit = checkPaymentRateLimit(request, "checkout-verify", 60, 60_000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: "Too many verification attempts. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      }
+    );
+  }
+
   if (!isBachsConfigured()) {
     return NextResponse.json(
       { success: false, message: "Payment system is not configured" },
@@ -18,12 +31,17 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: { checkoutId?: unknown };
-  try {
-    body = await request.json();
-  } catch {
+  const parsed = await readJsonBody(request, 4 * 1024);
+  if (!parsed.ok) {
     return NextResponse.json(
       { success: false, message: "Invalid request body" },
+      { status: parsed.reason === "too-large" ? 413 : 400 }
+    );
+  }
+  const body = parsed.value as { checkoutId?: unknown } | null;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json(
+      { success: false, message: "A valid checkout ID is required" },
       { status: 400 }
     );
   }
@@ -51,13 +69,59 @@ export async function POST(request: Request) {
 
   // `completed` is the only terminal success state; `open`, `expired` and
   // `cancelled` all mean no money moved.
-  const isSuccessful = result.data.status === "completed";
+  const isCompleted = result.data.status === "completed";
 
   const metadata = result.data.metadata;
-  const order =
-    metadata && isSuccessful
-      ? decodeBookOrder(metadata.items, metadata.fulfillment)
+  const decodedOrder =
+    metadata && isCompleted
+      ? decodeBookOrder(
+          metadata.items,
+          metadata.fulfillment,
+          metadata.order_snapshot
+        )
       : null;
+  const expectedAmount =
+    typeof metadata?.type === "string" && metadata.type === "donation"
+      ? typeof metadata.amount === "string"
+        ? Number(metadata.amount)
+        : undefined
+      : undefined;
+  const paidAmountRaw = result.data.amountPaid;
+  const parsedPaidAmount =
+    typeof paidAmountRaw === "number"
+      ? paidAmountRaw
+      : typeof paidAmountRaw === "string" && /^\d+(?:\.\d{1,2})?$/.test(paidAmountRaw)
+        ? Number(paidAmountRaw)
+        : undefined;
+  const amountRemaining =
+    typeof result.data.amountRemaining === "number"
+      ? result.data.amountRemaining
+      : typeof result.data.amountRemaining === "string" &&
+          /^\d+(?:\.\d{1,2})?$/.test(result.data.amountRemaining)
+        ? Number(result.data.amountRemaining)
+        : undefined;
+  const paidAmountValid =
+    parsedPaidAmount !== undefined &&
+    Number.isFinite(parsedPaidAmount) &&
+    parsedPaidAmount > 0 &&
+    amountRemaining !== undefined &&
+    Number.isFinite(amountRemaining) &&
+    amountRemaining <= PRICE_TOLERANCE_NGN &&
+    result.data.currency === "NGN";
+  const amountMatchesOrder =
+    metadata?.type === "book-order"
+      ? decodedOrder !== null &&
+        paidAmountValid &&
+        Math.abs(parsedPaidAmount! - decodedOrder.total) <= PRICE_TOLERANCE_NGN
+      : true;
+  const amountMatchesDonation =
+    metadata?.type === "donation"
+      ? paidAmountValid &&
+        expectedAmount !== undefined &&
+        Math.abs(parsedPaidAmount! - expectedAmount) <= PRICE_TOLERANCE_NGN
+      : true;
+  const order =
+    decodedOrder && amountMatchesOrder ? decodedOrder : null;
 
   // The buyer's name and phone come from the checkout metadata (set by our
   // own initialize route) — used on the staff verify page to hand over the
@@ -71,6 +135,14 @@ export async function POST(request: Request) {
             typeof metadata.phone === "string" ? metadata.phone : undefined,
         }
       : undefined;
+
+  const isSuccessful =
+    isCompleted &&
+    (metadata?.type === "book-order"
+      ? amountMatchesOrder
+      : metadata?.type === "donation"
+        ? amountMatchesDonation
+        : false);
 
   return NextResponse.json({
     success: isSuccessful,

@@ -3,6 +3,7 @@ import { getBachsCheckoutSession, isBachsConfigured } from "@/lib/server/bachs";
 import { decodeBookOrder } from "@/lib/server/book-orders";
 import { books, bookPdfUrl } from "@/data/books";
 import { getCloudinaryCloudName } from "@/lib/cdn/cloudinary-cloud-name";
+import { checkPaymentRateLimit } from "@/lib/server/request-guards";
 
 /**
  * Paid PDF delivery, stateless.
@@ -15,6 +16,17 @@ import { getCloudinaryCloudName } from "@/lib/cdn/cloudinary-cloud-name";
  * payment, and it is a per-checkout code the buyer was shown on their receipt.
  */
 export async function GET(request: Request) {
+  const rateLimit = checkPaymentRateLimit(request, "book-download", 30, 60_000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: "Too many download attempts. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      }
+    );
+  }
+
   if (!isBachsConfigured()) {
     return NextResponse.json(
       { success: false, message: "Payment system is not configured" },
@@ -52,7 +64,11 @@ export async function GET(request: Request) {
 
   const metadata = result.data.metadata;
   const order = metadata
-    ? decodeBookOrder(metadata.items, metadata.fulfillment)
+    ? decodeBookOrder(
+        metadata.items,
+        metadata.fulfillment,
+        metadata.order_snapshot
+      )
     : null;
 
   if (!order) {
@@ -61,6 +77,34 @@ export async function GET(request: Request) {
         success: false,
         message: "This checkout is not a book order.",
       },
+      { status: 403 }
+    );
+  }
+
+  const amountPaid =
+    typeof result.data.amountPaid === "number"
+      ? result.data.amountPaid
+      : typeof result.data.amountPaid === "string" &&
+          /^\d+(?:\.\d{1,2})?$/.test(result.data.amountPaid)
+        ? Number(result.data.amountPaid)
+        : undefined;
+  const amountRemaining =
+    typeof result.data.amountRemaining === "number"
+      ? result.data.amountRemaining
+      : typeof result.data.amountRemaining === "string" &&
+          /^\d+(?:\.\d{1,2})?$/.test(result.data.amountRemaining)
+        ? Number(result.data.amountRemaining)
+        : undefined;
+  if (
+    metadata?.type !== "book-order" ||
+    result.data.currency !== "NGN" ||
+    amountPaid === undefined ||
+    amountRemaining === undefined ||
+    amountRemaining > 0.01 ||
+    Math.abs(amountPaid - order.total) > 0.01
+  ) {
+    return NextResponse.json(
+      { success: false, message: "Payment amount does not match this order." },
       { status: 403 }
     );
   }
@@ -76,7 +120,16 @@ export async function GET(request: Request) {
     );
   }
 
-  const book = books.find((candidate) => candidate.id === bookId)!;
+  const book = books.find((candidate) => candidate.id === bookId);
+  if (!book) {
+    return NextResponse.json(
+      {
+        success: false,
+        message: "This book is no longer available for PDF delivery.",
+      },
+      { status: 403 }
+    );
+  }
   if (
     order.fulfillment !== "pdf" ||
     (book.format !== "ebook" && book.format !== "both")

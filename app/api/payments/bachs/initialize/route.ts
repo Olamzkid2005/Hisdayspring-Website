@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import {
   isValidDonationAmount,
@@ -12,6 +11,12 @@ import {
   type BachsCorridor,
 } from "@/lib/server/bachs";
 import { getSiteOrigin } from "@/lib/server/site-url";
+import {
+  checkPaymentRateLimit,
+  deriveCheckoutIdentity,
+  getPaymentIdempotencyKey,
+  readJsonBody,
+} from "@/lib/server/request-guards";
 import type { PaymentMethod } from "@/types";
 
 /**
@@ -51,6 +56,17 @@ interface InitializeRequest {
  * pastoral-giving upgrade path.
  */
 export async function POST(request: Request) {
+  const rateLimit = checkPaymentRateLimit(request, "donation-init", 10, 60_000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: "Too many checkout attempts. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      }
+    );
+  }
+
   if (!isBachsConfigured()) {
     return NextResponse.json(
       { success: false, message: "Payment system is not configured" },
@@ -58,12 +74,23 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: InitializeRequest;
-  try {
-    body = await request.json();
-  } catch {
+  const parsed = await readJsonBody(request, 16 * 1024);
+  if (!parsed.ok) {
     return NextResponse.json(
-      { success: false, message: "Invalid request body" },
+      {
+        success: false,
+        message:
+          parsed.reason === "too-large"
+            ? "Request body is too large"
+            : "Invalid request body",
+      },
+      { status: parsed.reason === "too-large" ? 413 : 400 }
+    );
+  }
+  const body = parsed.value as InitializeRequest;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json(
+      { success: false, message: "Invalid donation details" },
       { status: 400 }
     );
   }
@@ -83,11 +110,30 @@ export async function POST(request: Request) {
   }
 
   const metadata: PaymentMetadata = body.metadata;
+  if (metadata.purpose === "pastoral-giving") {
+    return NextResponse.json(
+      {
+        success: false,
+        message:
+          "Pastoral gifts are bank-transfer only. Please use the account details on the giving page.",
+      },
+      { status: 400 }
+    );
+  }
   const origin = getSiteOrigin(request.url);
 
-  // Ties the reference and the idempotency key to one logical checkout, so a
-  // transport retry inside the client cannot mint a second session.
-  const reference = `hisdayspring-${metadata.purpose}-${randomUUID()}`;
+  const clientIdempotencyKey = getPaymentIdempotencyKey(request);
+  const { reference, idempotencyKey } = deriveCheckoutIdentity(
+    "donation",
+    metadata.purpose,
+    clientIdempotencyKey,
+    {
+      email: body.email,
+      amount: body.amount,
+      paymentMethod: body.paymentMethod,
+      metadata,
+    }
+  );
 
   const result = await createBachsCheckoutSession({
     amount: body.amount,
@@ -99,7 +145,7 @@ export async function POST(request: Request) {
     // Bachs appends `?checkout_id=` to the success URL itself.
     successUrl: `${origin}/giving`,
     cancelUrl: `${origin}/giving`,
-    idempotencyKey: `checkout_${reference}`,
+    idempotencyKey,
     reference,
   });
 

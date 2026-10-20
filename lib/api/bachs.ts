@@ -56,12 +56,16 @@ export function clearLastCheckoutId(): void {
 
 async function postPaymentRoute(
   path: string,
-  body: Record<string, unknown>
+  body: Record<string, unknown>,
+  idempotencyKey?: string
 ): Promise<PaymentResponse> {
   try {
     const response = await fetch(path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
+      },
       body: JSON.stringify(body),
     });
     const data = (await response.json()) as PaymentResponse;
@@ -84,6 +88,8 @@ async function postPaymentRoute(
 }
 
 export interface DonationCheckoutInput {
+  /** Stable across retries of the same unchanged checkout attempt. */
+  idempotencyKey?: string;
   email: string;
   /** Amount in Naira, as the donor entered it. */
   amount: number;
@@ -102,17 +108,21 @@ export interface DonationCheckoutInput {
 export async function initializeDonation(
   input: DonationCheckoutInput
 ): Promise<PaymentResponse> {
-  return postPaymentRoute("/api/payments/bachs/initialize", {
-    email: input.email,
-    amount: input.amount,
-    paymentMethod: input.paymentMethod,
-    metadata: {
-      name: input.name,
-      phone: input.phone,
-      purpose: input.purpose,
-      type: "donation",
+  return postPaymentRoute(
+    "/api/payments/bachs/initialize",
+    {
+      email: input.email,
+      amount: input.amount,
+      paymentMethod: input.paymentMethod,
+      metadata: {
+        name: input.name,
+        phone: input.phone,
+        purpose: input.purpose,
+        type: "donation",
+      },
     },
-  });
+    input.idempotencyKey
+  );
 }
 
 /**
@@ -195,6 +205,8 @@ export interface VerifiedBookOrder {
   lines: BookOrderLineView[];
   total: number;
   catalogMatch: boolean;
+  paymentMethod?: string;
+  paidAt?: string;
   buyer?: { name?: string; phone?: string };
 }
 
@@ -221,12 +233,13 @@ export async function verifyBookOrder(
       paidAt?: string;
       order: VerifiedBookOrder;
     }
-  | { success: false; message: string }
+  | { success: false; message: string; status?: string }
 > {
   try {
     const maxAttempts = (options.retries ?? 4) + 1;
     const delayMs = options.delayMs ?? 800;
     let lastMessage = "We could not confirm this payment.";
+    let lastStatus: string | undefined;
 
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       if (attempt > 0) {
@@ -271,11 +284,16 @@ export async function verifyBookOrder(
           reference: data.reference,
           paymentMethod: data.paymentMethod,
           paidAt: data.paidAt,
-          order: data.order,
+          order: {
+            ...data.order,
+            paymentMethod: data.paymentMethod,
+            paidAt: data.paidAt,
+          },
         };
       }
 
       lastMessage = data.message || "We could not confirm this payment.";
+      lastStatus = data.status;
 
       // Only the "exists but not settled yet" race is worth retrying.
       // Expired and cancelled are terminal — retrying cannot change them, and
@@ -283,7 +301,7 @@ export async function verifyBookOrder(
       if (data.status !== "open") break;
     }
 
-    return { success: false, message: lastMessage };
+    return { success: false, message: lastMessage, status: lastStatus };
   } catch {
     return {
       success: false,

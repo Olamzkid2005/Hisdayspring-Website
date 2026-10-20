@@ -9,6 +9,8 @@
 import { MIN_DONATION_AMOUNT } from "@/data/donations";
 
 export const PAYMENT_CURRENCY = "NGN";
+/** Allow one kobo for provider decimal normalization; no larger shortfall is paid. */
+export const PRICE_TOLERANCE_NGN = 0.01;
 
 /**
  * The NGN floor (100) is Bachs' minimum charge as well as ours, so it lives

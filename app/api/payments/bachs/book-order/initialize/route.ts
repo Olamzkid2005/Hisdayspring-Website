@@ -1,4 +1,3 @@
-import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { isValidEmail } from "@/lib/server/payments";
 import {
@@ -7,8 +6,14 @@ import {
   type BachsCorridor,
 } from "@/lib/server/bachs";
 import { priceBookOrder } from "@/lib/server/book-orders";
-import { PDF_DELIVERY_ENABLED } from "@/data/books";
+import { books, PDF_DELIVERY_ENABLED } from "@/data/books";
 import { getSiteOrigin } from "@/lib/server/site-url";
+import {
+  checkPaymentRateLimit,
+  deriveCheckoutIdentity,
+  getPaymentIdempotencyKey,
+  readJsonBody,
+} from "@/lib/server/request-guards";
 import type { PaymentMethod } from "@/types";
 
 /**
@@ -49,6 +54,17 @@ interface BookOrderInitializeRequest {
  * with no database.
  */
 export async function POST(request: Request) {
+  const rateLimit = checkPaymentRateLimit(request, "book-order-init", 10, 60_000);
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { success: false, message: "Too many checkout attempts. Try again shortly." },
+      {
+        status: 429,
+        headers: { "Retry-After": String(rateLimit.retryAfterSeconds) },
+      }
+    );
+  }
+
   if (!isBachsConfigured()) {
     return NextResponse.json(
       { success: false, message: "Payment system is not configured" },
@@ -56,12 +72,23 @@ export async function POST(request: Request) {
     );
   }
 
-  let body: BookOrderInitializeRequest;
-  try {
-    body = await request.json();
-  } catch {
+  const parsed = await readJsonBody(request, 32 * 1024);
+  if (!parsed.ok) {
     return NextResponse.json(
-      { success: false, message: "Invalid request body" },
+      {
+        success: false,
+        message:
+          parsed.reason === "too-large"
+            ? "Request body is too large"
+            : "Invalid request body",
+      },
+      { status: parsed.reason === "too-large" ? 413 : 400 }
+    );
+  }
+  const body = parsed.value as BookOrderInitializeRequest;
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return NextResponse.json(
+      { success: false, message: "Invalid order details" },
       { status: 400 }
     );
   }
@@ -108,7 +135,15 @@ export async function POST(request: Request) {
         success: false,
         message: isEmpty
           ? "Your order is empty. Add at least one book and try again."
-          : "We could not price this order. An item may no longer be available, so please refresh the page and try again.",
+          : Array.isArray(body.items) &&
+              body.items.some((item) => {
+                if (!item || typeof item !== "object") return false;
+                const bookId = (item as Record<string, unknown>).bookId;
+                const book = books.find((candidate) => candidate.id === bookId);
+                return Boolean(book && book.availability !== "in-stock");
+              })
+            ? "One or more books are not currently available for order. Please refresh the page."
+            : "We could not price this order. An item may no longer be available, so please refresh the page and try again.",
       },
       { status: 400 }
     );
@@ -116,7 +151,20 @@ export async function POST(request: Request) {
 
   const name = body.name.trim();
   const phone = body.phone.trim();
-  const reference = `hisdayspring-book-${randomUUID()}`;
+  const clientIdempotencyKey = getPaymentIdempotencyKey(request);
+  const { reference, idempotencyKey } = deriveCheckoutIdentity(
+    "book-order",
+    "book",
+    clientIdempotencyKey,
+    {
+      name,
+      email: body.email,
+      phone,
+      paymentMethod: body.paymentMethod,
+      fulfillment: order.fulfillment,
+      items: order.items,
+    }
+  );
 
   const result = await createBachsCheckoutSession({
     amount: order.total,
@@ -131,12 +179,13 @@ export async function POST(request: Request) {
     // orders their download links.
     successUrl: `${getSiteOrigin(request.url)}/books/receipt`,
     cancelUrl: `${getSiteOrigin(request.url)}/books`,
-    idempotencyKey: `checkout_${reference}`,
+    idempotencyKey,
     reference,
     type: "book-order",
     metadataExtras: {
       items: order.itemsToken,
       fulfillment: order.fulfillment,
+      order_snapshot: order.orderSnapshot,
     },
   });
 

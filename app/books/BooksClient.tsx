@@ -45,6 +45,10 @@ import {
 } from "@/lib/api/bachs";
 import { useBookCart } from "@/hooks/useBookCartCount";
 import { writeCart } from "@/lib/book-cart";
+import {
+  clearCheckoutIdempotencyKey,
+  getCheckoutIdempotencyKey,
+} from "@/lib/api/payment-idempotency";
 import type { BookOrderFulfillment, PaymentMethod } from "@/types";
 
 type Stage = "browse" | "checkout" | "paid";
@@ -108,10 +112,16 @@ export default function BooksClient() {
       const result = await verifyBookOrder(checkoutId);
       if (cancelled) return;
 
-      // Consume the stash and strip the parameter only once settled, so an
-      // unpaid/pending checkout survives a refresh and can be re-verified.
-      clearLastCheckoutId();
-      window.history.replaceState({}, "", window.location.pathname);
+      // Keep the checkout id and retry key for an open or temporarily
+      // unverifiable checkout. Clear them only after success or a terminal
+      // provider status, so a retry cannot accidentally create a second order.
+      const resolved = result.success ||
+        (result.status !== undefined && result.status !== "open");
+      if (resolved) {
+        clearLastCheckoutId();
+        clearCheckoutIdempotencyKey("book-order");
+        window.history.replaceState({}, "", window.location.pathname);
+      }
 
       if (result.success) {
         // The order is paid — the cart's job is done. Empty it (and persist
@@ -175,22 +185,30 @@ export default function BooksClient() {
 
     setIsSubmitting(true);
     try {
+      const orderPayload = {
+        name: buyerName.trim(),
+        email: buyerEmail.trim(),
+        phone: buyerPhone.trim(),
+        paymentMethod,
+        fulfillment,
+        items: cartLines.map((line) => ({
+          bookId: line.book.id,
+          quantity: line.quantity,
+        })),
+      };
+      const idempotencyKey = await getCheckoutIdempotencyKey(
+        "book-order",
+        orderPayload
+      );
       const response = await fetch(
         "/api/payments/bachs/book-order/initialize",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            name: buyerName.trim(),
-            email: buyerEmail.trim(),
-            phone: buyerPhone.trim(),
-            paymentMethod,
-            fulfillment,
-            items: cartLines.map((line) => ({
-              bookId: line.book.id,
-              quantity: line.quantity,
-            })),
-          }),
+          headers: {
+            "Content-Type": "application/json",
+            "Idempotency-Key": idempotencyKey,
+          },
+          body: JSON.stringify(orderPayload),
         }
       );
       const data = (await response.json()) as {

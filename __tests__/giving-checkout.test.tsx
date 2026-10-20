@@ -104,6 +104,10 @@ describe("/giving checkout flow", () => {
       purpose: "tithes",
       type: "donation",
     });
+    expect((init.headers as Record<string, string>)["Idempotency-Key"]).toMatch(
+      /^[A-Za-z0-9-]{8,64}$/
+    );
+    expect(window.sessionStorage.getItem("hds-payment-idempotency:donation")).not.toBeNull();
   });
 
   it("asks for a bank-transfer corridor when that method is chosen", async () => {
@@ -196,6 +200,10 @@ describe("/giving checkout flow", () => {
     const navigated = spyOnNavigation();
 
     // The return path reads the query string on mount.
+    window.sessionStorage.setItem(
+      "hds-payment-idempotency:donation",
+      JSON.stringify({ digest: "checkout-digest", key: "retry-key-123456" })
+    );
     setUrl("?checkout_id=chk_abc");
     const replaceState = jest.spyOn(window.history, "replaceState");
 
@@ -213,8 +221,9 @@ describe("/giving checkout flow", () => {
     expect(screen.getByText("chk_abc")).toBeInTheDocument();
     // The parameter is stripped so a refresh cannot replay the confirmation.
     expect(replaceState).toHaveBeenCalled();
-    // Confirming a payment must not start another one.
+    // Confirming a payment must not start another one, and resolves the retry key.
     expect(navigated()).toBe(false);
+    expect(window.sessionStorage.getItem("hds-payment-idempotency:donation")).toBeNull();
   });
 
   it("refuses to thank the donor for a checkout that did not complete", async () => {

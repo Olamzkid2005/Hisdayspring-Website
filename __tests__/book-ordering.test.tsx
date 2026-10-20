@@ -168,6 +168,7 @@ describe("/books ordering", () => {
     expect(window.sessionStorage.getItem("hds-last-checkout-id")).toBe(
       "chk_stashme"
     );
+    expect(window.sessionStorage.getItem("hds-payment-idempotency:book-order")).not.toBeNull();
     errorSpy.mockRestore();
   });
 
@@ -662,6 +663,7 @@ describe("/books receipt page", () => {
     expect(screen.getByText(/hisdayspring-book-abc/i)).toBeInTheDocument();
     // The stash is consumed once verified.
     expect(window.sessionStorage.getItem("hds-last-checkout-id")).toBeNull();
+    expect(window.sessionStorage.getItem("hds-payment-idempotency:book-order")).toBeNull();
   });
 
   it("recovers when the session settles after the redirect (race)", async () => {
@@ -691,6 +693,10 @@ describe("/books receipt page", () => {
       status: 200,
       body: { success: false, status: "open", message: "This checkout has not been completed" },
     });
+    window.sessionStorage.setItem(
+      "hds-payment-idempotency:book-order",
+      JSON.stringify({ digest: "checkout-digest", key: "retry-key-123456" })
+    );
 
     setUrl("?checkout_id=chk_pending");
     render(<BookReceiptPage />);
@@ -700,6 +706,7 @@ describe("/books receipt page", () => {
       { timeout: 3000 }
     );
     expect(screen.queryByText(/Payment received/i)).not.toBeInTheDocument();
+    expect(window.sessionStorage.getItem("hds-payment-idempotency:book-order")).not.toBeNull();
 
     // The buyer pays the transfer before it reflects; re-checking after the
     // settlement shows the receipt.
@@ -710,6 +717,7 @@ describe("/books receipt page", () => {
       () => expect(screen.getByText(/Payment received/i)).toBeInTheDocument(),
       { timeout: 3000 }
     );
+    expect(window.sessionStorage.getItem("hds-payment-idempotency:book-order")).toBeNull();
   });
 
   it("shows the invalid state for a malformed link", async () => {

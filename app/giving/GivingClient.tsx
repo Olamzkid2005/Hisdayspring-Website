@@ -31,6 +31,7 @@ import {
   verifyDonation,
 } from "@/lib/api/bachs";
 import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
+import { downloadReceiptPdf } from "@/lib/receipt-pdf";
 import {
   clearCheckoutIdempotencyKey,
   getCheckoutIdempotencyKey,
@@ -54,6 +55,12 @@ const bgImages = [
 
 export default function GivingClient() {
   const [amount, setAmount] = useState<number>(0);
+  const [paidDonationDetails, setPaidDonationDetails] = useState<{
+    amount: number;
+    purpose: string;
+    paymentMethod?: string;
+    paidAt?: string;
+  } | null>(null);
   const [customAmount, setCustomAmount] = useState<string>("");
   const [purpose, setPurpose] = useState<DonationPurpose | "">("");
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("card-payment");
@@ -147,7 +154,18 @@ export default function GivingClient() {
         window.history.replaceState({}, "", window.location.pathname);
       }
 
-      if (verified.success) {
+      if (verified.success && verified.amount !== undefined) {
+        setPaidDonationDetails({
+          amount: verified.amount,
+          purpose: verified.purpose ?? "",
+          paymentMethod: verified.paymentMethod,
+          paidAt: verified.paidAt,
+        });
+        setAmount(verified.amount);
+        const verifiedPurpose = donationPurposes.find(
+          (item) => item.id === verified.purpose
+        );
+        if (verifiedPurpose) setPurpose(verifiedPurpose.id);
         setSuccessReference(checkoutId);
         setShowSuccess(true);
       } else {
@@ -339,6 +357,41 @@ export default function GivingClient() {
             <p className="text-sm text-on-surface-variant mb-6">
               Please keep your reference for your records.
             </p>
+            {successReference && (
+              <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    downloadReceiptPdf(
+                      {
+                        title: "DONATION RECEIPT",
+                        reference: successReference,
+                        paymentMethod: paidDonationDetails?.paymentMethod ?? "Verified payment",
+                        paidAt: paidDonationDetails?.paidAt
+                          ? new Date(paidDonationDetails.paidAt).toLocaleString("en-NG", {
+                              timeZone: "Africa/Lagos",
+                            })
+                          : undefined,
+                        lines: [
+                          {
+                            label:
+                              donationPurposes.find(
+                                (item) => item.id === paidDonationDetails?.purpose
+                              )?.label ?? "Donation",
+                            amount: paidDonationDetails?.amount ?? amount,
+                          },
+                        ],
+                        total: paidDonationDetails?.amount ?? amount,
+                      },
+                      `hisdayspring-donation-receipt-${successReference.slice(-12)}`
+                    )
+                  }
+                >
+                  Download receipt (PDF)
+                </Button>
+              </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
@@ -346,6 +399,7 @@ export default function GivingClient() {
                 onClick={() => {
                   setShowSuccess(false);
                   setSuccessReference(null);
+                  setPaidDonationDetails(null);
                   setAmount(0);
                   setPurpose("");
                   setDonorName("");

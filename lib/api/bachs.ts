@@ -137,6 +137,10 @@ export type DonationVerifyResult = {
   /** True when the checkout exists but has not settled yet (worth re-checking). */
   pending: boolean;
   status?: string;
+  amount?: number;
+  purpose?: string;
+  paymentMethod?: string;
+  paidAt?: string;
 };
 
 export async function verifyDonation(
@@ -170,6 +174,9 @@ export async function verifyDonation(
         success?: boolean;
         status?: string;
         message?: string;
+        paymentMethod?: string;
+        paidAt?: string;
+        donation?: { amount?: number; purpose?: string };
       };
       try {
         data = (await response.json()) as typeof data;
@@ -181,7 +188,15 @@ export async function verifyDonation(
       // Only the "exists but not settled yet" race is worth retrying.
       // Expired/cancelled are terminal; a bogus id never returns a status.
       const pending = status === "open";
-      last = { success: data.success === true, pending, status };
+      last = {
+        success: data.success === true,
+        pending,
+        status,
+        amount: data.donation?.amount,
+        purpose: data.donation?.purpose,
+        paymentMethod: data.paymentMethod,
+        paidAt: data.paidAt,
+      };
 
       if (last.success || !pending) break;
     }

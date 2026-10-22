@@ -533,6 +533,42 @@ describe("/books receipt page", () => {
     expect(screen.getByText(/hisdayspring-book-abc/i)).toBeInTheDocument();
     expect(screen.getByText(/Card payment/i)).toBeInTheDocument();
     expect(screen.getByText(/Jane Buyer/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Download receipt \(PDF\)/i })
+    ).toBeInTheDocument();
+  });
+
+  it("downloads a genuine PDF receipt when the receipt download action is clicked", async () => {
+    mockFetch(verifyResponse());
+    jest.useFakeTimers();
+    const createObjectURL = jest.fn(() => "blob:receipt-test");
+    const revokeObjectURL = jest.fn();
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: createObjectURL,
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeObjectURL,
+    });
+    let clickedAnchor: HTMLAnchorElement | undefined;
+    jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(function (this: HTMLAnchorElement) {
+      clickedAnchor = this;
+    });
+
+    setUrl("?checkout_id=chk_receipt1");
+    render(<BookReceiptPage />);
+    fireEvent.click(
+      await screen.findByRole("button", { name: /Download receipt \(PDF\)/i })
+    );
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect((createObjectURL.mock.calls[0][0] as Blob).type).toBe("application/pdf");
+    expect(clickedAnchor?.download).toMatch(/\.pdf$/);
+    expect(clickedAnchor?.download).not.toMatch(/\.(?:cv|csv)$/i);
+    expect(clickedAnchor?.href).toBe("blob:receipt-test");
+    jest.advanceTimersByTime(1000);
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:receipt-test");
   });
 
   it("links the PDF download route for pdf orders", async () => {

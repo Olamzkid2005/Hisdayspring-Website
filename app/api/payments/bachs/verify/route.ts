@@ -146,6 +146,14 @@ export async function POST(request: Request) {
 
   return NextResponse.json({
     success: isSuccessful,
+    ...(metadata?.type === "donation" && amountMatchesDonation && expectedAmount !== undefined
+      ? {
+          donation: {
+            amount: expectedAmount,
+            purpose: typeof metadata.purpose === "string" ? metadata.purpose : undefined,
+          },
+        }
+      : {}),
     checkoutId: result.data.checkoutId,
     reference: result.data.reference ?? undefined,
     status: result.data.status,

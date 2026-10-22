@@ -32,6 +32,22 @@ function mockFetch(
 }
 
 /**
+ * jsdom's Blob predates `Blob.prototype.arrayBuffer`/`text`, so read the
+ * bytes through FileReader, which jsdom does implement.
+ */
+function readBlobAsText(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () =>
+      resolve(
+        Buffer.from(reader.result as ArrayBuffer).toString("ascii")
+      );
+    reader.onerror = () => reject(reader.error);
+    reader.readAsArrayBuffer(blob);
+  });
+}
+
+/**
  * jsdom's Location is fully read-only (assign is writable:false,
  * configurable:false), so a redirect cannot be stubbed. Reaching a real
  * navigation is itself the signal we want, and jsdom reports it through
@@ -191,11 +207,60 @@ describe("/giving checkout flow", () => {
     expect(navigated()).toBe(false);
   });
 
+  it("downloads a PDF receipt containing the server-verified donation amount", async () => {
+    const fetchMock = mockFetch({
+      ok: true,
+      status: 200,
+      body: {
+        success: true,
+        status: "completed",
+        checkoutId: "chk_receipt_donation",
+        paymentMethod: "NGN_CARD",
+        paidAt: "2026-10-20T09:15:00.000Z",
+        donation: { amount: 5000, purpose: "tithes" },
+      },
+    });
+    const createObjectURL = jest.fn(() => "blob:donation-receipt");
+    const revokeObjectURL = jest.fn();
+    Object.defineProperty(URL, "createObjectURL", {
+      configurable: true,
+      value: createObjectURL,
+    });
+    Object.defineProperty(URL, "revokeObjectURL", {
+      configurable: true,
+      value: revokeObjectURL,
+    });
+    jest.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => undefined);
+    setUrl("?checkout_id=chk_receipt_donation");
+    render(<GivingPage />);
+
+    fireEvent.click(
+      await screen.findByRole("button", { name: /Download receipt \(PDF\)/i })
+    );
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    const downloadedBlob = createObjectURL.mock.calls[0][0] as Blob;
+    expect(downloadedBlob.type).toBe("application/pdf");
+    const pdf = await readBlobAsText(downloadedBlob);
+    expect(pdf).toContain("TOTAL PAID: NGN 5,000");
+    expect(pdf).toContain("Tithes - NGN 5,000");
+    // The object URL is revoked on a 1s timeout; give waitFor headroom past that.
+    await waitFor(
+      () => expect(revokeObjectURL).toHaveBeenCalledWith("blob:donation-receipt"),
+      { timeout: 3000 }
+    );
+  });
+
   it("confirms a returned checkout server-side and then thanks the donor", async () => {
     const fetchMock = mockFetch({
       ok: true,
       status: 200,
-      body: { success: true, status: "completed", checkoutId: "chk_abc" },
+      body: {
+        success: true,
+        status: "completed",
+        checkoutId: "chk_abc",
+        donation: { amount: 5000, purpose: "tithes" },
+      },
     });
     const navigated = spyOnNavigation();
 

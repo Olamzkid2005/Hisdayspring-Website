@@ -309,13 +309,14 @@ describe("bachs verify route", () => {
       amount_paid: "5000.00",
       amount_remaining: "0.00",
       currency: "NGN",
-      metadata: { type: "donation", amount: "5000.00" },
+      metadata: { type: "donation", amount: "5000.00", purpose: "tithes" },
     });
 
     const response = await bachsVerify(makeRequest({ checkoutId: "chk_abc" }));
     const body = await response.json();
 
     expect(body.success).toBe(true);
+    expect(body.donation).toEqual({ amount: 5000, purpose: "tithes" });
     expect(sentUrl(fetchMock)).toBe(
       "https://sandbox-api.bachs.io/v1/checkout-sessions/chk_abc"
     );

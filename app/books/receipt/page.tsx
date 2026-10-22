@@ -35,6 +35,7 @@ import {
   type VerifiedBookOrder,
 } from "@/lib/api/bachs";
 import { clearCheckoutIdempotencyKey } from "@/lib/api/payment-idempotency";
+import { downloadReceiptPdf } from "@/lib/receipt-pdf";
 import { getCartSnapshot, writeCart } from "@/lib/book-cart";
 import { config } from "@/lib/config/env";
 import { formatLagosDateTime } from "@/lib/lagos-time";
@@ -282,6 +283,30 @@ export default function BookReceiptPage() {
    * logo, lines, totals — while the action buttons live outside it, so the
    * image is clean by construction.
    */
+  const downloadReceipt = () => {
+    if (state.kind !== "verified") return;
+    downloadReceiptPdf(
+      {
+        title: "BOOK ORDER RECEIPT",
+        reference: state.reference ?? state.checkoutId,
+        paidAt: state.paidAt ? formatLagosDateTime(state.paidAt) : undefined,
+        paymentMethod: state.paymentMethod
+          ? (PAYMENT_METHOD_LABELS[state.paymentMethod] ?? state.paymentMethod)
+          : undefined,
+        lines: state.order.lines.map((line) => ({
+          label: `${line.title} x ${line.quantity}`,
+          amount: line.lineTotal,
+        })),
+        total: state.order.total,
+        note:
+          state.order.fulfillment === "pickup"
+            ? "Collection: pick up in church. Show this receipt at the bookstand."
+            : "Collection: download PDF copies using the links on the receipt page.",
+      },
+      `hisdayspring-book-receipt-${(state.reference ?? state.checkoutId).slice(-12)}`
+    );
+  };
+
   const captureReceiptImage = async (): Promise<Blob | null> => {
     if (!receiptRef.current) return null;
     const dataUrl = await toPng(receiptRef.current, {
@@ -309,7 +334,7 @@ export default function BookReceiptPage() {
       URL.revokeObjectURL(url);
     } catch {
       setActionError(
-        "Could not save the image. Try again, or use Save as PDF — it also carries the logo."
+        "Could not save the image. Try again, or download the receipt as PDF."
       );
     } finally {
       setSavingImage(false);
@@ -425,11 +450,19 @@ export default function BookReceiptPage() {
           <div className="flex flex-wrap gap-2">
             <button
               type="button"
+              onClick={downloadReceipt}
+              className={buttonClasses("outline", "sm")}
+            >
+              <Download className="w-4 h-4 mr-1" />
+              Download receipt (PDF)
+            </button>
+            <button
+              type="button"
               onClick={() => window.print()}
               className={buttonClasses("outline", "sm")}
             >
               <Printer className="w-4 h-4 mr-1" />
-              Save as PDF
+              Print receipt
             </button>
             <button
               type="button"

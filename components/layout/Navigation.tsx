@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, ChevronDown, ShoppingCart } from "lucide-react";
 import {
@@ -31,6 +32,20 @@ export function Navigation() {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState("home");
   const cartCount = useBookCartCount();
+  const pathname = usePathname();
+
+  // Scroll-spy only describes the homepage. On every other route there are no
+  // sections to spy on, so the old code left "home" selected — /live, /prayer
+  // and the rest all showed Home as the current page. Off the homepage the
+  // current page is whichever link's href matches the route.
+  const isHome = pathname === "/";
+  const routeLinkId = isHome
+    ? undefined
+    : [...navigationLinks, ...moreLinks, ...dropdownLinks].find(
+        (link) => link.href === pathname,
+      )?.id;
+  const activeId = isHome ? activeSection : (routeLinkId ?? "");
+  const moreIsActive = moreLinks.some((link) => link.id === activeId);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -137,7 +152,7 @@ export function Navigation() {
                   <button
                     onClick={() => navigateTo(link.id)}
                     className={`flex items-center gap-1 transition-colors whitespace-nowrap ${
-                      activeSection === link.id
+                      activeId === link.id
                         ? "text-primary font-bold border-b-2 border-secondary pb-1"
                         : "text-on-surface-variant hover:text-primary"
                     }`}
@@ -183,7 +198,7 @@ export function Navigation() {
                   key={link.id}
                   onClick={() => navigateTo(link.id)}
                   className={`transition-colors whitespace-nowrap ${
-                    activeSection === link.id
+                    activeId === link.id
                       ? "text-primary font-bold border-b-2 border-secondary pb-1"
                       : "text-on-surface-variant hover:text-primary"
                   }`}
@@ -201,9 +216,7 @@ export function Navigation() {
               <button
                 onClick={() => setOpenDropdown("more")}
                 className={`flex items-center gap-1 transition-colors whitespace-nowrap ${
-                  openDropdown === "more" ||
-                  activeSection === "sermons" ||
-                  activeSection === "gallery"
+                  openDropdown === "more" || moreIsActive
                     ? "text-primary font-bold border-b-2 border-secondary pb-1"
                     : "text-on-surface-variant hover:text-primary"
                 }`}
@@ -360,7 +373,7 @@ export function Navigation() {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.05 }}
                           className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 transition-colors font-headline ${
-                            activeSection === link.id
+                            activeId === link.id
                               ? "text-primary font-bold bg-primary/5"
                               : "text-on-surface-variant hover:text-primary hover:bg-surface-container-low"
                           }`}
@@ -385,7 +398,7 @@ export function Navigation() {
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: index * 0.05 }}
                         className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 transition-colors font-headline ${
-                          activeSection === link.id
+                          activeId === link.id
                             ? "text-primary font-bold bg-primary/5"
                             : "text-on-surface-variant hover:text-primary hover:bg-surface-container-low"
                         }`}

@@ -12,12 +12,15 @@ export const metadata: Metadata = {
 export default function RadioPage() {
   return (
     <>
-      <section className="relative min-h-[60vh] flex items-end overflow-hidden bg-surface-container-low">
-        {/* Served through next/image + the Cloudinary loader (WebP/AVIF at the
-            right width) instead of the raw 1920px Unsplash JPEG. */}
+      <section className="relative min-h-[50vh] flex items-end overflow-hidden bg-surface-container-low">
+        {/* A real Hisdayspring photo from the gallery CDN (pastor at the mic).
+            The previous Unsplash URL now 404s, which left the hero as a flat
+            burgundy block with a broken-image icon. Served through next/image
+            + the Cloudinary loader so it arrives as WebP/AVIF at the right
+            width. */}
         <Image
-          src="https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80"
-          alt="Hisdayspring Radio"
+          src="/images/gallery/DSC_5084.jpg"
+          alt="Pastor ministering at Hisdayspring"
           fill
           priority
           sizes="100vw"

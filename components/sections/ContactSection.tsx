@@ -9,6 +9,14 @@ import { useFormValidation } from "@/hooks";
 import { contactInfo } from "@/data/contact";
 import { config } from "@/lib/config";
 
+/**
+ * The church as it is listed on Google Maps. The street address alone geocodes
+ * to a point in Gowon Estate with no marker, so the listing name is what makes
+ * the map show where to go.
+ */
+const MAP_PLACE_QUERY =
+  "Hisdayspring Evangelical Ministries International, Gowon Estate, Lagos";
+
 export function ContactSection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -48,6 +56,17 @@ export function ContactSection() {
   });
 
   const firstAddress = contactInfo.addresses[0];
+  // The map is centred on the church's Google listing, not on the postal
+  // address: a `q=` embed built from the full address centres the right
+  // neighbourhood but draws no marker, while the listing name drops a labelled
+  // pin exactly where the church is. Both the embed and the mobile link use the
+  // same query so "Open in Google Maps" lands on the same place.
+  const mapsEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(
+    MAP_PLACE_QUERY
+  )}&z=16&output=embed`;
+  const mapsLinkUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    MAP_PLACE_QUERY
+  )}`;
 
   return (
     <section id="contact" ref={ref} className="py-10 md:py-16 bg-surface text-on-surface">
@@ -110,11 +129,7 @@ export function ContactSection() {
               phone screen for a map nobody scrolls. Mobile gets a one-tap
               link; the embed returns from md up. */}
           <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-              firstAddress
-                ? `${firstAddress.address}, ${firstAddress.city}`
-                : "Hisdayspring Church, Ipaja, Lagos"
-            )}`}
+            href={mapsLinkUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="md:hidden mt-6 inline-flex min-h-[44px] items-center gap-2 px-5 py-3 rounded-full border border-outline-variant text-on-surface font-medium hover:bg-surface-container-low transition-colors"
@@ -124,7 +139,7 @@ export function ContactSection() {
           </a>
           <div className="hidden md:block mt-8 md:mt-10 h-48 md:h-56 w-full bg-surface-container-high rounded-3xl overflow-hidden grayscale">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3963.3!2d3.3!3d6.5!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwMzAnMDAuMCJOIDPCsDE4JzAwLjAiRQ!5e0!3m2!1sen!2sng!4v1600000000000!5m2!1sen!2sng"
+              src={mapsEmbedUrl}
               width="100%"
               height="100%"
               style={{ border: 0 }}

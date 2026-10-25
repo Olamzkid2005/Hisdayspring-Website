@@ -23,6 +23,34 @@ const FEATURED_EVENT_SLIDE = {
   caption: "Making Ministry Impact · 26 & 27 October, 9AM",
 };
 
+/** Recent crusade and in-church photos, shown after the static opening slides. */
+const RECENT_HERO_SLIDES: HeroSlide[] = [
+  {
+    image: "/images/launch/_DSC4002.jpg",
+    alt: "Hisdayspring crusade outreach at a community venue",
+  },
+  {
+    image: "/images/launch/_DSC2549.jpg",
+    alt: "Worshippers gathered together during a Hisdayspring service",
+  },
+  {
+    image: "/images/launch/_DSC2526.jpg",
+    alt: "Pastor preaching at a Hisdayspring crusade",
+  },
+  {
+    image: "/images/launch/_DSC2509.jpg",
+    alt: "Hisdayspring ministers sharing the gospel at a crusade",
+  },
+  {
+    image: "/images/launch/_DSC2475.jpg",
+    alt: "Worship and praise on stage inside Hisdayspring church",
+  },
+  {
+    image: "/images/launch/_DSC2459.jpg",
+    alt: "Musician playing drums during worship inside Hisdayspring church",
+  },
+];
+
 interface HeroSlide {
   image: string;
   alt: string;
@@ -95,9 +123,15 @@ export function HeroSection() {
   const [heroSlides] = useState<HeroSlide[]>(() => [
     { image: FIRST_HERO, alt: "Hisdayspring Ministries" },
     FEATURED_EVENT_SLIDE,
-    ...pickGallerySlides(HERO_GALLERY_SLIDES).map(heroSlideFrom),
+    ...RECENT_HERO_SLIDES,
+    ...pickGallerySlides(HERO_GALLERY_SLIDES - RECENT_HERO_SLIDES.length).map(heroSlideFrom),
   ]);
   const [currentImage, setCurrentImage] = useState(0);
+  // Index of the last slide whose photo actually decoded. It is painted as a
+  // static underlay, so when the carousel advances the previous photo stays up
+  // while the next one downloads — otherwise the crossfade uncovers the grey
+  // container and the hero looks empty for however long the image takes.
+  const [paintedImage, setPaintedImage] = useState(0);
 
   // Auto-advance every 8s to a random slide that is not the one already up.
   // A plain uniform pick landed on the current index about once every twelve
@@ -125,6 +159,17 @@ export function HeroSection() {
   return (
     <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0 bg-surface-container-low">
+        {/* Decorative underlay: the last photo that finished loading. Never
+            announced by screen readers, and the same URL the carousel asks
+            for, so it costs no extra download. */}
+        <Image
+          src={heroSlides[paintedImage].image}
+          alt=""
+          aria-hidden
+          fill
+          sizes="100vw"
+          className="w-full h-full object-cover object-center"
+        />
         {/* No mode="wait": the incoming slide now mounts (and starts loading)
             while the outgoing one fades, instead of waiting out the whole 0.8s
             exit first and showing the backdrop in between. */}
@@ -144,6 +189,7 @@ export function HeroSection() {
               sizes="100vw"
               // The opening slide is the LCP image, so it must not be lazy.
               priority={currentImage === 0}
+              onLoad={() => setPaintedImage(currentImage)}
               className="w-full h-full object-cover object-center"
             />
           </motion.div>

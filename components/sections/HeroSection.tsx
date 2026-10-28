@@ -23,8 +23,26 @@ const FEATURED_EVENT_SLIDE = {
   caption: "Making Ministry Impact · 26 & 27 October, 9AM",
 };
 
-/** Recent crusade and in-church photos, shown after the static opening slides. */
+/** Recent service and outreach photos, shown after the static opening slides. */
 const RECENT_HERO_SLIDES: HeroSlide[] = [
+  // Last Sunday's service (25 October 2026) leads the recent group, ahead of
+  // the earlier crusade photos.
+  {
+    image: "/images/gallery/_DSC7107.jpg",
+    alt: "The worship team leading praise at the Power Lifting Sunday service",
+  },
+  {
+    image: "/images/gallery/_DSC7078.jpg",
+    alt: "A pastor ministering from the pulpit at the Power Lifting Sunday service",
+  },
+  {
+    image: "/images/gallery/_DSC7249.jpg",
+    alt: "The congregation gathered for the Power Lifting Sunday service",
+  },
+  {
+    image: "/images/gallery/_DSC7182.jpg",
+    alt: "Ministers praying for a member during the Power Lifting Sunday service",
+  },
   {
     image: "/images/launch/_DSC4002.jpg",
     alt: "Hisdayspring crusade outreach at a community venue",
@@ -32,22 +50,6 @@ const RECENT_HERO_SLIDES: HeroSlide[] = [
   {
     image: "/images/launch/_DSC2549.jpg",
     alt: "Worshippers gathered together during a Hisdayspring service",
-  },
-  {
-    image: "/images/launch/_DSC2526.jpg",
-    alt: "Pastor preaching at a Hisdayspring crusade",
-  },
-  {
-    image: "/images/launch/_DSC2509.jpg",
-    alt: "Hisdayspring ministers sharing the gospel at a crusade",
-  },
-  {
-    image: "/images/launch/_DSC2475.jpg",
-    alt: "Worship and praise on stage inside Hisdayspring church",
-  },
-  {
-    image: "/images/launch/_DSC2459.jpg",
-    alt: "Musician playing drums during worship inside Hisdayspring church",
   },
 ];
 

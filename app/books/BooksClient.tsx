@@ -715,12 +715,15 @@ export default function BooksClient() {
         </div>
       </div>
 
-      {/* Floating cart bar */}
+      {/* Floating cart bar. The cookie banner shares this bottom edge, so
+          the offset from --consent-banner-offset keeps the bar above it while
+          the banner is open instead of rendering underneath it. */}
       {cartCount > 0 && stage === "browse" && (
         <motion.div
           initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 w-[min(94vw,32rem)]"
+          style={{ bottom: "calc(var(--consent-banner-offset, 0px) + 1rem)" }}
+          className="fixed left-1/2 -translate-x-1/2 z-40 w-[min(94vw,32rem)] transition-[bottom] duration-300"
         >
           <div className="bg-surface-container-high/95 backdrop-blur-md rounded-2xl shadow-lg border border-outline-variant/30 px-5 py-4 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3 min-w-0">

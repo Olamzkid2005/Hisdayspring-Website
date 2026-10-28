@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Cookie } from "lucide-react";
 import Link from "next/link";
@@ -12,6 +12,7 @@ const COOKIE_CONSENT_KEY = "hisdayspring_cookie_consent";
 export function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
   const [consent, setConsent] = useState<CookieConsent | null>(null);
+  const bannerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Check if user has already made a choice
@@ -27,6 +28,35 @@ export function CookieConsent() {
       }, 0);
     }
   }, []);
+
+  // The banner is pinned to the bottom of the viewport, which is also where
+  // other CTAs live (the floating book checkout bar). Publish its height as a
+  // CSS variable so those CTAs can sit above it instead of being covered.
+  useEffect(() => {
+    if (!showBanner) return;
+    const banner = bannerRef.current;
+    if (!banner) return;
+
+    const root = document.documentElement;
+    const syncOffset = () => {
+      const height = Math.ceil(banner.getBoundingClientRect().height);
+      if (height > 0) {
+        root.style.setProperty("--consent-banner-offset", `${height + 16}px`);
+      }
+    };
+
+    syncOffset();
+    const observer =
+      typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncOffset);
+    observer?.observe(banner);
+    window.addEventListener("resize", syncOffset);
+
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", syncOffset);
+      root.style.removeProperty("--consent-banner-offset");
+    };
+  }, [showBanner]);
 
   const handleAccept = () => {
     const newConsent: CookieConsent = {
@@ -58,6 +88,7 @@ export function CookieConsent() {
     <AnimatePresence>
       {showBanner && (
         <motion.div
+          ref={bannerRef}
           initial={{ y: 100, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}

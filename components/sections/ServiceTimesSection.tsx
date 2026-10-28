@@ -91,7 +91,7 @@ export function ServiceTimesSection() {
                         <p className="font-body font-semibold text-on-surface text-lg">
                           {service.name}
                         </p>
-                        <span className="bg-secondary/10 text-secondary-fixed-dim rounded-full text-sm font-bold px-4 py-1">
+                        <span className="bg-secondary/10 text-secondary rounded-full text-sm font-bold px-4 py-1">
                           {service.time}
                         </span>
                       </div>

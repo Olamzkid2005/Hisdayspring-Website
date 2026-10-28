@@ -329,12 +329,14 @@ export function Navigation() {
 
       <AnimatePresence>
         {isMobileMenuOpen && (
+          // Above the cookie banner (z-50): the drawer's own Give Online CTA
+          // used to sit underneath the banner and was unreachable on first visit.
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-inverse-surface/60 backdrop-blur-sm lg:hidden"
+            className="fixed inset-0 z-[60] bg-inverse-surface/60 backdrop-blur-sm lg:hidden"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             <motion.div

@@ -7,7 +7,9 @@ import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
 
 /** Section artwork - Cloudinary-optimized rather than the raw 1920px JPEG. */
 const SECTION_ART = cloudinaryLoader({
-  src: "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80",
+  // The previous Unsplash frame 404s, which left this section as a flat
+  // burgundy band. Use a real church photo from the gallery CDN instead.
+  src: "/images/gallery/DSC_5084.jpg",
   width: 1080,
   quality: 70,
 });

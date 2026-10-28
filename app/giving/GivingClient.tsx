@@ -50,7 +50,9 @@ const bgImages = [
   "https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920&q=80",
   "https://images.unsplash.com/photo-1507692049790-de58290a4334?w=1920&q=80",
   "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1920&q=80",
-  "https://images.unsplash.com/photo-1478739273407-adb4b0981f27?w=1920&q=80",
+  // A real church photo replaces an Unsplash frame that 404s: the slideshow
+  // used to spend one of its four turns on a blank, flat grey hero.
+  "/images/gallery/DSC_0356.jpg",
 ].map((src) => cloudinaryLoader({ src, width: 1080, quality: 70 }));
 
 export default function GivingClient() {

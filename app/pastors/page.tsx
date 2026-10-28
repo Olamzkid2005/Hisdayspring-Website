@@ -56,7 +56,7 @@ function MemberCard({ member }: { member: WorkforceMember }) {
         {(member.branch || member.department) && (
           <div className="flex flex-wrap gap-2 mt-3">
             {member.branch && (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-on-primary-container text-xs font-semibold">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold">
                 <Church className="w-3.5 h-3.5" />
                 {member.branch} Branch
               </span>

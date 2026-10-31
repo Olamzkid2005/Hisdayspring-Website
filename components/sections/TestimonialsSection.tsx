@@ -18,7 +18,7 @@ function CardLight({ testimonial }: { testimonial: typeof testimonials[0] }) {
   return (
     <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl shadow-sm relative">
       <Quote className="absolute top-4 left-4 w-10 h-10 text-primary opacity-20" />
-      <p className="italic text-lg text-on-surface mb-6 leading-relaxed pl-2 pt-4">
+      <p className="text-lg text-on-surface mb-6 leading-relaxed pl-2 pt-4">
         &ldquo;{testimonial.testimony}&rdquo;
       </p>
       <div className="flex items-center gap-3">
@@ -39,7 +39,7 @@ function CardLight({ testimonial }: { testimonial: typeof testimonials[0] }) {
 function CardBrand({ testimonial }: { testimonial: typeof testimonials[0] }) {
   return (
     <div className="bg-primary text-on-primary p-4 sm:p-8 rounded-xl">
-      <p className="italic text-lg leading-relaxed mb-6 opacity-90">
+      <p className="text-lg leading-relaxed mb-6 opacity-80">
         &ldquo;{testimonial.testimony}&rdquo;
       </p>
       <div className="flex items-center gap-3">

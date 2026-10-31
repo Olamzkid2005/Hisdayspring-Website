@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Heart, Users, Home } from "lucide-react";
-import { ReadMore } from "@/components/ui/ReadMore";
+import { ReadMore } from "@/components/ui";
 
 const leadMessage = {
   name: "Pastor Blessing Olamijulo",

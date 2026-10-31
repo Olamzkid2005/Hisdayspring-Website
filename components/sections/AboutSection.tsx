@@ -5,7 +5,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 import { aboutContent } from "@/data";
-import { ReadMore } from "@/components/ui/ReadMore";
+import { ReadMore } from "@/components/ui";
 
 const EYEBROW =
   "font-label text-xs font-bold uppercase tracking-[0.3em] text-secondary";

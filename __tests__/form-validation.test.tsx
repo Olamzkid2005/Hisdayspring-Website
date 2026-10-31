@@ -76,4 +76,29 @@ describe("useFormValidation", () => {
     });
     expect(result.current.isSubmitting).toBe(false);
   });
+
+  it("derives validity from every field's own rules", () => {
+    const mixedFields = {
+      name: { required: true },
+      email: { required: true, email: true },
+      nickname: {},
+    } as const;
+    const { result } = renderHook(() =>
+      useFormValidation({ fields: mixedFields })
+    );
+
+    act(() => {
+      result.current.setFieldValue("name", "Jane Donor");
+      result.current.setFieldValue("email", "not-an-email");
+    });
+    // The old implementation only looked at the first required field, so an
+    // invalid email could still be reported as valid.
+    expect(result.current.isValid).toBe(false);
+
+    act(() => {
+      result.current.setFieldValue("email", "jane@example.com");
+    });
+    // `nickname` is optional; leaving it empty must not make the form invalid.
+    expect(result.current.isValid).toBe(true);
+  });
 });

@@ -45,6 +45,7 @@ import {
 } from "@/lib/api/bachs";
 import { useBookCart } from "@/hooks/useBookCartCount";
 import { writeCart } from "@/lib/book-cart";
+import { isValidEmail } from "@/lib/validation";
 import {
   clearCheckoutIdempotencyKey,
   getCheckoutIdempotencyKey,
@@ -174,7 +175,7 @@ export default function BooksClient() {
       setError("Please enter your name.");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail.trim())) {
+    if (!isValidEmail(buyerEmail.trim())) {
       setError("Please enter a valid email address.");
       return;
     }

@@ -3,66 +3,30 @@
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown, ShoppingCart } from "lucide-react";
+import { Menu, X, ShoppingCart } from "lucide-react";
+import { useBookCartCount } from "@/hooks/useBookCartCount";
 import {
   navigationLinks,
-  dropdownLinks,
-  moreLinks,
-} from "@/data/navigation";
-import { useBookCartCount } from "@/hooks/useBookCartCount";
-
-const sectionLinkIds = [
-  ...navigationLinks
-    .map((link) => link.id)
-    .filter(
-      (id) =>
-        id !== "giving" &&
-        id !== "pastors" &&
-        id !== "ministries" &&
-        id !== "welfare" &&
-        id !== "crusade",
-    ),
-  "sermons",
-  "gallery",
-];
+  sectionLinkIds,
+  resolveActiveNav,
+  topLevelLinks,
+  dropdownMenuLinks,
+  moreMenuLinks,
+} from "./navigation/links";
+import { useScrollSpy } from "./navigation/useScrollSpy";
+import { useBodyScrollLock } from "./navigation/useBodyScrollLock";
+import { DesktopMenu } from "./navigation/DesktopMenu";
+import { MobileMenu } from "./navigation/MobileMenu";
 
 export function Navigation() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
-  const [activeSection, setActiveSection] = useState("home");
   const cartCount = useBookCartCount();
   const pathname = usePathname();
+  const homeSection = useScrollSpy(sectionLinkIds, pathname === "/");
+  const { activeId, moreIsActive } = resolveActiveNav(pathname, homeSection);
 
-  // Scroll-spy only describes the homepage. On every other route there are no
-  // sections to spy on, so the old code left "home" selected — /live, /prayer
-  // and the rest all showed Home as the current page. Off the homepage the
-  // current page is whichever link's href matches the route.
-  const isHome = pathname === "/";
-  const routeLinkId = isHome
-    ? undefined
-    : [...navigationLinks, ...moreLinks, ...dropdownLinks].find(
-        (link) => link.href === pathname,
-      )?.id;
-  const activeId = isHome ? activeSection : (routeLinkId ?? "");
-  const moreIsActive = moreLinks.some((link) => link.id === activeId);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 100;
-
-      for (const sectionId of [...sectionLinkIds].reverse()) {
-        const element = document.getElementById(sectionId);
-        if (element && element.offsetTop <= scrollPosition) {
-          setActiveSection(sectionId);
-          break;
-        }
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  useBodyScrollLock(isMobileMenuOpen);
 
   useEffect(() => {
     const handleResize = () => {
@@ -74,24 +38,13 @@ export function Navigation() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMobileMenuOpen]);
-
   const closeMenus = () => {
     setIsMobileMenuOpen(false);
     setOpenDropdown(null);
   };
 
   const navigateTo = (linkId: string) => {
-    const link = navigationLinks.find((l) => l.id === linkId);
+    const link = navigationLinks.find((item) => item.id === linkId);
     if (link && link.href.startsWith("/") && !link.href.startsWith("/#")) {
       window.location.href = link.href;
       closeMenus();
@@ -121,8 +74,6 @@ export function Navigation() {
     closeMenus();
   };
 
-  const topLevelLinks = navigationLinks.filter((l) => l.id !== "giving");
-
   return (
     <>
       <nav className="fixed top-0 w-full z-50 bg-surface-container-lowest/80 backdrop-blur-md">
@@ -140,127 +91,17 @@ export function Navigation() {
             />
           </button>
 
-          <div className="hidden lg:flex gap-4 xl:gap-7 items-center font-headline text-sm xl:text-base font-medium">
-            {topLevelLinks.map((link) =>
-              link.id === "ministries" ? (
-                <div
-                  key={link.id}
-                  className="relative"
-                  onMouseEnter={() => setOpenDropdown(link.id)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                >
-                  <button
-                    onClick={() => navigateTo(link.id)}
-                    className={`flex items-center gap-1 transition-colors whitespace-nowrap ${
-                      activeId === link.id
-                        ? "text-primary font-bold border-b-2 border-secondary pb-1"
-                        : "text-on-surface-variant hover:text-primary"
-                    }`}
-                  >
-                    {link.label}
-                    <ChevronDown
-                      className={`w-4 h-4 transition-transform ${
-                        openDropdown === link.id ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  <AnimatePresence>
-                    {openDropdown === link.id && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute top-full left-1/2 -translate-x-1/2 mt-3 w-80 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant p-2"
-                      >
-                        {dropdownLinks.map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={() => navigateToHref(item.href)}
-                            className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors"
-                          >
-                            {item.label}
-                          </button>
-                        ))}
-                        <div className="my-2 h-px bg-surface-container-low" />
-                        <button
-                          onClick={() => navigateTo("ministries")}
-                          className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors"
-                        >
-                          View All Ministries →
-                        </button>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              ) : (
-                <button
-                  key={link.id}
-                  onClick={() => navigateTo(link.id)}
-                  className={`transition-colors whitespace-nowrap ${
-                    activeId === link.id
-                      ? "text-primary font-bold border-b-2 border-secondary pb-1"
-                      : "text-on-surface-variant hover:text-primary"
-                  }`}
-                >
-                  {link.label}
-                </button>
-              ),
-            )}
-
-            <div
-              className="relative"
-              onMouseEnter={() => setOpenDropdown("more")}
-              onMouseLeave={() => setOpenDropdown(null)}
-            >
-              <button
-                onClick={() => setOpenDropdown("more")}
-                className={`flex items-center gap-1 transition-colors whitespace-nowrap ${
-                  openDropdown === "more" || moreIsActive
-                    ? "text-primary font-bold border-b-2 border-secondary pb-1"
-                    : "text-on-surface-variant hover:text-primary"
-                }`}
-              >
-                More
-                <ChevronDown
-                  className={`w-4 h-4 transition-transform ${
-                    openDropdown === "more" ? "rotate-180" : ""
-                  }`}
-                />
-              </button>
-              <AnimatePresence>
-                {openDropdown === "more" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 8 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute top-full right-0 mt-3 w-64 bg-surface-container-lowest rounded-2xl shadow-xl border border-outline-variant p-2"
-                  >
-                    {moreLinks.slice(0, 2).map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => navigateToHref(item.href)}
-                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-on-surface hover:text-primary hover:bg-primary/5 transition-colors"
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                    <div className="my-2 h-px bg-surface-container-low" />
-                    {moreLinks.slice(2).map((item) => (
-                      <button
-                        key={item.id}
-                        onClick={() => navigateToHref(item.href)}
-                        className="block w-full text-left px-4 py-2.5 rounded-lg text-sm text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors"
-                      >
-                        {item.label}
-                      </button>
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
+          <DesktopMenu
+            links={topLevelLinks}
+            dropdownLinks={dropdownMenuLinks}
+            moreLinks={moreMenuLinks}
+            activeId={activeId}
+            moreIsActive={moreIsActive}
+            openDropdown={openDropdown}
+            onOpenDropdown={setOpenDropdown}
+            onNavigateSection={navigateTo}
+            onNavigateHref={navigateToHref}
+          />
 
           <div className="hidden lg:flex gap-3 items-center">
             {/* Book cart — visible from any page, links to the order flow. */}
@@ -327,118 +168,16 @@ export function Navigation() {
         </div>
       </nav>
 
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          // Above the cookie banner (z-50): the drawer's own Give Online CTA
-          // used to sit underneath the banner and was unreachable on first visit.
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[60] bg-inverse-surface/60 backdrop-blur-sm lg:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-          >
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-surface-container-lowest shadow-2xl"
-            >
-              <div className="flex flex-col h-full">
-                <div className="flex items-center justify-between p-6 border-b border-outline-variant">
-                  <Image
-                    src="/images/logo/Logo-Website.png"
-                    alt="Hisdayspring"
-                    width={128}
-                    height={32}
-                    className="h-8 w-auto"
-                  />
-                  <button
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 text-on-surface-variant hover:text-primary transition-colors"
-                    aria-label="Close menu"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto py-4">
-                  {topLevelLinks.map((link, index) =>
-                    link.id === "ministries" ? (
-                      <div key={link.id}>
-                        <motion.button
-                          onClick={() => navigateTo(link.id)}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.05 }}
-                          className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 transition-colors font-headline ${
-                            activeId === link.id
-                              ? "text-primary font-bold bg-primary/5"
-                              : "text-on-surface-variant hover:text-primary hover:bg-surface-container-low"
-                          }`}
-                        >
-                          {link.label}
-                        </motion.button>
-                        {dropdownLinks.map((item) => (
-                          <button
-                            key={item.id}
-                            onClick={() => navigateToHref(item.href)}
-                            className="block w-full text-left px-10 py-3 text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container-low border-b border-outline-variant/30 transition-colors"
-                          >
-                            {item.label}
-                          </button>
-                        ))}
-                      </div>
-                    ) : (
-                      <motion.button
-                        key={link.id}
-                        onClick={() => navigateTo(link.id)}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
-                        className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 transition-colors font-headline ${
-                          activeId === link.id
-                            ? "text-primary font-bold bg-primary/5"
-                            : "text-on-surface-variant hover:text-primary hover:bg-surface-container-low"
-                        }`}
-                      >
-                        {link.label}
-                      </motion.button>
-                    ),
-                  )}
-
-                  <div>
-                    <div className="block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/30 font-headline text-on-surface-variant">
-                      More
-                    </div>
-                    {moreLinks.map((link) => (
-                      <button
-                        key={link.id}
-                        onClick={() => navigateToHref(link.href)}
-                        className="block w-full text-left px-10 py-3 text-sm text-on-surface-variant hover:text-primary hover:bg-surface-container-low border-b border-outline-variant/30 transition-colors"
-                      >
-                        {link.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-6 border-t border-outline-variant">
-                  <button
-                    onClick={() => navigateTo("giving")}
-                    className="block w-full bg-primary text-on-primary px-6 py-3 rounded-full font-medium text-center hover:brightness-110 transition-all min-h-[44px]"
-                  >
-                    Give Online
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <MobileMenu
+        open={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        links={topLevelLinks}
+        dropdownLinks={dropdownMenuLinks}
+        moreLinks={moreMenuLinks}
+        activeId={activeId}
+        onNavigateSection={navigateTo}
+        onNavigateHref={navigateToHref}
+      />
     </>
   );
 }

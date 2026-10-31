@@ -31,6 +31,7 @@ import {
   verifyDonation,
 } from "@/lib/api/bachs";
 import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
+import { isValidEmail } from "@/lib/validation";
 import { downloadReceiptPdf } from "@/lib/receipt-pdf";
 import {
   clearCheckoutIdempotencyKey,
@@ -217,7 +218,7 @@ export default function GivingClient() {
 
     if (!donorEmail.trim()) {
       newErrors.donorEmail = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(donorEmail)) {
+    } else if (!isValidEmail(donorEmail)) {
       newErrors.donorEmail = "Please enter a valid email";
     }
 

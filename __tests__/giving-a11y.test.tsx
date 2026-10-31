@@ -46,8 +46,14 @@ describe("/giving accessibility", () => {
       value: jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
-        json: async () =>
-          ({ success: true, status: "completed", checkoutId: "chk_axe" }),
+        json: async () => ({
+          success: true,
+          status: "completed",
+          checkoutId: "chk_axe",
+          // A completed verification carries the confirmed amount; without it
+          // the page correctly refuses to show the thank-you state.
+          donation: { amount: 2500 },
+        }),
       }),
     });
 

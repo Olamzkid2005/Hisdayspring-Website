@@ -1,133 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { PlayCircle, ChevronDown } from "lucide-react";
-import { galleryPhotos } from "@/data/gallery";
-import type { GalleryPhoto } from "@/types";
-
-const HERO_COUNT = 12;
-/** Slides 1 and 2 are fixed (see below), the rest come from the gallery. */
-const HERO_GALLERY_SLIDES = HERO_COUNT - 2;
-const FIRST_HERO = "/images/Very good hero.JPG";
-
-/**
- * Permanent second slide: the current flagship event handbill. When the
- * conference has passed, swap this path (and the caption) for whatever is
- * next — the rest of the carousel carries on automatically.
- */
-const FEATURED_EVENT_SLIDE = {
-  image: "/images/events/greater-works-conference.webp",
-  alt: "Greater Works Ministers & Leaders Conference — Making Ministry Impact, 26–27 October 2026",
-  caption: "Making Ministry Impact · 26 & 27 October, 9AM",
-};
-
-/** Recent service and outreach photos, shown after the static opening slides. */
-const RECENT_HERO_SLIDES: HeroSlide[] = [
-  // Last Sunday's service (25 October 2026) leads the recent group, ahead of
-  // the earlier crusade photos.
-  {
-    image: "/images/gallery/_DSC7107.jpg",
-    alt: "The worship team leading praise at the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/gallery/_DSC7078.jpg",
-    alt: "A pastor ministering from the pulpit at the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/gallery/_DSC7249.jpg",
-    alt: "The congregation gathered for the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/gallery/_DSC7182.jpg",
-    alt: "Ministers praying for a member during the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/launch/_DSC4002.jpg",
-    alt: "Hisdayspring crusade outreach at a community venue",
-  },
-  {
-    image: "/images/launch/_DSC2549.jpg",
-    alt: "Worshippers gathered together during a Hisdayspring service",
-  },
-];
-
-interface HeroSlide {
-  image: string;
-  alt: string;
-  caption?: string;
-}
-
-/**
- * Slide 3 onwards: photos spread across the whole gallery.
- *
- * This used to be `galleryPhotos.slice(0, 10)`, which took the first ten
- * entries in file order — ten consecutive frames from one shoot, so the
- * carousel showed the same event over and over and never reached the other
- * 386 photos. Each category is now sampled with an even stride and the
- * categories are then interleaved, so ten slides cover the year's events.
- */
-function pickGallerySlides(count: number): GalleryPhoto[] {
-  const byCategory = new Map<string, GalleryPhoto[]>();
-  for (const photo of galleryPhotos) {
-    const bucket = byCategory.get(photo.category);
-    if (bucket) bucket.push(photo);
-    else byCategory.set(photo.category, [photo]);
-  }
-
-  // Split the slots evenly across the categories, then take each category's
-  // share with an even stride. The split stops Sunday services crowding out
-  // the smaller ministries; the stride stops consecutive slides being
-  // neighbouring frames from the same moment, which is what read as one photo
-  // on repeat.
-  const categories = [...byCategory.values()];
-  const share = Math.floor(count / categories.length);
-  const remainder = count % categories.length;
-
-  const buckets = categories.map((photos, index) => {
-    const take = Math.min(share + (index < remainder ? 1 : 0), photos.length);
-    return Array.from({ length: take }, (_, i) =>
-      photos[Math.floor((i * photos.length) / take)]
-    );
-  });
-
-  // One from each category in turn, so the order alternates ministries rather
-  // than playing three Sunday services back to back.
-  const picks: GalleryPhoto[] = [];
-  for (let round = 0; picks.length < count; round++) {
-    let tookOne = false;
-    for (const bucket of buckets) {
-      if (picks.length >= count) break;
-      if (round < bucket.length) {
-        picks.push(bucket[round]);
-        tookOne = true;
-      }
-    }
-    if (!tookOne) break;
-  }
-  return picks;
-}
-
-function heroSlideFrom(photo: GalleryPhoto): HeroSlide {
-  return {
-    image: photo.imageUrl,
-    // The gallery captions are camera filenames ("U3A7207", "DSC 0358"), which
-    // is what a screen reader used to announce. The event name is what the
-    // photo actually shows.
-    alt: photo.eventName
-      ? `${photo.eventName} at Hisdayspring Ministries`
-      : "Hisdayspring Ministries",
-  };
-}
+import { Badge } from "@/components/ui";
+import { buildHeroSlides } from "@/lib/hero-slides";
+import { HeroCarousel } from "./hero/HeroCarousel";
 
 export function HeroSection() {
-  const [heroSlides] = useState<HeroSlide[]>(() => [
-    { image: FIRST_HERO, alt: "Hisdayspring Ministries" },
-    FEATURED_EVENT_SLIDE,
-    ...RECENT_HERO_SLIDES,
-    ...pickGallerySlides(HERO_GALLERY_SLIDES - RECENT_HERO_SLIDES.length).map(heroSlideFrom),
-  ]);
+  const [heroSlides] = useState(() => buildHeroSlides());
   const [currentImage, setCurrentImage] = useState(0);
   // Index of the last slide whose photo actually decoded. It is painted as a
   // static underlay, so when the carousel advances the previous photo stays up
@@ -159,81 +40,17 @@ export function HeroSection() {
   };
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 bg-surface-container-low">
-        {/* Decorative underlay: the last photo that finished loading. Never
-            announced by screen readers, and the same URL the carousel asks
-            for, so it costs no extra download. */}
-        <Image
-          src={heroSlides[paintedImage].image}
-          alt=""
-          aria-hidden
-          fill
-          sizes="100vw"
-          className="w-full h-full object-cover object-center"
-        />
-        {/* No mode="wait": the incoming slide now mounts (and starts loading)
-            while the outgoing one fades, instead of waiting out the whole 0.8s
-            exit first and showing the backdrop in between. */}
-        <AnimatePresence>
-          <motion.div
-            key={currentImage}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="absolute inset-0"
-          >
-            <Image
-              src={heroSlides[currentImage].image}
-              alt={heroSlides[currentImage].alt}
-              fill
-              sizes="100vw"
-              // The opening slide is the LCP image, so it must not be lazy.
-              priority={currentImage === 0}
-              onLoad={() => setPaintedImage(currentImage)}
-              className="w-full h-full object-cover object-center"
-            />
-          </motion.div>
-        </AnimatePresence>
-        <div className="absolute inset-0 bg-gradient-to-b from-[rgba(26,28,28,0.4)] to-[rgba(26,28,28,0.8)]" />
-        <div className="absolute inset-0" style={{
-          background: "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.4) 100%)",
-        }} />
-        {/* Featured-event caption — only while the handbill slide is up. */}
-        {heroSlides[currentImage].caption && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="hidden md:block absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4 text-center"
-          >
-            <span className="inline-block px-5 py-2.5 rounded-full bg-secondary-container/95 text-on-secondary-container text-sm font-bold shadow-lg">
-              {heroSlides[currentImage].caption}
-            </span>
-          </motion.div>
-        )}
-
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
-          {heroSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentImage(index)}
-              // 24x24 hit area (WCAG 2.5.8); the visible dot stays 8px tall.
-              className="-m-2 flex h-6 w-6 items-center justify-center p-2"
-              aria-label={`Go to slide ${index + 1}`}
-              aria-current={index === currentImage}
-            >
-              <span
-                className={`block h-2 rounded-full transition-all ${
-                  index === currentImage
-                    ? "w-6 bg-white"
-                    : "w-2 bg-white/40 hover:bg-white/60"
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-      </div>
+    <section
+      id="home"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+    >
+      <HeroCarousel
+        slides={heroSlides}
+        currentIndex={currentImage}
+        paintedIndex={paintedImage}
+        onSelect={setCurrentImage}
+        onPainted={setPaintedImage}
+      />
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 text-center">
         <motion.div
@@ -247,9 +64,13 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="hidden md:block mb-8"
           >
-            <span className="inline-block px-6 py-2.5 rounded-full bg-secondary-container text-on-secondary-container uppercase tracking-widest text-xs font-bold">
+            <Badge
+              tone="secondary"
+              uppercase
+              className="px-6 py-2.5 tracking-widest"
+            >
               Welcome to Hisdayspring Ministries
-            </span>
+            </Badge>
           </motion.div>
 
           <motion.h1
@@ -259,7 +80,7 @@ export function HeroSection() {
             className="font-headline text-3xl md:text-[5rem] leading-snug md:leading-tight text-white mb-5 md:mb-6"
           >
             Raising holy, healthy and{" "}
-            <em className="text-secondary-container">Wealthy People</em>
+            <span className="text-secondary-container">Wealthy People</span>
           </motion.h1>
 
           <motion.div
@@ -287,7 +108,7 @@ export function HeroSection() {
             <button
               onClick={() => scrollToSection("services")}
               // Only one call to action on a phone (this one returns from md up).
-              className="hidden md:inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-white/30 text-white font-bold text-sm uppercase tracking-wide backdrop-blur-sm transition-colors hover:bg-white/10"
+              className="hidden md:inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 rounded-full border-2 border-white/20 text-white font-bold text-sm uppercase tracking-wide backdrop-blur-sm transition-colors hover:bg-white/20"
             >
               Plan Your Visit
             </button>
@@ -303,11 +124,18 @@ export function HeroSection() {
       >
         <motion.div
           animate={{ scale: [1, 1.15, 1] }}
-          transition={{ duration: 0.6, repeat: Infinity, repeatDelay: 2.4, ease: "easeInOut" }}
+          transition={{
+            duration: 0.6,
+            repeat: Infinity,
+            repeatDelay: 2.4,
+            ease: "easeInOut",
+          }}
         >
           <ChevronDown className="w-6 h-6 text-white/40" />
         </motion.div>
-        <span className="text-white/65 text-xs font-label uppercase tracking-widest">Scroll</span>
+        <span className="text-white/60 text-xs font-label uppercase tracking-widest">
+          Scroll
+        </span>
       </motion.div>
     </section>
   );

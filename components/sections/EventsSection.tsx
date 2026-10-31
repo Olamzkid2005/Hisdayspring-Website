@@ -5,24 +5,17 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Clock, CalendarPlus, X, Expand, Check } from "lucide-react";
 import { getUpcomingEvents } from "@/data/events";
-import { ReadMore } from "@/components/ui/ReadMore";
+import { Badge, ReadMore, type BadgeTone } from "@/components/ui";
 import { formatEventDate } from "@/lib/event-dates";
 import { downloadEventIcs } from "@/lib/calendar";
 import type { Event } from "@/types";
 
-function getCategoryBadge(category: Event["category"]) {
-  switch (category) {
-    case "youth":
-      return "bg-secondary-container text-on-secondary-container";
-    case "women":
-      return "bg-tertiary-container/10 text-tertiary";
-    case "special":
-      return "bg-secondary-container text-on-secondary-container";
-    case "general":
-    default:
-      return "bg-primary-container/10 text-primary";
-  }
-}
+const categoryTones: Record<Event["category"], BadgeTone> = {
+  youth: "secondary",
+  women: "tertiary",
+  special: "secondary",
+  general: "primary",
+};
 
 function EventItem({
   event,
@@ -115,9 +108,9 @@ function EventItem({
             <span className="whitespace-nowrap text-sm font-bold text-primary md:hidden">
               {day} {month}
             </span>
-            <span className={`inline-block text-xs px-2 py-0.5 rounded-full font-bold uppercase ${getCategoryBadge(event.category)}`}>
+            <Badge tone={categoryTones[event.category]} uppercase>
               {event.category}
-            </span>
+            </Badge>
           </div>
           {/* Capped at two lines so a long title can't stretch one card. */}
           <h3 className="font-headline text-base md:text-xl text-on-surface line-clamp-2 md:line-clamp-none group-hover:text-primary transition-colors">
@@ -212,7 +205,7 @@ export function EventsSection() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 md:p-10"
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-10"
             onClick={() => setLightboxEvent(null)}
             role="dialog"
             aria-modal="true"

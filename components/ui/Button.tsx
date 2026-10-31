@@ -13,10 +13,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: "bg-[#b80035] text-white hover:bg-[#d4264f]",
-  secondary: "bg-[#735c00] text-white",
-  outline: "border border-[#e5bdbe] text-[#1a1c1c] hover:bg-white",
-  ghost: "text-[#1a1c1c] hover:bg-white",
+  primary: "bg-primary text-on-primary hover:bg-primary-container",
+  secondary: "bg-secondary text-on-secondary hover:brightness-110",
+  outline: "border border-outline-variant text-on-surface hover:bg-surface-container-lowest",
+  ghost: "text-on-surface hover:bg-surface-container-lowest",
 };
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -27,7 +27,7 @@ const sizeStyles: Record<ButtonSize, string> = {
 };
 
 const baseStyles =
-  "inline-flex items-center justify-center font-semibold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#b80035] focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
+  "inline-flex items-center justify-center font-semibold transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed";
 
 /**
  * The classes a Button renders with, for the times a **link** has to look like

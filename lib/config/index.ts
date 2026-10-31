@@ -2,4 +2,4 @@
  * Configuration exports
  */
 
-export { config, validateEnv } from "./env";
+export { config } from "./env";

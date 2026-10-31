@@ -1,7 +1,14 @@
 /**
- * Environment configuration
- * Validates and exports environment variables
+ * Environment configuration.
+ *
+ * These keys are optional: the site is designed to render without any of them
+ * and degrade gracefully (YouTube falls back to cached sermons, the map is
+ * omitted, WhatsApp uses the church number). The previous `validateEnv()`
+ * built an empty "missing" list and never actually checked anything, so it has
+ * been removed rather than left as a function that implies validation.
  */
+
+import { contactInfo } from "@/data/contact";
 
 interface EnvConfig {
   youtubeApiKeyPublic: string | undefined;
@@ -19,19 +26,6 @@ function getOptionalEnv(key: string): string | undefined {
   return value === "" ? undefined : value;
 }
 
-export function validateEnv(): void {
-  const requiredButMissing: string[] = [];
-
-  // Only validate if we're on the server and the env var is literally undefined (not empty string)
-  // For client-side keys, we don't require them at build time since they're meant to be public
-
-  if (requiredButMissing.length > 0) {
-    console.warn(
-      `Missing required environment variables: ${requiredButMissing.join(", ")}`
-    );
-  }
-}
-
 export const config: EnvConfig = {
   // Client-side YouTube API key (exposed to browser)
   youtubeApiKeyPublic: getOptionalEnv("NEXT_PUBLIC_YOUTUBE_API_KEY"),
@@ -42,11 +36,7 @@ export const config: EnvConfig = {
   // Google Maps API key (used for embeds)
   googleMapsApiKey: getOptionalEnv("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY"),
 
-  // WhatsApp number for floating button
-  whatsappNumber: getEnv("NEXT_PUBLIC_WHATSAPP_NUMBER", "+2348077829444"),
+  // WhatsApp number for floating button — defaults to the church number in
+  // `data/contact.ts` instead of a second hard-coded copy.
+  whatsappNumber: getEnv("NEXT_PUBLIC_WHATSAPP_NUMBER", contactInfo.whatsapp),
 };
-
-// Validate on module load (server-side only)
-if (typeof window === "undefined") {
-  validateEnv();
-}

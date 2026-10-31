@@ -7,6 +7,7 @@
  */
 
 import { MIN_DONATION_AMOUNT } from "@/data/donations";
+import { EMAIL_PATTERN } from "@/lib/validation";
 
 export const PAYMENT_CURRENCY = "NGN";
 /** Allow one kobo for provider decimal normalization; no larger shortfall is paid. */
@@ -51,7 +52,7 @@ export function isValidDonationAmount(amount: unknown): amount is number {
 }
 
 export function isValidEmail(email: unknown): email is string {
-  return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return typeof email === "string" && EMAIL_PATTERN.test(email);
 }
 
 export function isValidMetadata(metadata: unknown): metadata is PaymentMetadata {

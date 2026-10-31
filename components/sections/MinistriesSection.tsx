@@ -54,7 +54,7 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-on-surface-variant to-on-surface flex items-center justify-center">
-            <Users className="w-16 h-16 text-white/30" />
+            <Users className="w-16 h-16 text-white/40" />
           </div>
         )}
         <div className={`absolute inset-0 bg-gradient-to-t ${gradientOverlays[index % gradientOverlays.length]} to-transparent`} />
@@ -67,7 +67,7 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
           </p>
           {/* Touch devices never fire :hover, so the affordance was invisible on
               a phone. Visible by default there; hover-reveal from md up. */}
-          <span className="inline-flex items-center gap-2 mt-2 md:mt-4 text-white/90 text-sm font-semibold md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
+          <span className="inline-flex items-center gap-2 mt-2 md:mt-4 text-white/80 text-sm font-semibold md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
             Learn More <ArrowRight className="w-4 h-4" />
           </span>
         </div>

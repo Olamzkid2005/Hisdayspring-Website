@@ -4,12 +4,13 @@ import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { workforce } from "@/data";
+import { Badge, type BadgeTone } from "@/components/ui";
 
-const roleColors: Record<string, string> = {
-  "lead-pastor": "bg-primary/10 text-on-primary-container",
-  "branch-pastor": "bg-secondary/10 text-on-secondary-container",
-  minister: "bg-primary/10 text-on-primary-container",
-  "head-of-department": "bg-secondary/10 text-on-secondary-container",
+const roleTones: Record<string, BadgeTone> = {
+  "lead-pastor": "primary-soft",
+  "branch-pastor": "secondary-soft",
+  minister: "primary-soft",
+  "head-of-department": "secondary-soft",
 };
 
 const roleLabels: Record<string, string> = {
@@ -48,13 +49,13 @@ function WorkforceCard({
 
           {/* Role badge */}
           <div className="absolute top-3 left-3">
-            <span
-              className={`inline-block px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase ${
-                roleColors[member.role] || "bg-primary/10 text-on-primary-container"
-              }`}
+            <Badge
+              tone={roleTones[member.role] ?? "primary-soft"}
+              uppercase
+              className="px-3 py-1"
             >
               {roleLabels[member.role] || member.role}
-            </span>
+            </Badge>
           </div>
         </div>
 

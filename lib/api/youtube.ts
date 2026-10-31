@@ -3,10 +3,9 @@
  * Uses client-side public API key for sermon fetching
  */
 
-import type { YouTubeVideo, LiveStreamStatus } from "@/types";
+import type { YouTubeVideo } from "@/types";
 import { config } from "@/lib/config";
-
-const YOUTUBE_API_BASE = "https://www.googleapis.com/youtube/v3";
+import { YOUTUBE_API_BASE, YOUTUBE_CHANNEL_HANDLE } from "./youtube-config";
 
 interface YouTubeSearchResponse {
   items: YouTubeSearchItem[];
@@ -60,7 +59,7 @@ export async function fetchSermons(
   if (apiKey) {
     try {
       // First, search for videos in the channel
-      const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=@hisdayspring&part=snippet&order=date&type=video&maxResults=${maxResults}`;
+      const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=${YOUTUBE_CHANNEL_HANDLE}&part=snippet&order=date&type=video&maxResults=${maxResults}`;
 
       const response = await fetchWithRetry(searchUrl, 3);
 
@@ -121,18 +120,6 @@ export async function fetchSermons(
 
   console.warn("YouTube API key not configured. Using placeholder data with real YouTube thumbnails.");
   return getPlaceholderSermons();
-}
-
-/**
- * Fetch live stream status
- * This should only be called from server-side API routes
- */
-export async function fetchLiveStreamStatus(): Promise<LiveStreamStatus> {
-  // This would be called from /api/livestream route
-  // For now, return offline status
-  return {
-    isLive: false,
-  };
 }
 
 /**

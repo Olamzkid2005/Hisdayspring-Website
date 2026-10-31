@@ -47,7 +47,7 @@ function makeRequest(body: unknown): Request {
     },
     url: `${ORIGIN}/api/payments/bachs/initialize`,
     headers: new Headers({
-      "cf-connecting-ip": "198.51.100.1",
+      "x-forwarded-for": "198.51.100.1",
       "idempotency-key": idempotencyKey,
     }),
   } as unknown as Request;

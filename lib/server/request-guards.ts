@@ -1,13 +1,12 @@
 /**
  * Resource guards for unauthenticated payment endpoints.
  *
- * Pxxl currently fronts this site through Cloudflare, so use its edge-written
- * CF-Connecting-IP header (not attacker-controlled X-Forwarded-For). The local
- * counter is per Node process: it is defense-in-depth, not a substitute for an
- * edge/distributed rate limit across replicas and restarts.
+ * The local counter is per Node process: it is defense-in-depth, not a
+ * substitute for an edge/distributed rate limit across replicas and restarts.
  */
 
 import { createHash, randomUUID } from "node:crypto";
+import { isIP } from "node:net";
 import { TextDecoder } from "node:util";
 
 const rateBuckets = new Map<string, { count: number; resetAt: number }>();
@@ -85,6 +84,46 @@ export function deriveCheckoutIdentity(
   return { reference, idempotencyKey: `checkout_${digest}` };
 }
 
+const MAX_FORWARDED_VALUE_LENGTH = 512;
+const UNIDENTIFIED_KEY = "unidentified";
+
+/**
+ * The caller's IP, as recorded by the proxy hop closest to us.
+ *
+ * Pxxl terminates TLS in Caddy, whose `reverse_proxy` ignores incoming
+ * `X-Forwarded-*` values from untrusted peers and writes the connecting
+ * address itself. So the **rightmost** entry is the one address we can
+ * believe; everything to its left was sent by the client and is trivially
+ * spoofed — which is why rotating the left-hand entries must not buy a fresh
+ * bucket.
+ *
+ * `CF-Connecting-IP` is deliberately not read: this site is not behind
+ * Cloudflare, so that header is client-controlled, and rotating it was enough
+ * to bypass the limiter entirely. If the edge ever becomes Cloudflare, that
+ * header (overwritten at their edge) becomes the trustworthy one and this
+ * needs revisiting.
+ */
+export function getClientIp(request: Request): string | undefined {
+  const raw = request.headers.get("x-forwarded-for");
+  if (!raw) return undefined;
+  const value = raw.trim();
+  if (!value || value.length > MAX_FORWARDED_VALUE_LENGTH) return undefined;
+
+  const hops = value.split(",");
+  const last = hops[hops.length - 1]?.trim();
+  if (!last) return undefined;
+
+  // Tolerate the `host:port` forms an upstream may append.
+  const bracketed = /^\[([0-9a-fA-F:.]+)\](?::\d{1,5})?$/.exec(last);
+  const host = bracketed
+    ? bracketed[1]
+    : /^\d{1,3}(?:\.\d{1,3}){3}:\d{1,5}$/.test(last)
+      ? last.slice(0, last.lastIndexOf(":"))
+      : last;
+
+  return isIP(host) ? host : undefined;
+}
+
 export function checkPaymentRateLimit(
   request: Request,
   bucket: string,
@@ -92,12 +131,10 @@ export function checkPaymentRateLimit(
   windowMs: number,
   now = Date.now()
 ): { allowed: true } | { allowed: false; retryAfterSeconds: number } {
-  const ip = request.headers.get("cf-connecting-ip")?.trim();
-  // Fail open when the trusted edge IP header is missing rather than making
-  // every unidentifiable caller share one bucket (which would let one client
-  // deny service to all others). Production must configure a real edge limit.
-  if (!ip || ip.length > 80) return { allowed: true };
-  const key = `${bucket}:${ip}`;
+  // Callers we cannot identify share one bucket instead of skipping the limit
+  // altogether: failing open here made every checkout endpoint unlimited for
+  // anyone who simply omitted the header, which is every real visitor.
+  const key = `${bucket}:${getClientIp(request) ?? UNIDENTIFIED_KEY}`;
 
   // Opportunistically expire old entries to keep memory bounded on warm workers.
   for (const [candidate, value] of rateBuckets) {

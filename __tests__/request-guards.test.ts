@@ -100,40 +100,53 @@ describe("payment request guards", () => {
     });
   });
 
-  it("limits requests by trusted edge IP without trusting forwarded headers", () => {
-    const request = mockRequest("https://hisdayspring.org/api/payments", [], {
-      "cf-connecting-ip": "198.51.100.42",
-      "x-forwarded-for": "203.0.113.1",
-    });
-    expect(checkPaymentRateLimit(request, "checkout", 2, 60_000, 1_000)).toEqual({
+  it("limits by the proxy-written hop, not a spoofed prefix", () => {
+    const withSpoofedPrefix = (prefix: string) =>
+      mockRequest("https://hisdayspring.org/api/payments", [], {
+        "x-forwarded-for": `${prefix}, 198.51.100.42`,
+      });
+
+    expect(
+      checkPaymentRateLimit(withSpoofedPrefix("203.0.113.1"), "checkout", 2, 60_000, 1_000)
+    ).toEqual({ allowed: true });
+    expect(
+      checkPaymentRateLimit(withSpoofedPrefix("203.0.113.2"), "checkout", 2, 60_000, 2_000)
+    ).toEqual({ allowed: true });
+    // A fresh left-hand entry must not buy a fresh bucket.
+    expect(
+      checkPaymentRateLimit(withSpoofedPrefix("203.0.113.3"), "checkout", 2, 60_000, 3_000)
+    ).toEqual({ allowed: false, retryAfterSeconds: 58 });
+  });
+
+  it("ignores client-supplied CF-Connecting-IP and never fails open", () => {
+    const spoofedEdge = (ip: string) =>
+      mockRequest("https://hisdayspring.org/api/payments", [], {
+        "cf-connecting-ip": ip,
+      });
+
+    expect(checkPaymentRateLimit(spoofedEdge("198.51.100.1"), "checkout", 1, 60_000, 0)).toEqual({
       allowed: true,
     });
-    expect(checkPaymentRateLimit(request, "checkout", 2, 60_000, 2_000)).toEqual({
-      allowed: true,
-    });
-    expect(checkPaymentRateLimit(request, "checkout", 2, 60_000, 3_000)).toEqual({
+    // Rotating the header cannot evade the shared bucket, and a caller with no
+    // usable client IP is limited rather than exempt.
+    expect(checkPaymentRateLimit(spoofedEdge("198.51.100.2"), "checkout", 1, 60_000, 1)).toEqual({
       allowed: false,
-      retryAfterSeconds: 58,
+      retryAfterSeconds: 60,
+    });
+    expect(checkPaymentRateLimit(mockRequest("https://hisdayspring.org/api/payments"), "checkout", 1, 60_000, 2)).toEqual({
+      allowed: false,
+      retryAfterSeconds: 60,
     });
   });
 
-  it("fails open without a trusted edge IP and expires old buckets", () => {
-    const untrustedOnly = mockRequest("https://hisdayspring.org/api/payments", [], {
+  it("expires old buckets", () => {
+    const request = mockRequest("https://hisdayspring.org/api/payments", [], {
       "x-forwarded-for": "198.51.100.42",
     });
-    for (let index = 0; index < 3; index++) {
-      expect(checkPaymentRateLimit(untrustedOnly, "checkout", 1, 100, index)).toEqual({
-        allowed: true,
-      });
-    }
-
-    const trusted = mockRequest("https://hisdayspring.org/api/payments", [], {
-      "cf-connecting-ip": "198.51.100.42",
-    });
-    expect(checkPaymentRateLimit(trusted, "checkout", 1, 100, 0)).toEqual({
+    expect(checkPaymentRateLimit(request, "checkout", 1, 100, 0)).toEqual({
       allowed: true,
     });
-    expect(checkPaymentRateLimit(trusted, "checkout", 1, 100, 101)).toEqual({
+    expect(checkPaymentRateLimit(request, "checkout", 1, 100, 101)).toEqual({
       allowed: true,
     });
   });

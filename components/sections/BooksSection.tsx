@@ -37,13 +37,13 @@ export function BooksSection() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 md:gap-x-8 gap-y-8 md:gap-y-16">
-        {books.map((book, index) => (
+        {books.map((book) => (
           <motion.div
             key={book.id}
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, delay: index * 0.05 }}
+            transition={{ duration: 0.4 }}
             className="group"
           >
             <div className="aspect-[3/4] bg-surface-container rounded-xl overflow-hidden mb-6 relative">
@@ -52,7 +52,7 @@ export function BooksSection() {
                 alt={book.title}
                 fill
                 sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
                 <a

@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import {
   useRef,
   useState,
@@ -9,57 +8,39 @@ import {
   useMemo,
   useSyncExternalStore,
 } from "react";
-import { motion, useInView, AnimatePresence } from "framer-motion";
-import Link from "next/link";
-import { X, ChevronLeft, ChevronRight, Quote } from "lucide-react";
-import { galleryPhotos, galleryCategories } from "@/data/gallery";
-import { testimonials } from "@/data/testimonials";
+import { motion, useInView } from "framer-motion";
+import { galleryPhotos } from "@/data/gallery";
+import { shuffleArray } from "@/lib/shuffle";
 import type { GalleryCategory } from "@/types";
+import { GalleryFilter } from "./gallery/GalleryFilter";
+import { GalleryGrid } from "./gallery/GalleryGrid";
+import { GalleryTestimonials } from "./gallery/GalleryTestimonials";
+import { GalleryLightbox } from "./gallery/GalleryLightbox";
 
 /** Once-only client detection; there is nothing to subscribe to. */
 const subscribeToNothing = () => () => {};
 const trueOnClient = () => true;
 const falseOnServer = () => false;
 
-const featuredTestimonials = testimonials.slice(0, 3);
-
-const bentoSizes = [
-  "md:col-span-2 md:row-span-2",
-  "md:col-span-1 md:row-span-1",
-  "md:col-span-1 md:row-span-2",
-  "md:col-span-1 md:row-span-1",
-  "md:col-span-1 md:row-span-1",
-];
-
-/**
- * Fisher-Yates shuffle – returns a new array. `rotateBy` shifts the result, so
- * the auto-shuffle timer leads with a different photo even when two shuffles
- * happen to land on the same order.
- */
-function shuffleArray<T>(arr: T[], rotateBy = 0): T[] {
-  const shuffled = [...arr];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  if (rotateBy <= 0 || shuffled.length === 0) return shuffled;
-  const shift = rotateBy % shuffled.length;
-  return [...shuffled.slice(shift), ...shuffled.slice(0, shift)];
-}
-
 export function GallerySection() {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-  const [activeCategory, setActiveCategory] = useState<GalleryCategory | "all">("all");
+  const [activeCategory, setActiveCategory] = useState<GalleryCategory | "all">(
+    "all"
+  );
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
-  /** Id of the photo the lightbox has finished loading (see below). */
+  /** Id of the photo the lightbox has finished loading. */
   const [loadedPhoto, setLoadedPhoto] = useState<string | null>(null);
   const [shuffleTick, setShuffleTick] = useState(0);
 
   // False during SSR and the hydration render, true afterwards. The shuffle is
   // random, so running it on the server would produce a different order than
   // the client and the grid markup would not match on hydration.
-  const isClient = useSyncExternalStore(subscribeToNothing, trueOnClient, falseOnServer);
+  const isClient = useSyncExternalStore(
+    subscribeToNothing,
+    trueOnClient,
+    falseOnServer
+  );
 
   const filteredPhotos = useMemo(
     () =>
@@ -76,20 +57,15 @@ export function GallerySection() {
     [isClient, filteredPhotos, shuffleTick]
   );
 
-  // Auto-shuffle every 8 seconds while in view
+  // Auto-shuffle every 8 seconds while in view.
   useEffect(() => {
     if (!isInView || filteredPhotos.length <= 5) return;
-    const interval = setInterval(() => setShuffleTick((tick) => tick + 1), 8000);
+    const interval = setInterval(
+      () => setShuffleTick((tick) => tick + 1),
+      8000
+    );
     return () => clearInterval(interval);
   }, [isInView, filteredPhotos]);
-
-  const bentoPhotos = shuffledPhotos.slice(0, 5);
-
-  // Deriving this means changing photo resets the skeleton on its own, with no
-  // effect to keep in sync.
-  const currentPhotoId =
-    selectedPhoto === null ? null : filteredPhotos[selectedPhoto]?.id ?? null;
-  const lightboxLoaded = currentPhotoId !== null && loadedPhoto === currentPhotoId;
 
   const goToPrev = useCallback(() => {
     setSelectedPhoto((prev) =>
@@ -107,19 +83,23 @@ export function GallerySection() {
 
   const closeLightbox = () => setSelectedPhoto(null);
 
-  const handleLightboxKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") closeLightbox();
-    else if (e.key === "ArrowLeft") goToPrev();
-    else if (e.key === "ArrowRight") goToNext();
+  const handleLightboxKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Escape") closeLightbox();
+    else if (event.key === "ArrowLeft") goToPrev();
+    else if (event.key === "ArrowRight") goToNext();
   };
 
   const openFilteredIndex = (photoId: string) => {
-    const idx = filteredPhotos.findIndex((p) => p.id === photoId);
-    setSelectedPhoto(idx >= 0 ? idx : 0);
+    const index = filteredPhotos.findIndex((photo) => photo.id === photoId);
+    setSelectedPhoto(index >= 0 ? index : 0);
   };
 
   return (
-    <section id="gallery" ref={ref} className="py-10 md:py-16 px-6 md:px-12 max-w-7xl mx-auto">
+    <section
+      id="gallery"
+      ref={ref}
+      className="py-10 md:py-16 px-6 md:px-12 max-w-7xl mx-auto"
+    >
       <div className="flex flex-col md:flex-row justify-between items-end mb-5 md:mb-10 gap-5 md:gap-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -134,275 +114,35 @@ export function GallerySection() {
           </p>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          // Phones get one scrollable row of filters instead of four wrapped
-          // rows that pushed the photos off the screen.
-          className="flex w-full flex-nowrap items-center gap-2 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-1 -mx-6 px-6 md:mx-0 md:w-auto md:flex-wrap md:gap-3 md:overflow-visible md:px-0 md:pb-0"
-        >
-          <button
-            onClick={() => setActiveCategory("all")}
-            className={`inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap px-4 md:px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-              activeCategory === "all"
-                ? "bg-primary text-on-primary"
-                : "bg-surface-container-low text-on-surface-variant"
-            }`}
-          >
-            All
-          </button>
-          {galleryCategories.map((cat) => (
-            <button
-              key={cat.value}
-              onClick={() => setActiveCategory(cat.value)}
-            className={`inline-flex min-h-[44px] shrink-0 items-center whitespace-nowrap px-4 md:px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-              activeCategory === cat.value
-                  ? "bg-primary text-on-primary"
-                  : "bg-surface-container-low text-on-surface-variant"
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
-        </motion.div>
+        <GalleryFilter
+          activeCategory={activeCategory}
+          isInView={isInView}
+          onChange={setActiveCategory}
+        />
       </div>
 
-      {/** ---- Bento grid with crossfade shuffle ---- */}
-      {/* Two photos per row on a phone (four tiles) — a single 190px column of
-          five photos was over a thousand pixels of scrolling on its own. */}
-      <div className="grid grid-cols-2 md:grid-cols-4 md:grid-rows-[400px_400px] auto-rows-[150px] md:auto-rows-auto gap-3 md:gap-4">
-        {bentoPhotos.map((photo, index) => (
-          <div
-            key={`slot-${index}`}
-            className={`group relative rounded-xl overflow-hidden cursor-pointer ${
-              index === 4 ? "hidden md:block" : ""
-            } ${bentoSizes[index] || ""}`}
-            onClick={() => openFilteredIndex(photo.id)}
-            role="button"
-            tabIndex={0}
-            aria-label={`View ${photo.caption || "gallery photo"}`}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") openFilteredIndex(photo.id);
-            }}
-          >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={photo.id}
-                initial={{ opacity: 0, scale: 1.05 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0"
-              >
-                {/* The caption is rendered as visible text on this tile and
-                    the tile is labelled "View <caption>", so repeating it as
-                    alt text makes a screen reader announce it twice. */}
-                <Image
-                  src={photo.imageUrl}
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 100vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-              </motion.div>
-            </AnimatePresence>
-            {/* Overlay gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            {/* Caption bar */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 backdrop-blur-sm bg-black/20">
-              <p className="text-white text-sm font-medium truncate drop-shadow-md">
-                {photo.caption}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
+      <GalleryGrid
+        photos={shuffledPhotos}
+        isInView={isInView}
+        onOpen={openFilteredIndex}
+        onViewAll={() => {
+          const first = filteredPhotos[0];
+          if (first) openFilteredIndex(first.id);
+        }}
+      />
 
-      {/** ---- View All trigger ---- */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.5, delay: 0.6 }}
-        className="flex justify-center mt-6 md:mt-8"
-      >
-        <button
-          onClick={() => {
-            const first = filteredPhotos[0];
-            if (first) openFilteredIndex(first.id);
-          }}
-          className="text-primary hover:text-primary/80 font-medium underline underline-offset-4 transition-colors"
-        >
-          View All Photos
-        </button>
-      </motion.div>
+      <GalleryTestimonials isInView={isInView} />
 
-      {/** ---- Testimonials strip ---- */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-        transition={{ duration: 0.6, delay: 0.2 }}
-        className="mt-10 md:mt-20"
-      >
-        <div className="text-center mb-4 md:mb-8">
-          {/* The heading doubles as the link to the full page of testimonies,
-              which was reachable only from the sitemap before. */}
-          <h3 className="font-headline text-2xl md:text-4xl text-on-surface">
-            <Link href="/testimonials" className="transition-colors hover:text-primary">
-              Divine Encounters
-            </Link>
-          </h3>
-          <p className="text-on-surface-variant mt-2 max-w-2xl mx-auto text-sm md:text-base">
-            Hear how God has transformed lives through His Power and Grace.
-          </p>
-        </div>
-        {/* Phones swipe through the testimonies in one row (every card stays
-            reachable) instead of stacking three of them down the page. */}
-        {/* Single-axis rail (see MinistriesSection for the measurement):
-            overflow-y-hidden stops the browser treating this as a two-axis
-            scroller, which is what swallowed vertical gestures on phones. */}
-        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto overflow-y-hidden overscroll-x-contain pb-2 -mx-6 px-6 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
-          {featuredTestimonials.map((testimonial, index) => (
-            <motion.div
-              key={testimonial.id}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className={`w-[85%] flex-none snap-start p-4 md:w-auto md:p-6 rounded-2xl ${
-                index % 2 === 0
-                  ? "bg-surface-container-lowest shadow-sm border border-outline-variant/20"
-                  : "bg-primary text-on-primary"
-              }`}
-            >
-              <Quote
-                className={`w-6 h-6 mb-2 md:w-8 md:h-8 md:mb-3 ${
-                  index % 2 === 0 ? "text-primary/20" : "text-white/30"
-                }`}
-              />
-              <p
-                className={`text-sm md:text-base leading-relaxed line-clamp-3 md:line-clamp-4 ${
-                  index % 2 === 0 ? "text-on-surface" : "text-on-primary/90"
-                }`}
-              >
-                &ldquo;{testimonial.testimony}&rdquo;
-              </p>
-              <p
-                className={`mt-3 md:mt-4 text-sm font-bold ${
-                  index % 2 === 0 ? "text-primary" : "text-white"
-                }`}
-              >
-                {testimonial.name}
-              </p>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
-
-      {/** ---- Lightbox ---- */}
-      <AnimatePresence>
-        {selectedPhoto !== null && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-50 bg-black flex items-center justify-center"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Image lightbox"
-            onClick={closeLightbox}
-            onKeyDown={handleLightboxKeyDown}
-            tabIndex={0}
-          >
-            <div className="absolute inset-0 flex flex-col">
-              <div className="flex-shrink-0 h-[8vh] md:h-[10vh] bg-black" />
-
-              <div className="flex-1 relative flex items-center justify-center min-h-0">
-                <button
-                  type="button"
-                  className="absolute top-4 right-4 p-2 text-white/80 hover:text-white transition-colors z-10"
-                  onClick={closeLightbox}
-                  aria-label="Close lightbox"
-                >
-                  <X className="w-10 h-10 md:w-8 md:h-8" />
-                </button>
-
-                <button
-                  type="button"
-                  className="absolute left-4 p-2 text-white/80 hover:text-white transition-colors z-10"
-                  onClick={(e) => { e.stopPropagation(); goToPrev(); }}
-                  aria-label="Previous photo"
-                >
-                  <ChevronLeft className="w-12 h-12 md:w-10 md:h-10" />
-                </button>
-
-                <button
-                  type="button"
-                  className="absolute right-4 p-2 text-white/80 hover:text-white transition-colors z-10"
-                  onClick={(e) => { e.stopPropagation(); goToNext(); }}
-                  aria-label="Next photo"
-                >
-                  <ChevronRight className="w-12 h-12 md:w-10 md:h-10" />
-                </button>
-
-                <motion.div
-                  key={selectedPhoto}
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.3 }}
-                  className="relative w-full max-w-5xl h-[70vh] mx-4 flex flex-col items-center justify-center"
-                  onClick={(e) => e.stopPropagation()}
-                  onKeyDown={(e) => e.stopPropagation()}
-                >
-                  {/* Deliberately not role="img": that role makes its children
-                      presentational, which would hide the caption below from
-                      assistive technology while still leaving the photo itself
-                      unnamed. The photo is decorative; the caption carries the
-                      meaning. */}
-                  {!lightboxLoaded && (
-                    <div className="flex items-center justify-center py-20">
-                      <div className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    </div>
-                  )}
-                  {/* Same reasoning as the grid: the caption and event name
-                      are printed under the photo, so this image is decorative. */}
-                  <Image
-                    src={filteredPhotos[selectedPhoto].imageUrl}
-                    alt=""
-                    fill
-                    sizes="100vw"
-                    onLoad={() => setLoadedPhoto(currentPhotoId)}
-                    className={`object-contain rounded-sm transition-opacity duration-300 ${
-                      lightboxLoaded ? "opacity-100" : "opacity-0"
-                    }`}
-                  />
-                  {(filteredPhotos[selectedPhoto].caption ||
-                    filteredPhotos[selectedPhoto].eventName) && (
-                    <div className="text-center mt-4">
-                      <p className="text-white font-medium">
-                        {filteredPhotos[selectedPhoto].eventName}
-                      </p>
-                      {filteredPhotos[selectedPhoto].caption && (
-                        <p className="text-white/60 text-sm">
-                          {filteredPhotos[selectedPhoto].caption}
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </motion.div>
-
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 text-white/60 text-sm">
-                  {selectedPhoto + 1} / {filteredPhotos.length}
-                </div>
-              </div>
-
-              <div className="flex-shrink-0 h-[8vh] md:h-[10vh] bg-black" />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <GalleryLightbox
+        photos={filteredPhotos}
+        selectedIndex={selectedPhoto}
+        loadedPhoto={loadedPhoto}
+        onLoaded={setLoadedPhoto}
+        onClose={closeLightbox}
+        onPrev={goToPrev}
+        onNext={goToNext}
+        onKeyDown={handleLightboxKeyDown}
+      />
     </section>
   );
 }

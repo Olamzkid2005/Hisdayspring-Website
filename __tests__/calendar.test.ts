@@ -53,6 +53,37 @@ describe("buildEventIcs", () => {
     expect(field(ics, "DTEND")).toBe("20260925T160000Z");
   });
 
+  it("reads NOON as 12:00 PM in a multi-service time list", () => {
+    const ics = icsOf({
+      ...singleEvent,
+      time: "8:00 AM, 10:00 AM & 12:00 NOON",
+    });
+    expect(field(ics, "DTSTART")).toBe("20260925T070000Z");
+    expect(field(ics, "DTEND")).toBe("20260925T110000Z");
+  });
+
+  it("moves an end time that crosses midnight to the next day", () => {
+    const ics = icsOf({ ...singleEvent, time: "11:15 PM – 12:30 AM" });
+    // 11:15 PM Lagos = 22:15 UTC; 12:30 AM the next day = 23:30 UTC.
+    expect(field(ics, "DTSTART")).toBe("20260925T221500Z");
+    expect(field(ics, "DTEND")).toBe("20260925T233000Z");
+  });
+
+  it("exports one daily occurrence per night when recurrenceCount is set", () => {
+    const ics = icsOf({
+      ...singleEvent,
+      time: "11:15 PM – 12:30 AM",
+      recurrenceCount: 10,
+    });
+    expect(field(ics, "DTSTART")).toBe("20260925T221500Z");
+    expect(field(ics, "DTEND")).toBe("20260925T233000Z");
+    expect(field(ics, "RRULE")).toBe("FREQ=DAILY;COUNT=10");
+  });
+
+  it("does not add a recurrence rule for a one-off event", () => {
+    expect(icsOf(singleEvent)).not.toContain("RRULE");
+  });
+
   it("blocks multi-day events until the end of the final day", () => {
     const ics = icsOf({
       ...singleEvent,

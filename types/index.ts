@@ -109,6 +109,12 @@ export interface Event {
   imageUrl?: string;
   category: "youth" | "women" | "general" | "special";
   isFeatured?: boolean;
+  /**
+   * Consecutive daily occurrences to export to calendars, starting at `date`.
+   * Display is unchanged; this only widens the ICS beyond the opening night
+   * (for example, a ten-night prayer link).
+   */
+  recurrenceCount?: number;
   dates?: {
     date: string;
     time: string;

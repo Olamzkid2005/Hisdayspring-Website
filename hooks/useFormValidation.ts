@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, type ChangeEvent, type FormEvent } from "react";
+import { useState, useCallback, useMemo, type ChangeEvent, type FormEvent } from "react";
+import { humanizeFieldName, isValidEmail } from "@/lib/validation";
 
 export interface ValidationRule {
   required?: boolean;
@@ -36,67 +37,71 @@ export interface UseFormValidationReturn<T extends FieldConfig> {
   setFieldValue: (field: keyof T, value: string) => void;
 }
 
-/**
- * Hook for form validation with real-time error checking
- */
-export function useFormValidation<T extends FieldConfig>(
-  options: UseFormValidationOptions<T>
-): UseFormValidationReturn<T> {
-  const { fields, onSubmit } = options;
-
-  // Initialize values with empty strings
-  const initialValues = Object.keys(fields).reduce(
+function buildInitialValues<T extends FieldConfig>(fields: T): Record<keyof T, string> {
+  return Object.keys(fields).reduce(
     (acc, key) => {
       acc[key as keyof T] = "";
       return acc;
     },
     {} as Record<keyof T, string>
   );
+}
+
+/**
+ * Hook for form validation with real-time error checking.
+ *
+ * `fields` is expected to be a stable form configuration: the empty starting
+ * values are captured once, so a re-render cannot silently reset a form that
+ * is already being filled in.
+ */
+export function useFormValidation<T extends FieldConfig>(
+  options: UseFormValidationOptions<T>
+): UseFormValidationReturn<T> {
+  const { fields, onSubmit } = options;
+
+  // A lazy initializer, so the empty form is built once instead of on every
+  // render, and a re-render cannot reset a form that is being filled in.
+  const [initialValues] = useState<Record<keyof T, string>>(() =>
+    buildInitialValues(fields)
+  );
 
   const [values, setValues] = useState<Record<keyof T, string>>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Validate a single field
+  /** Validate a single field against its configured rules. */
   const validateField = useCallback(
     (name: string, value: string): string | undefined => {
-      const rules = fields[name as keyof T];
+      const rules = fields[name];
       if (!rules) return undefined;
 
-      // Required check
+      const label = humanizeFieldName(name);
+
       if (rules.required && !value.trim()) {
-        return `${name.charAt(0).toUpperCase() + name.slice(1).replace(/([A-Z])/g, ' $1')} is required`;
+        return `${label} is required`;
       }
 
-      // If empty and not required, skip other validations
+      // If empty and not required, skip the remaining checks.
       if (!value.trim()) return undefined;
 
-      // Email validation
-      if (rules.email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(value)) {
-          return "Please enter a valid email address";
-        }
+      if (rules.email && !isValidEmail(value)) {
+        return "Please enter a valid email address";
       }
 
-      // Pattern validation
       if (rules.pattern && !rules.pattern.test(value)) {
-        return rules.customMessage || `Invalid format for ${name}`;
+        return rules.customMessage || `Invalid format for ${label}`;
       }
 
-      // Min length validation
       if (rules.minLength && value.length < rules.minLength) {
-        return `${name.charAt(0).toUpperCase() + name.slice(1).replace(/([A-Z])/g, ' $1')} must be at least ${rules.minLength} characters`;
+        return `${label} must be at least ${rules.minLength} characters`;
       }
 
-      // Max length validation
       if (rules.maxLength && value.length > rules.maxLength) {
-        return `${name.charAt(0).toUpperCase() + name.slice(1).replace(/([A-Z])/g, ' $1')} must be no more than ${rules.maxLength} characters`;
+        return `${label} must be no more than ${rules.maxLength} characters`;
       }
 
-      // Custom validation
       if (rules.custom && !rules.custom(value)) {
-        return rules.customMessage || `Invalid value for ${name}`;
+        return rules.customMessage || `Invalid value for ${label}`;
       }
 
       return undefined;
@@ -104,59 +109,45 @@ export function useFormValidation<T extends FieldConfig>(
     [fields]
   );
 
-  // Validate all fields
   const validateAll = useCallback((): boolean => {
-    const newErrors: FormErrors = {};
-    let isFormValid = true;
+    const nextErrors: FormErrors = {};
+    let formIsValid = true;
 
-    Object.keys(fields).forEach((name) => {
+    for (const name of Object.keys(fields)) {
       const error = validateField(name, values[name as keyof T] || "");
       if (error) {
-        newErrors[name] = error;
-        isFormValid = false;
+        nextErrors[name] = error;
+        formIsValid = false;
       }
-    });
+    }
 
-    setErrors(newErrors);
-    return isFormValid;
+    setErrors(nextErrors);
+    return formIsValid;
   }, [fields, validateField, values]);
 
-  // Handle input change
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const { name, value } = e.target;
 
-      setValues((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-
-      // Clear error when user starts typing
-      if (errors[name]) {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: undefined,
-        }));
-      }
+      setValues((prev) => ({ ...prev, [name]: value }));
+      // Clear the field's error as soon as the user starts correcting it. The
+      // functional update keeps this callback independent of the error object.
+      setErrors((prev) =>
+        prev[name] ? { ...prev, [name]: undefined } : prev
+      );
     },
-    [errors]
+    []
   );
 
-  // Set field value programmatically
   const setFieldValue = useCallback((field: keyof T, value: string) => {
-    setValues((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setValues((prev) => ({ ...prev, [field]: value }));
   }, []);
 
-  // Handle form submission
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
-      const isValid = validateAll();
-      if (!isValid) return;
+      if (!validateAll()) return;
 
       if (onSubmit) {
         setIsSubmitting(true);
@@ -170,22 +161,24 @@ export function useFormValidation<T extends FieldConfig>(
     [validateAll, onSubmit, values]
   );
 
-  // Reset form
   const resetForm = useCallback(() => {
     setValues(initialValues);
     setErrors({});
     setIsSubmitting(false);
   }, [initialValues]);
 
-  // Check if form is valid
-  const isValid = Object.keys(errors).length === 0 &&
-    Object.values(values).every((value) => {
-      const rules = fields[Object.keys(fields).find((k) => fields[k as keyof T]?.required) as keyof T];
-      if (rules?.required) {
-        return value.trim().length > 0;
-      }
-      return true;
-    });
+  /**
+   * Derived from every field's own rules. The previous implementation found
+   * the first `required` field and applied *its* rules to every value, so a
+   * mixed required/optional form could report the wrong answer.
+   */
+  const isValid = useMemo(
+    () =>
+      Object.keys(fields).every(
+        (name) => !validateField(name, values[name as keyof T] || "")
+      ),
+    [fields, validateField, values]
+  );
 
   return {
     values,

@@ -73,6 +73,31 @@ const scheduledEvents: Event[] = [
     ],
   },
   {
+    id: "november-mega-thanksgiving-2026-11-01",
+    title: "November Mega Thanksgiving Service",
+    date: "2026-11-01",
+    time: "8:00 AM, 10:00 AM & 12:00 NOON",
+    location: "Plot 200, 21 Road, Beside Faith Academy, Gate Bus Stop, Gowon Estate, Lagos",
+    description:
+      "Theme: Harvest of Thanksgiving. Three services at 8:00 AM, 10:00 AM and 12:00 NOON, with Pastor Blessing Olamijulo ministering.",
+    imageUrl: "/images/events/november-mega-thanksgiving.webp",
+    category: "special",
+    isFeatured: true,
+  },
+  {
+    id: "upper-room-prayer-link-season-58-2026-11-01",
+    title: "Upper Room Prayer Link, Season 58: Harvest",
+    date: "2026-11-01",
+    time: "11:15 PM – 12:30 AM nightly, Nov 1–10",
+    // One calendar entry per night, not a continuous ten-day block.
+    recurrenceCount: 10,
+    location: "Online: YouTube @PastorBlessingO",
+    description:
+      "Theme: Harvest. Ten nights of prayer with Pastor Blessing Olamijulo, streaming nightly on YouTube @PastorBlessingO.",
+    imageUrl: "/images/events/upper-room-prayer-link-season-58.webp",
+    category: "general",
+  },
+  {
     id: "light-convention-uk-2026-11-07",
     title: "Light Convention UK — Exceeding Multiplication",
     date: "2026-11-07",

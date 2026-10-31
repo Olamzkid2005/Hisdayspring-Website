@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
 import { Clock, BookOpen, Sunrise, Church, Flower2 } from "lucide-react";
 import { serviceTimes } from "@/data";
-import { ReadMore } from "@/components/ui/ReadMore";
+import { Badge, ReadMore } from "@/components/ui";
 
 const servicePhotos = [
   {
@@ -91,9 +91,9 @@ export function ServiceTimesSection() {
                         <p className="font-body font-semibold text-on-surface text-lg">
                           {service.name}
                         </p>
-                        <span className="bg-secondary/10 text-secondary rounded-full text-sm font-bold px-4 py-1">
+                        <Badge tone="secondary-soft" size="lg">
                           {service.time}
-                        </span>
+                        </Badge>
                       </div>
                       {service.description && (
                         <p className="text-sm text-on-surface-variant leading-relaxed">
@@ -155,12 +155,12 @@ export function ServiceTimesSection() {
                 </motion.div>
               )}
 
-              {otherServices.map((service, i) => (
+              {otherServices.map((service) => (
                 <motion.div
                   key={service.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                  transition={{ duration: 0.5 }}
                   className="bg-surface-container-low p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
                   <div className="rounded-lg bg-primary/10 p-2 md:p-3 flex-shrink-0">
@@ -185,12 +185,12 @@ export function ServiceTimesSection() {
 
           {/* RIGHT: Auto-rotating gallery (same level as cards) */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, y: 24 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="md:col-span-5"
           >
-            <div className="relative aspect-[16/10] md:aspect-square overflow-hidden rounded-2xl border border-outline-variant/30 shadow-sm bg-surface-container-low">
+            <div className="relative aspect-[16/10] md:aspect-square overflow-hidden rounded-2xl border border-outline-variant/20 shadow-sm bg-surface-container-low">
               <button
                 type="button"
                 onClick={() => setLightbox(currentPhoto)}
@@ -217,7 +217,7 @@ export function ServiceTimesSection() {
               </AnimatePresence>
               <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/50 to-transparent pointer-events-none" />
               <div className="absolute inset-x-0 bottom-0 p-3 flex items-center justify-between">
-                <p className="text-white/90 text-sm font-medium drop-shadow">
+                <p className="text-white/80 text-sm font-medium drop-shadow">
                   {servicePhotos[currentPhoto].alt}
                 </p>
                 <div className="flex gap-1.5">

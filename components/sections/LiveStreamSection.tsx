@@ -28,6 +28,10 @@ export function LiveStreamSection() {
         if (response.ok) {
           const data = await response.json();
           setLiveStatus(data);
+        } else {
+          // Offline UI, not a blank state: the route reports upstream failure
+          // with a non-2xx status.
+          setLiveStatus({ isLive: false });
         }
       } catch {
         setLiveStatus({ isLive: false });
@@ -63,7 +67,7 @@ export function LiveStreamSection() {
         <div className="aspect-video w-full bg-surface-container-low relative">
           {isLoading ? (
             <div className="absolute inset-0 flex items-center justify-center">
-              <div className="w-10 h-10 border-4 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin" />
             </div>
           ) : isLive && liveStatus?.videoId ? (
             <iframe
@@ -91,7 +95,7 @@ export function LiveStreamSection() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Watch Sunday Service on YouTube"
-                  className="relative z-10 w-16 h-16 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center text-white hover:scale-105 transition-transform"
+                  className="relative z-10 w-16 h-16 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center text-white hover:bg-primary transition-colors"
                 >
                   <Play className="w-7 h-7 md:w-10 md:h-10 fill-white" />
                 </a>

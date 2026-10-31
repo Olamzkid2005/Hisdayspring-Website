@@ -85,7 +85,7 @@ function MemberCard({ member }: { member: WorkforceMember }) {
           </div>
         )}
         {(member.spouse || member.children) && (
-          <div className="mt-4 pt-4 border-t border-outline-variant/30">
+          <div className="mt-4 pt-4 border-t border-outline-variant/20">
             {member.spouse && (
               <p className="text-sm text-on-surface-variant flex items-center gap-1.5">
                 <Heart className="w-4 h-4 text-primary" />

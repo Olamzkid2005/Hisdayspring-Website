@@ -19,7 +19,7 @@ export function BackButton({
   const surface =
     variant === "light"
       ? "border-outline-variant bg-surface-container-lowest text-primary shadow-sm hover:border-primary hover:bg-primary hover:text-on-primary"
-      : "border-white/20 bg-white/10 text-white backdrop-blur-sm hover:bg-white hover:text-primary";
+      : "border-white/20 bg-white/10 text-white hover:bg-white hover:text-primary";
 
   return (
     <Link

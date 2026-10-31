@@ -9,6 +9,7 @@ export * from "./events";
 export * from "./books";
 export * from "./testimonials";
 export * from "./gallery";
+export * from "./hero";
 export * from "./contact";
 export * from "./social";
 export * from "./navigation";

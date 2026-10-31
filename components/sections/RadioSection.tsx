@@ -36,7 +36,7 @@ export function RadioSection() {
           <div className="p-8 md:p-10 text-center">
             <div className="inline-flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="uppercase tracking-widest text-xs font-bold text-white/90">
+              <span className="uppercase tracking-widest text-xs font-bold text-white/80">
                 Live Broadcast
               </span>
             </div>
@@ -60,7 +60,7 @@ export function RadioSection() {
             </div>
           </div>
 
-          <div className="border-t border-white/10 p-6 bg-black/20">
+          <div className="border-t border-white/20 p-6 bg-black/20">
             <p className="text-white/70 text-center text-sm">
               Click &quot;Open in Zeno.fm&quot; below to listen to the live stream
             </p>

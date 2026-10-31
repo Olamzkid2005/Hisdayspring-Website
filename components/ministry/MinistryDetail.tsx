@@ -135,7 +135,7 @@ export function MinistryDetail({
                 <span className="font-label text-secondary font-semibold tracking-widest uppercase text-xs">
                   Scripture
                 </span>
-                <p className="font-headline text-lg md:text-xl text-on-surface italic leading-relaxed mt-3">
+                <p className="font-headline text-lg md:text-xl text-on-surface leading-relaxed mt-3">
                   &ldquo;{ministry.verse.text}&rdquo;
                 </p>
                 <p className="text-sm font-bold text-secondary mt-3">

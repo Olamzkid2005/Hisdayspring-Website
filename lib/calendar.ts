@@ -26,13 +26,16 @@ interface ClockTime {
 }
 
 function parseClockTimes(time: string): ClockTime[] {
-  const matches = [...time.matchAll(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)/gi)];
+  const matches = [
+    ...time.matchAll(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM|NOON|MIDNIGHT)/gi),
+  ];
   return matches.map((match) => {
-    let hours = parseInt(match[1], 10) % 12;
-    if (match[3].toUpperCase() === "PM") hours += 12;
+    const suffix = match[3].toUpperCase();
+    let hours = suffix === "MIDNIGHT" ? 0 : parseInt(match[1], 10) % 12;
+    if (suffix === "PM" || suffix === "NOON") hours += 12;
     return {
       hours,
-      minutes: match[2] ? parseInt(match[2], 10) : 0,
+      minutes: suffix === "NOON" || suffix === "MIDNIGHT" ? 0 : match[2] ? parseInt(match[2], 10) : 0,
     };
   });
 }
@@ -99,6 +102,12 @@ export function buildEventIcs(event: Event, generatedAt: Date = new Date()): str
     end = new Date(start.getTime() + DEFAULT_DURATION_HOURS * 60 * 60 * 1000);
   }
 
+  // An end clock earlier than the start is a session that runs past midnight
+  // ("11:15 PM – 12:30 AM"), not a negative-length event.
+  if (end.getTime() <= start.getTime()) {
+    end = new Date(end.getTime() + 24 * 60 * 60 * 1000);
+  }
+
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -110,6 +119,9 @@ export function buildEventIcs(event: Event, generatedAt: Date = new Date()): str
     `DTSTAMP:${toIcsUtc(generatedAt)}`,
     `DTSTART:${toIcsUtc(start)}`,
     `DTEND:${toIcsUtc(end)}`,
+    ...(event.recurrenceCount && event.recurrenceCount > 1
+      ? [`RRULE:FREQ=DAILY;COUNT=${event.recurrenceCount}`]
+      : []),
     `SUMMARY:${escapeText(event.title)}`,
     `DESCRIPTION:${escapeText(event.description ?? event.title)}`,
     `LOCATION:${escapeText(event.location)}`,

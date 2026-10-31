@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Heart, Users, Home } from "lucide-react";
-import { ReadMore } from "@/components/ui/ReadMore";
+import { ReadMore } from "@/components/ui";
 
 const leadMessage = {
   name: "Pastor Blessing Olamijulo",
@@ -48,7 +48,7 @@ export function PastorSection() {
               id="welcome-heading"
               className="font-headline text-4xl md:text-5xl text-on-surface"
             >
-              Welcome to <em className="text-secondary">Hisdayspring</em>
+              Welcome to <span className="text-secondary">Hisdayspring</span>
             </h2>
           </div>
           <div className="hidden md:block flex-1 h-px bg-outline-variant" />
@@ -103,20 +103,20 @@ export function PastorSection() {
           <div className="space-y-10 md:space-y-16">
             {/* Lead Pastor */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              initial={{ opacity: 0, y: 24 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.25 }}
             >
               <div className="flex items-center gap-2 mb-2">
                 <Home className="w-4 h-4 text-primary" />
-                <span className="font-label text-primary font-bold tracking-widest uppercase text-xs">
+                <span className="font-label text-primary font-semibold text-xs">
                   From the Lead Pastor
                 </span>
               </div>
               <h3 className="font-headline text-xl md:text-2xl text-on-surface mb-1">
                 {leadMessage.name}
               </h3>
-              <p className="font-label text-secondary font-bold tracking-widest uppercase text-xs mb-4">
+              <p className="font-label text-secondary font-semibold text-xs mb-4">
                 {leadMessage.title}
               </p>
               {/* Both paragraphs collapse as one block on phones: the two
@@ -129,20 +129,20 @@ export function PastorSection() {
 
             {/* Resident Pastor */}
             <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={isInView ? { opacity: 1, x: 0 } : {}}
+              initial={{ opacity: 0, y: 24 }}
+              animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.7, delay: 0.4 }}
             >
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-4 h-4 text-secondary" />
-                <span className="font-label text-secondary font-bold tracking-widest uppercase text-xs">
+                <span className="font-label text-secondary font-semibold text-xs">
                   From the Resident Pastor
                 </span>
               </div>
               <h3 className="font-headline text-xl md:text-2xl text-on-surface mb-1">
                 {residentMessage.name}
               </h3>
-              <p className="font-label text-secondary font-bold tracking-widest uppercase text-xs mb-4">
+              <p className="font-label text-secondary font-semibold text-xs mb-4">
                 {residentMessage.title}
               </p>
               <ReadMore clamp="line-clamp-6" className="text-on-surface-variant">

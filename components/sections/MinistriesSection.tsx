@@ -34,7 +34,7 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
+      transition={{ duration: 0.5 }}
       // Narrower cards and no vertical stagger on phones: the offset made the
       // row look ragged, and 300px-tall cards wasted most of the screen.
       className={`flex-none w-[78vw] md:w-80 snap-center ${stagger ? "md:mt-12" : ""}`}
@@ -50,11 +50,11 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
             alt={ministry.name}
             fill
             sizes="(max-width: 768px) 280px, 320px"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-on-surface-variant to-on-surface flex items-center justify-center">
-            <Users className="w-16 h-16 text-white/30" />
+            <Users className="w-16 h-16 text-white/40" />
           </div>
         )}
         <div className={`absolute inset-0 bg-gradient-to-t ${gradientOverlays[index % gradientOverlays.length]} to-transparent`} />
@@ -67,7 +67,7 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
           </p>
           {/* Touch devices never fire :hover, so the affordance was invisible on
               a phone. Visible by default there; hover-reveal from md up. */}
-          <span className="inline-flex items-center gap-2 mt-2 md:mt-4 text-white/90 text-sm font-semibold md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
+          <span className="inline-flex items-center gap-2 mt-2 md:mt-4 text-white/80 text-sm font-semibold md:opacity-0 md:translate-y-1 md:group-hover:opacity-100 md:group-hover:translate-y-0 transition-all duration-300">
             Learn More <ArrowRight className="w-4 h-4" />
           </span>
         </div>

@@ -93,14 +93,15 @@ describe("GET /api/livestream", () => {
     });
   });
 
-  it("returns a safe offline response when the provider fails", async () => {
+  it("surfaces an upstream failure instead of claiming the channel is offline", async () => {
     process.env.YOUTUBE_API_KEY = "test-key";
     mockFetch({ ok: false, status: 503, body: "Service unavailable" });
 
     const response = await GET();
+    expect(response.status).toBe(502);
     await expect(response.json()).resolves.toEqual({
       isLive: false,
-      message: "YouTube API error: 503",
+      message: "Error fetching live stream status",
     });
   });
 });

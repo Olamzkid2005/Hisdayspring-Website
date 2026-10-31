@@ -152,8 +152,8 @@ export function ContactSection() {
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={isInView ? { opacity: 1, x: 0 } : {}}
+          initial={{ opacity: 0, y: 24 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="flex flex-col gap-6"
         >
@@ -189,7 +189,7 @@ export function ContactSection() {
           initial={{ opacity: 0, y: 30 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="bg-surface-container-lowest p-6 md:p-8 rounded-3xl border border-outline-variant/10"
+          className="bg-surface-container-lowest p-6 md:p-8 rounded-3xl border border-outline-variant/20"
         >
           <div className="flex items-start gap-3 mb-4 md:mb-6">
             {/* shrink-0 matters: without it the flex row squeezed this 40px

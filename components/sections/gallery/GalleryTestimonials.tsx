@@ -43,7 +43,7 @@ export function GalleryTestimonials({ isInView }: GalleryTestimonialsProps) {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
+            transition={{ duration: 0.4 }}
             className={`w-[85%] flex-none snap-start p-4 md:w-auto md:p-6 rounded-2xl ${
               index % 2 === 0
                 ? "bg-surface-container-lowest shadow-sm border border-outline-variant/20"

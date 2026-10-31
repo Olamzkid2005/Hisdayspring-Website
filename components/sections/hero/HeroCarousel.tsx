@@ -2,7 +2,6 @@
 
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Badge } from "@/components/ui";
 import type { HeroSlide } from "@/data/hero";
 
 interface HeroCarouselProps {
@@ -76,19 +75,6 @@ export function HeroCarousel({
         }}
       />
 
-      {/* Featured-event caption — only while the handbill slide is up. */}
-      {current.caption && (
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="hidden md:block absolute bottom-16 left-1/2 -translate-x-1/2 z-20 w-full max-w-xl px-4 text-center"
-        >
-          <Badge tone="secondary" className="px-5 py-2.5 text-sm shadow-lg">
-            {current.caption}
-          </Badge>
-        </motion.div>
-      )}
-
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-20">
         {slides.map((slide, index) => (
           <button
@@ -99,10 +85,15 @@ export function HeroCarousel({
             aria-label={`Go to slide ${index + 1}`}
             aria-current={index === currentIndex}
           >
+            {/* `shrink-0` is required: the 24px button has an 8px content box
+                (p-2), and as a flex item the pill was being shrunk back to 8px
+                — so the active dot never grew. 16px is the widest pill that
+                still leaves a gap at the 16px dot pitch; 24px touched its
+                neighbours. */}
             <span
-              className={`block h-2 rounded-full transition-all ${
+              className={`block h-2 shrink-0 rounded-full transition-all ${
                 index === currentIndex
-                  ? "w-6 bg-white"
+                  ? "w-4 bg-white"
                   : "w-2 bg-white/40 hover:bg-white/60"
               }`}
             />

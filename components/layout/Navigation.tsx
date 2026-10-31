@@ -110,8 +110,8 @@ export function Navigation() {
               className="relative p-2.5 rounded-full text-on-surface-variant hover:text-primary hover:bg-primary/5 transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
               aria-label={
                 cartCount > 0
-                  ? `Book cart, ${cartCount} item${cartCount === 1 ? "" : "s"} — open books page`
-                  : "Book cart — open books page"
+                  ? `Book cart, ${cartCount} item${cartCount === 1 ? "" : "s"}. Open books page`
+                  : "Book cart. Open books page"
               }
             >
               <ShoppingCart className="w-5 h-5" />
@@ -138,8 +138,8 @@ export function Navigation() {
               className="relative p-3 text-on-surface-variant hover:text-primary transition-colors"
               aria-label={
                 cartCount > 0
-                  ? `Book cart, ${cartCount} item${cartCount === 1 ? "" : "s"} — open books page`
-                  : "Book cart — open books page"
+                  ? `Book cart, ${cartCount} item${cartCount === 1 ? "" : "s"}. Open books page`
+                  : "Book cart. Open books page"
               }
             >
               <ShoppingCart className="w-6 h-6" />

@@ -155,12 +155,12 @@ export function ServiceTimesSection() {
                 </motion.div>
               )}
 
-              {otherServices.map((service, i) => (
+              {otherServices.map((service) => (
                 <motion.div
                   key={service.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={isInView ? { opacity: 1, y: 0 } : {}}
-                  transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                  transition={{ duration: 0.5 }}
                   className="bg-surface-container-low p-3 md:p-6 rounded-xl flex items-center gap-3 md:gap-6"
                 >
                   <div className="rounded-lg bg-primary/10 p-2 md:p-3 flex-shrink-0">
@@ -185,8 +185,8 @@ export function ServiceTimesSection() {
 
           {/* RIGHT: Auto-rotating gallery (same level as cards) */}
           <motion.div
-            initial={{ opacity: 0, x: 30 }}
-            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            initial={{ opacity: 0, y: 24 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="md:col-span-5"
           >

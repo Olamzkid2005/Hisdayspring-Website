@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import type { NavigationLink } from "@/types";
 
 interface DesktopMenuProps {
@@ -75,7 +75,10 @@ export function DesktopMenu({
                     onClick={() => onNavigateSection("ministries")}
                     className="block w-full text-left px-4 py-2.5 rounded-lg text-sm font-semibold text-primary hover:bg-primary/5 transition-colors"
                   >
-                    View All Ministries →
+                    <span className="inline-flex items-center gap-2">
+                      View All Ministries
+                      <ArrowRight className="w-4 h-4" />
+                    </span>
                   </button>
                 </motion.div>
               )}

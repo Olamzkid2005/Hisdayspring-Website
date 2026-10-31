@@ -66,14 +66,14 @@ export function MobileMenu({
               </div>
 
               <div className="flex-1 overflow-y-auto py-4">
-                {links.map((link, index) =>
+                {links.map((link) =>
                   link.id === "ministries" ? (
                     <div key={link.id}>
                       <motion.button
                         onClick={() => onNavigateSection(link.id)}
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: index * 0.05 }}
+                        transition={{ duration: 0.2 }}
                         className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/20 transition-colors font-headline ${
                           activeId === link.id
                             ? "text-primary font-bold bg-primary/5"
@@ -98,7 +98,7 @@ export function MobileMenu({
                       onClick={() => onNavigateSection(link.id)}
                       initial={{ opacity: 0, x: 20 }}
                       animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
+                      transition={{ duration: 0.2 }}
                       className={`block w-full text-left px-6 py-4 text-base font-medium border-b border-outline-variant/20 transition-colors font-headline ${
                         activeId === link.id
                           ? "text-primary font-bold bg-primary/5"

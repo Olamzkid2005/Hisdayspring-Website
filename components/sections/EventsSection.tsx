@@ -19,11 +19,9 @@ const categoryTones: Record<Event["category"], BadgeTone> = {
 
 function EventItem({
   event,
-  index,
   onImageClick,
 }: {
   event: Event;
-  index: number;
   onImageClick: (event: Event) => void;
 }) {
   const { day, month, sessions } = formatEventDate(event);
@@ -66,7 +64,7 @@ function EventItem({
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
+      transition={{ duration: 0.4 }}
       // Phones get two tidy rows — media + details, then a time/calendar strip
       // — so every card is built the same way. Desktop keeps one wide row.
       className="group flex flex-col md:flex-row md:items-center gap-3 md:gap-8 p-4 md:p-6 bg-surface-container-lowest rounded-2xl transition-all shadow-sm"
@@ -187,8 +185,8 @@ export function EventsSection() {
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 space-y-3 md:space-y-6">
         {upcomingEvents.length > 0 ? (
-          upcomingEvents.map((event, index) => (
-            <EventItem key={event.id} event={event} index={index} onImageClick={setLightboxEvent} />
+          upcomingEvents.map((event) => (
+            <EventItem key={event.id} event={event} onImageClick={setLightboxEvent} />
           ))
         ) : (
           <div className="text-center py-16">

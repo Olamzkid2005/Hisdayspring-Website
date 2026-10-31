@@ -34,7 +34,7 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
+      transition={{ duration: 0.5 }}
       // Narrower cards and no vertical stagger on phones: the offset made the
       // row look ragged, and 300px-tall cards wasted most of the screen.
       className={`flex-none w-[78vw] md:w-80 snap-center ${stagger ? "md:mt-12" : ""}`}
@@ -50,7 +50,7 @@ function MinistryCard({ ministry, index }: { ministry: Ministry; index: number }
             alt={ministry.name}
             fill
             sizes="(max-width: 768px) 280px, 320px"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-on-surface-variant to-on-surface flex items-center justify-center">

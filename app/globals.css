@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Skill bundles are docs, not app source. Their shadcn snippets contain
+   classes such as `origin-[var(--radix-<primitive>-content-transform-origin)]`,
+   which Tailwind's automatic content detection would compile into invalid CSS
+   (`<primitive>` is not a valid custom-property name) and break every route. */
+@source not "../.agents";
+@source not "../.claude";
+@source not "../.commandcode";
+@source not "../.kiro";
+
 :root {
   --color-primary: #b80035;
   --color-on-primary: #ffffff;

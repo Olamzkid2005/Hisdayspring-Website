@@ -173,7 +173,7 @@ export function SermonsSection() {
                 className="md:col-span-2"
               >
                 <div
-                  className="relative h-[200px] md:h-[450px] rounded-xl overflow-hidden group cursor-pointer"
+                  className="relative h-[200px] md:h-[450px] rounded-xl overflow-hidden group cursor-pointer bg-surface-container-highest"
                   onClick={() => setSelectedVideo(featured)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -188,7 +188,12 @@ export function SermonsSection() {
                   <img
                     src={featured.thumbnailUrl}
                     alt={featured.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    className="w-full h-full object-cover"
+                    onError={(event) => {
+                      // YouTube can rotate a thumbnail out; keep the dark
+                      // gradient instead of the browser's broken-image glyph.
+                      event.currentTarget.style.visibility = "hidden";
+                    }}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                   <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
@@ -217,20 +222,23 @@ export function SermonsSection() {
             {/* Phones get compact rows (thumbnail beside the details) instead
                 of three full-width 16:9 cards stacked down the screen. */}
             <div className="space-y-3 md:space-y-8">
-              {others.map((video, index) => (
+              {others.map((video) => (
                 <motion.div
                   key={video.id}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={isInView ? { opacity: 1, x: 0 } : {}}
-                  transition={{ duration: 0.4, delay: 0.2 + index * 0.1 }}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={isInView ? { opacity: 1, y: 0 } : {}}
+                  transition={{ duration: 0.4 }}
                   className="group flex cursor-pointer gap-3 rounded-xl bg-surface-container-lowest p-3 shadow-sm transition-shadow hover:shadow-md md:block md:p-4"
                   onClick={() => setSelectedVideo(video)}
                 >
-                  <div className="relative aspect-video w-28 flex-none overflow-hidden rounded-lg md:mb-3 md:w-full">
+                  <div className="relative aspect-video w-28 flex-none overflow-hidden rounded-lg bg-surface-container-highest md:mb-3 md:w-full">
                     <img
                       src={video.thumbnailUrl}
                       alt={video.title}
-                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      className="w-full h-full object-cover"
+                      onError={(event) => {
+                        event.currentTarget.style.visibility = "hidden";
+                      }}
                     />
                     <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors duration-300 flex items-center justify-center">
                       <Play className="w-6 h-6 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" fill="currentColor" />

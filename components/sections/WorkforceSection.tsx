@@ -22,17 +22,15 @@ const roleLabels: Record<string, string> = {
 
 function WorkforceCard({
   member,
-  index,
 }: {
   member: (typeof workforce)[number];
-  index: number;
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.12 }}
+      transition={{ duration: 0.5 }}
       className="group"
     >
       <div className="bg-surface-container-lowest rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
@@ -43,7 +41,7 @@ function WorkforceCard({
             alt={member.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
@@ -98,7 +96,7 @@ export function WorkforceSection() {
               className="font-headline text-4xl md:text-5xl text-on-surface"
             >
               Meet Our{" "}
-              <em className="text-secondary">Pastors</em>
+              <span className="text-secondary">Pastors</span>
             </h2>
           </div>
           <div className="hidden md:block flex-1 h-px bg-outline-variant" />
@@ -106,15 +104,15 @@ export function WorkforceSection() {
 
         {/* Lead Pastors — feature in a two-column row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-6 md:mb-8">
-          {workforce.slice(0, 2).map((member, index) => (
-            <WorkforceCard key={member.id} member={member} index={index} />
+          {workforce.slice(0, 2).map((member) => (
+            <WorkforceCard key={member.id} member={member} />
           ))}
         </div>
 
         {/* Remaining pastors — three-column grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {workforce.slice(2).map((member, index) => (
-            <WorkforceCard key={member.id} member={member} index={index + 2} />
+          {workforce.slice(2).map((member) => (
+            <WorkforceCard key={member.id} member={member} />
           ))}
         </div>
       </div>

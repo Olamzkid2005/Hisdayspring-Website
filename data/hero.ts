@@ -1,16 +1,23 @@
 /**
  * Hero carousel content.
  *
- * The component used to own these paths and captions, which meant changing a
- * slide meant editing presentation code. The featured handbill also duplicated
- * an event that lives in `data/events.ts`; keep the next conference's copy in
- * sync when the handbill is swapped.
+ * The opening slide is permanent. Every other slide is drawn from the gallery
+ * pool newest shoot first (see `lib/hero-slides.ts`), so publishing a batch
+ * with a later date in `data/gallery.ts` brings it straight into the hero and
+ * pushes the older photos out — no change needed here.
  */
+
+import { lagosToday } from "@/lib/lagos-time";
 
 export interface HeroSlide {
   image: string;
   alt: string;
   caption?: string;
+}
+
+interface FeaturedHeroSlide extends HeroSlide {
+  /** Last Lagos date (inclusive) the slide may appear. */
+  until: string;
 }
 
 export const HERO_SLIDE_COUNT = 12;
@@ -21,42 +28,27 @@ export const FIRST_HERO_SLIDE: HeroSlide = {
 };
 
 /**
- * Permanent second slide: the current flagship event handbill. When the
- * conference has passed, swap this path (and the caption) for whatever is
- * next — the rest of the carousel carries on automatically.
+ * Event handbills pinned near the front of the carousel for a fixed window.
+ * They drop out on their own after `until`, so a past event cannot stay in the
+ * hero just because nobody removed the entry.
  */
-export const FEATURED_EVENT_SLIDE: HeroSlide = {
-  image: "/images/events/greater-works-conference.webp",
-  alt: "Greater Works Ministers & Leaders Conference — Making Ministry Impact, 26–27 October 2026",
-  caption: "Making Ministry Impact · 26 & 27 October, 9AM",
-};
-
-/** Recent service and outreach photos, shown after the static opening slides. */
-export const RECENT_HERO_SLIDES: HeroSlide[] = [
-  // Last Sunday's service (25 October 2026) leads the recent group, ahead of
-  // the earlier crusade photos.
+export const FEATURED_HERO_SLIDES: FeaturedHeroSlide[] = [
   {
-    image: "/images/gallery/_DSC7107.jpg",
-    alt: "The worship team leading praise at the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/gallery/_DSC7078.jpg",
-    alt: "A pastor ministering from the pulpit at the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/gallery/_DSC7249.jpg",
-    alt: "The congregation gathered for the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/gallery/_DSC7182.jpg",
-    alt: "Ministers praying for a member during the Power Lifting Sunday service",
-  },
-  {
-    image: "/images/launch/_DSC4002.jpg",
-    alt: "Hisdayspring crusade outreach at a community venue",
-  },
-  {
-    image: "/images/launch/_DSC2549.jpg",
-    alt: "Worshippers gathered together during a Hisdayspring service",
+    image: "/images/events/november-mega-thanksgiving.webp",
+    alt: "November Mega Thanksgiving Service flyer",
+    caption: "Sun 1 Nov · 8 AM, 10 AM & 12 NOON",
+    until: "2026-11-01",
   },
 ];
+
+export function getFeaturedHeroSlides(
+  today: string = lagosToday()
+): HeroSlide[] {
+  return FEATURED_HERO_SLIDES.filter((slide) => today <= slide.until).map(
+    (slide) => ({
+      image: slide.image,
+      alt: slide.alt,
+      caption: slide.caption,
+    })
+  );
+}

@@ -24,7 +24,7 @@ const toneStyles: Record<BadgeTone, string> = {
   "secondary-soft": "bg-secondary/10 text-secondary",
   tertiary: "bg-tertiary-container/10 text-tertiary",
   neutral: "bg-surface-container text-on-surface-variant",
-  "on-dark": "border border-white/20 bg-white/10 text-white backdrop-blur-sm",
+  "on-dark": "border border-white/20 bg-white/10 text-white",
 };
 
 const sizeStyles: Record<BadgeSize, string> = {

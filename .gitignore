@@ -43,3 +43,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local agent tool config (shared skills live in .agents/skills)
+/.claude/
+/.commandcode/
+/.kiro/
+
+# generated launch media
+/artifacts/

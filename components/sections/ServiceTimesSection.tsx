@@ -9,10 +9,6 @@ import { Badge, ReadMore } from "@/components/ui";
 
 const servicePhotos = [
   {
-    src: "/images/service times/DAYSPRING HOUR OF REVELATION  DP 2026 3.jpg",
-    alt: "Dayspring Hour of Revelation",
-  },
-  {
     src: "/images/service times/WhatsApp Image 2026-08-19 at 11.19.48.jpeg",
     alt: "Service gathering",
   },

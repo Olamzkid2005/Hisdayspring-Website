@@ -39,6 +39,9 @@ export function GiveSection({ variant = "home" }: GiveSectionProps) {
     "inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-4 md:px-14 md:py-5 rounded-full bg-secondary text-on-secondary font-headline font-bold text-lg md:text-xl hover:brightness-110 transition-all shadow-xl shadow-black/20";
   const secondaryActionClasses =
     "inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border-2 border-on-primary/30 text-on-primary font-headline font-bold text-base";
+  // On /giving this panel sits above the form, so it is the page's first and
+  // only h1. On the homepage (if reused) it stays a section heading.
+  const Heading = onGivingPage ? "h1" : "h2";
 
   const copyText = async (text: string, key: string) => {
     const copied = await copy(text, key);
@@ -61,9 +64,9 @@ export function GiveSection({ variant = "home" }: GiveSectionProps) {
           <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_20%_20%,white,transparent_45%),radial-gradient(circle_at_80%_80%,white,transparent_45%)]" />
           <div className="relative z-10 max-w-3xl mx-auto">
             <HeartHandshake className="w-9 h-9 md:w-12 md:h-12 text-secondary mx-auto mb-3 md:mb-4" />
-            <h2 className="font-headline text-3xl md:text-5xl text-on-primary font-bold mb-3">
+            <Heading className="font-headline text-3xl md:text-5xl text-on-primary font-bold mb-3">
               Support the Mission
-            </h2>
+            </Heading>
             <p className="text-on-primary/80 text-base md:text-lg mb-6 md:mb-8 max-w-xl mx-auto">
               Your generosity fuels the work of God and transforms lives across
               our communities. Give securely in under two minutes.

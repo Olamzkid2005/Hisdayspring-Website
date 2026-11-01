@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   description: PDF_DELIVERY_ENABLED
     ? "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online, pick up in church or download PDF copies."
     : "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online and pick up in church.",
+  alternates: { canonical: "/books" },
 };
 
 export default function BooksPage() {

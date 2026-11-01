@@ -120,3 +120,76 @@ design and the button returns after Accept/Decline; it is not a lost action.
   exercised; no regression was introduced in their focus styles.
 - Probe with the backend stopped: not run; the homepage's only network data is
   YouTube, which already falls back to an empty sermon grid.
+
+---
+
+# Whole-site audit — 1 November 2026
+
+**Scope:** all 25 indexable routes (home, 14 content routes, 10 ministry
+routes), the payment/book APIs, metadata, structured data and the production
+host. **Method:** production build, full Jest suite, ESLint, a JSDOM crawl of
+`next start` (status, title, description, canonical, headings, alt text, form
+labels, duplicate ids, internal links), axe on the routes the page suites did
+not cover, unauthenticated probes of every payment endpoint, `npm audit
+--omit=dev`, and live requests to both domains.
+
+## Fixed in this pass
+
+| Area | Defect | Fix |
+|---|---|---|
+| Canonicals | Every route advertised `https://hisdayspring.org`, a host that answers 406. | One `SITE_URL` (`lib/site.ts`); per-route canonicals; home canonical added. |
+| Sitemap / robots / JSON-LD | Old origin; sitemap omitted `/live`, `/prayer`, `/testimonials`; robots blocked `/_next/`. | New origin, three routes added, `/_next/` allowed. |
+| Social previews | OG images for welfare, crusade and ministries pointed at `/images/...`, which is not deployed (404). | Cloudinary URLs at 1200px. |
+| Duplicate pages | `/welfare` and `/ministries/welfare` (same for crusade) were both indexable. | Ministry copies canonicalise to the dedicated route; sitemap lists one each. |
+| Headings | `/prayer` and `/testimonials` had no h1; `/giving` had h2 before h1; receipt loading state had none. | One h1 per page; giving panel is the page h1. |
+| Forms | Giving custom amount input had no label. | `aria-label="Custom donation amount"`. |
+| Content | JSON-LD and `llms.txt` said Sundays 8:00 & 10:30; the site runs 8:00, 10:00, 12:00. `llms.txt` also named Ikeja instead of Island Church. | Corrected. |
+| Headers | `X-Powered-By: Next.js`. | `poweredByHeader: false`. |
+| Tooling | The committed skills' fixtures broke `jest` and `eslint`; one book-cart test still used the old aria-label. | Ignore lists for `.agents` and the other tool directories; selector updated. |
+| Navigation | Homepage still carried the giving panel after it moved. | Panel now opens `/giving` and jumps to the form/bank card. |
+
+## Verified
+
+- `next build` passes; **227 tests in 29 suites** pass; ESLint has **0 errors**
+  (3 pre-existing warnings).
+- All 25 routes return 200; unknown routes return 404; no broken internal
+  links, duplicate ids, missing `alt`, or unlabelled inputs in the crawl.
+- Canonicals now self-reference on every indexable route; sitemap and robots
+  emit the new origin; sitemap no longer lists the duplicate ministry URLs.
+- axe found no violations on the nine uncovered surfaces (pastors, prayer,
+  privacy, terms, 404, error, book verify, book receipt, ministry detail).
+- Unsigned webhook POST returns 401, GET returns 405; initialize/verify/download
+  refuse when payment env is absent; signature checks use timing-safe compare
+  with a 300s timestamp window.
+- Cloudinary OG URLs return 200 image responses; live production returns 200 on
+  `www.hisdayspringfamily.org` and 406 on `hisdayspring.org`.
+
+## Open findings
+
+| Severity | Finding | Evidence / next step |
+|---|---|---|
+| Critical | `npm audit --omit=dev` reports 3 production vulnerabilities: Next 16.3.6 (advisory range 16.0.0–16.4.0, critical), `sharp` (high), `source-map-js` (high). | `npm audit fix` reports updates available; upgrade and re-run build/tests before the next payment release. |
+| High | Cookie consent does not gate anything: Analytics renders unconditionally and the YouTube/Google Maps iframes load before a choice. | `CookieConsent` stores a preference no other component reads; wire consent to embeds/analytics or change the copy. |
+| High | No Content-Security-Policy. | Add a report-only policy first; allow Cloudinary, YouTube, Maps and Bachs, then tighten. |
+| Medium | Date-dependent static pages: `EventsSection` and the hero call `lagosToday`/`getUpcomingEvents` during render, while the page is cached with `s-maxage=31536000`. | Events stay after they end and the first client render can mismatch after midnight. Move to ISR/dynamic or pass a server reference date; reduce the HTML cache lifetime. |
+| Medium | Rate limits are per Node process and keyed only by IP (10/min on donation init). | A shared church/NAT network can hit the cap; replicas each get their own bucket. Use a shared store or raise the limit. |
+| Medium | Mobile menu has no focus trap, no Escape handling and no dialog semantics. | Keyboard focus can move behind the drawer; add `role="dialog"`,`aria-modal`, focus trap and Escape. |
+| Medium | Webhooks are verified but not persisted; no donation/book fulfilment or receipt is triggered by an event. | Documented in the route; needs a database/queue before relying on webhooks as the source of truth. |
+| Medium | `@vercel/analytics` is mounted on Pxxl, which does not serve `/_vercel/*`. | Verify in the network panel; remove or replace with a host-compatible analytics tool. |
+| Low | Apex and `www` both return 200 with no redirect. | Pick www (used by canonicals) and redirect the apex at the host. |
+| Low | Contact data only lists the Ipaja headquarters, while pastor data names Island Church and Ikorodu branches. | Add the branch addresses or link them from the pastors page. |
+| Low | Sitemap `lastModified` is build time for every URL. | Search engines see everything change on every deploy; use real content dates. |
+| Low | `DEPLOYMENT.md` still describes the old domain; test fixtures still use it as an arbitrary origin. | Docs drift, not runtime behaviour. Update when the deployment guide is next touched. |
+| Info | The Visant UI gate was run over `app` + `components`: 3 token findings and 21 chrome-noise findings; copy lint was skipped because it looks under `~/.claude/skills`. | Not fixed in this pass; run the gate per route before a visual redesign. |
+
+## Operational checklist for the Pxxl deploy
+
+1. `SITE_URL=https://www.hisdayspringfamily.org` (checkout success/cancel URLs).
+2. `YOUTUBE_CHANNEL_ID=UCsK_cum0IKbuQ75Va8ty0CA` (a handle is rejected by the API;
+   the code falls back, but set it correctly).
+3. Confirm `BACHS_WEBHOOK_SECRET` is the secret for the production endpoint and
+   resend one signed delivery; expect `{"received":true,"handled":true}`.
+4. Purge the Pxxl/CDN cache after the deploy — the previous HTML was sent with a
+   one-year `s-maxage`.
+5. Spot-check `/giving`, `/live` and one ministry page in a private window
+   (canonical host, YouTube links, OG image).

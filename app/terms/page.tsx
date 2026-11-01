@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Terms and Conditions",
   description:
     "Terms and Conditions for using the Hisdayspring Evangelical Ministries International website, including donations, book orders, and payment processing.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {

@@ -74,9 +74,9 @@ export function TestimonialsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="font-headline text-3xl md:text-5xl font-bold text-on-surface mb-4">
+          <h1 className="font-headline text-3xl md:text-5xl font-bold text-on-surface mb-4">
             Divine Encounters
-          </h2>
+          </h1>
           <p className="text-on-surface-variant max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
             Hear from members of our community about how God has transformed their lives
             through His Power and Grace.

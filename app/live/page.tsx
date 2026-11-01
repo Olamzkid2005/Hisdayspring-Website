@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Live Stream",
   description:
     "Watch Hisdayspring services live on YouTube — Sunday services at 8am, 10am, or 12noon, and special events.",
+  alternates: { canonical: "/live" },
 };
 
 export default function LivePage() {

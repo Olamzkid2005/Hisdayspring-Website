@@ -1,15 +1,21 @@
 import { MetadataRoute } from "next";
 import { ministries } from "@/data";
+import { SITE_URL } from "@/lib/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://hisdayspring.org";
+  const baseUrl = SITE_URL;
 
-  const ministryUrls = ministries.map((ministry) => ({
-    url: `${baseUrl}/ministries/${ministry.id}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly" as const,
-    priority: 0.7,
-  }));
+  // welfare and crusade have dedicated routes; their /ministries copies
+  // canonicalise there, so listing both would send mixed signals.
+  const dedicatedMinistries = new Set(["welfare", "crusade"]);
+  const ministryUrls = ministries
+    .filter((ministry) => !dedicatedMinistries.has(ministry.id))
+    .map((ministry) => ({
+      url: `${baseUrl}/ministries/${ministry.id}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }));
 
   return [
     {
@@ -50,6 +56,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     {
       url: `${baseUrl}/radio`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/live`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/prayer`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/testimonials`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.6,

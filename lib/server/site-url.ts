@@ -11,7 +11,7 @@
  *
  * Trust order:
  * 1. `SITE_URL` — explicit, set it in the host's env panel
- *    (e.g. https://hisdayspring.org). Server-only: read at runtime, not
+ *    (e.g. https://www.hisdayspringfamily.org). Server-only: read at runtime, not
  *    inlined into any bundle, not spoofable by clients. (Not
  *    NEXT_PUBLIC_: those are statically replaced at build time, so a
  *    runtime-set value would never be seen.)

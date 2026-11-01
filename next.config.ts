@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 import path from "path";
 
 const nextConfig: NextConfig = {
+  // Do not advertise the framework on every response.
+  poweredByHeader: false,
   turbopack: {
     resolveExtensions: [".tsx", ".ts", ".jsx", ".js"],
     root: path.resolve(__dirname),

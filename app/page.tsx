@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import {
   HeroSection,
   AboutSection,
@@ -10,6 +11,10 @@ import {
   SocialSection,
   ContactSection,
 } from "@/components/sections";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default function Home() {
   return (

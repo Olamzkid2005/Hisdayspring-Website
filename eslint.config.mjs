@@ -16,6 +16,12 @@ const eslintConfig = defineConfig([
     "jest.setup.ts",
     "jest.config.ts",
     "__tests__/**",
+    // Installed agent skills ship demo fixtures that are not app code.
+    ".agents/**",
+    ".opencode/**",
+    ".claude/**",
+    ".commandcode/**",
+    ".kiro/**",
   ]),
   // Additional strict accessibility rules (jsx-a11y is already included in nextVitals)
   {

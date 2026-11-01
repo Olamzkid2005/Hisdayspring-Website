@@ -473,9 +473,9 @@ export default function GivingClient() {
             <Heart className="w-4 h-4" />
             Giving
           </div>
-          <h1 className="font-headline text-4xl md:text-5xl font-bold text-white mb-4">
+          <h2 className="font-headline text-4xl md:text-5xl font-bold text-white mb-4">
             Support Our Ministry
-          </h1>
+          </h2>
           <p className="text-white/80 text-lg max-w-2xl mx-auto">
             &ldquo;Give, and it will be given to you. A good measure, pressed down, shaken
             together and running over, will be poured into your lap.&rdquo;
@@ -562,6 +562,7 @@ export default function GivingClient() {
                     type="text"
                     value={customAmount}
                     onChange={(e) => handleCustomAmount(e.target.value)}
+                    aria-label="Custom donation amount"
                     placeholder="Enter custom amount"
                     className={`w-full pl-8 pr-4 py-3 rounded-xl border-2 transition-colors focus:outline-none focus:border-secondary bg-surface-container-low text-on-surface placeholder:text-on-surface-variant ${
                       errors.amount ? "border-error" : "border-outline-variant"
@@ -581,7 +582,10 @@ export default function GivingClient() {
                   replaced rather than shown with details that would send the
                   money somewhere other than the pastor. */}
               {isPastoralGiving ? (
-                <div className="rounded-2xl border-2 border-secondary/30 bg-secondary-container/10 p-6">
+                <div
+                  id="bank-details"
+                  className="scroll-mt-28 rounded-2xl border-2 border-secondary/30 bg-secondary-container/10 p-6"
+                >
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-lg bg-secondary text-on-secondary flex items-center justify-center shrink-0">
                       <Heart className="w-5 h-5" />

@@ -7,6 +7,7 @@ import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { CookieConsent } from "@/components/utility/CookieConsent";
 import { Analytics } from "@vercel/analytics/react";
 import { YOUTUBE_CHANNEL_URL } from "@/lib/api/youtube-config";
+import { SITE_URL } from "@/lib/site";
 
 // Self-hosted fonts (app/fonts/). The Google Fonts provider downloads from
 // fonts.gstatic.com at build time, which Pxxl's gVisor build sandbox cannot
@@ -45,7 +46,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://hisdayspring.org"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Hisdayspring Ministries International",
     template: "%s | Hisdayspring Ministries International",
@@ -91,9 +92,6 @@ export const metadata: Metadata = {
     index: true,
     follow: true,
   },
-  alternates: {
-    canonical: "/",
-  },
   icons: {
     // app/favicon.ico is picked up by the file convention, which Next links
     // with a content hash (?favicon.<hash>.ico). Listing it here as well would
@@ -119,7 +117,7 @@ export default function RootLayout({
     name: "Hisdayspring Ministries International",
     description:
       "Raising holy, healthy and wealthy people with a sense of dominion and world evangelism by the power of the Holy Spirit.",
-    url: "https://hisdayspring.org",
+    url: SITE_URL,
     telephone: "+234-906-619-2155",
     email: "hello@hisdayspring.org",
     address: [
@@ -132,7 +130,7 @@ export default function RootLayout({
         addressCountry: "NG",
       },
     ],
-    worshipTime: "Sundays 8:00am & 10:30am",
+    worshipTime: "Sundays 8:00am, 10:00am & 12:00noon",
     // Church profiles only — @hisdayspring on Facebook/Instagram are the radio
     // accounts, and the old YouTube handle no longer exists.
     sameAs: [

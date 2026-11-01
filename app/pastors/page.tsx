@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Meet Our Pastors",
   description:
     "Meet the pastors and ministers of Hisdayspring Ministries International — the lead pastors, branch pastors, and ministers serving across our branches.",
+  alternates: { canonical: "/pastors" },
 };
 
 const roleSections: {

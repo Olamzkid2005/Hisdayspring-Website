@@ -440,7 +440,7 @@ describe("book cart nav badge", () => {
 
   it("shows no badge count when the cart is empty", () => {
     const { container } = render(<Navigation />);
-    const badge = container.querySelector('button[aria-label="Book cart — open books page"]');
+    const badge = container.querySelector('button[aria-label="Book cart. Open books page"]');
     expect(badge).not.toBeNull();
     expect(badge!.querySelector("span")).toBeNull();
   });

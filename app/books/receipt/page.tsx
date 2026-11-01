@@ -386,7 +386,7 @@ export default function BookReceiptPage() {
       <section className="py-24 bg-surface-container-low min-h-screen flex items-center justify-center no-print">
         <div className="flex items-center gap-3 text-on-surface-variant">
           <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Confirming your payment…</span>
+          <h1 className="text-base font-medium">Confirming your payment…</h1>
         </div>
       </section>
     );

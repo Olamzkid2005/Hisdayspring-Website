@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Testimonies",
   description:
     "Divine Encounters — hear how God has transformed lives through His Power and Grace at Hisdayspring.",
+  alternates: { canonical: "/testimonials" },
 };
 
 export default function TestimonialsPage() {

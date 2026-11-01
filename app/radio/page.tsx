@@ -7,6 +7,7 @@ export const metadata: Metadata = {
   title: "Hisdayspring Radio",
   description:
     "Broadcasting Life and Hope to the Ends of the Earth — listen to Hisdayspring Radio on Zeno.fm, streaming 24/7.",
+  alternates: { canonical: "/radio" },
 };
 
 export default function RadioPage() {

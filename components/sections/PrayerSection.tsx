@@ -58,9 +58,9 @@ export function PrayerSection() {
             className="text-primary w-12 h-12 mx-auto mb-6"
             style={{ fontVariationSettings: "'FILL' 1" }}
           />
-          <h2 className="font-headline text-2xl md:text-4xl text-on-surface">
+          <h1 className="font-headline text-2xl md:text-4xl text-on-surface">
             How can we pray for you?
-          </h2>
+          </h1>
           <p className="text-on-surface-variant max-w-lg mx-auto mt-4">
             Share your prayer request and our team will stand with you in faith. Your request will open in WhatsApp for you to send directly to our prayer team; please avoid sharing highly sensitive information.
           </p>

@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Prayer Requests",
   description:
     "Share your prayer request with Hisdayspring — WhatsApp will open so you can send it directly to our prayer team. Please avoid sharing highly sensitive information.",
+  alternates: { canonical: "/prayer" },
 };
 
 export default function PrayerPage() {

@@ -7,7 +7,17 @@ const config: Config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
   },
-  testPathIgnorePatterns: ["<rootDir>/node_modules/", "<rootDir>/.next/"],
+  testPathIgnorePatterns: [
+    "<rootDir>/node_modules/",
+    "<rootDir>/.next/",
+    // Installed agent skills ship their own fixture tests (some for vitest);
+    // they are not this app's suite.
+    "<rootDir>/.agents/",
+    "<rootDir>/.opencode/",
+    "<rootDir>/.claude/",
+    "<rootDir>/.commandcode/",
+    "<rootDir>/.kiro/",
+  ],
   transform: {
     // Deliberately not named babel.config.js: Next.js treats a root-level
     // babel.config.js as "use Babel instead of SWC" and every cold build then

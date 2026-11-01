@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site";
 
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -6,10 +7,11 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/api/", "/_next/"],
+        // Do not block /_next/: crawlers need the JS/CSS to render the page.
+        disallow: ["/api/"],
       },
-      // Explicit AI-crawler policy (specification.website: robots.txt for AI
-      // crawlers). Search + feeding allowed; training disallowed by default.
+      // Explicit AI-crawler policy: search and live fetching are allowed;
+      // bulk training crawlers (Google-Extended, CCBot, Bytespider) are not.
       {
         userAgent: ["GPTBot"],
         allow: "/",
@@ -25,6 +27,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: "/",
       },
     ],
-    sitemap: "https://hisdayspring.org/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

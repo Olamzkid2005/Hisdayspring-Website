@@ -218,7 +218,7 @@ Private - All rights reserved.
 
 **Hisdayspring Evangelical Ministries International**
 
-- Website: https://hisdayspring.org
+- Website: https://www.hisdayspringfamily.org
 - Email: hello@hisdayspring.org
 - Phone: +234 906 619 2155
 - WhatsApp: +234 906 619 2155

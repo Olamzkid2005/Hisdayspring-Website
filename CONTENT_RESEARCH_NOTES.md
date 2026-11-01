@@ -5,7 +5,7 @@
 2. Pastor's Website: https://pastorblessing.com/about-pastor-blessing-olamijulo/ — ✅ SUCCESS
 3. Pastor's Shop: https://pastorblessing.com/shop/ — ✅ SUCCESS (full book list with prices)
 4. BOMS Page: https://pastorblessing.com/blessing-ola-mentoring-school/ — ✅ SUCCESS
-5. YouTube: https://www.youtube.com/@hisdayspring — Cookie consent wall (channel handle usable)
+5. YouTube: https://www.youtube.com/@Dayspring_Family — ✅ SUCCESS (the old @hisdayspring handle now 404s)
 6. Facebook: https://www.facebook.com/people/Hisdayspring-Evangelical-Ministries-Intl-Dayspring/61563639119953/ — Login wall
 7. Instagram: https://www.instagram.com/hisdayspring_family/ — Login wall
 8. Zeno.fm Radio: https://zeno.fm/radio/hisdayspringradio/ — ✅ SUCCESS
@@ -165,7 +165,7 @@ All books authored by Pastor Blessing Olamijulo. Purchase via pastorblessing.com
 |----------|-----|-------|
 | Facebook (Church) | https://www.facebook.com/people/Hisdayspring-Evangelical-Ministries-Intl-Dayspring/61563639119953/ | Main church page |
 | Facebook (Radio) | https://www.facebook.com/hisdayspring | Radio/ministry page |
-| YouTube | https://www.youtube.com/@hisdayspring | Handle confirmed |
+| YouTube | https://www.youtube.com/@Dayspring_Family | Handle confirmed 2026-11-01 |
 | Instagram (Church) | https://www.instagram.com/hisdayspring_family/ | Church community account |
 | Instagram (Radio) | https://www.instagram.com/hisdayspring | Radio account |
 | Twitter/X | https://www.twitter.com/hisdayspringNG | Radio/ministry account |
@@ -230,9 +230,11 @@ No photos extracted. Use royalty-free Unsplash/Picsum images as placeholders org
 
 ## YOUTUBE CHANNEL
 
-- **Handle**: @hisdayspring
-- **URL**: https://www.youtube.com/@hisdayspring
-- **Channel ID**: Not accessible (cookie wall) — use handle @hisdayspring for API calls or instruct church to provide exact Channel ID from YouTube Studio
+- **Handle**: @Dayspring_Family
+- **URL**: https://www.youtube.com/@Dayspring_Family
+- **Channel name**: Hisdayspring Evangelical Ministries International
+- **Channel ID**: `UCsK_cum0IKbuQ75Va8ty0CA` — required for Data API calls; `channelId` does not accept a handle
+- **Note**: the earlier `@hisdayspring` handle returns 404, so links built on it led nowhere
 
 ---
 

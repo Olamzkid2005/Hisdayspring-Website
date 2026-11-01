@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Play, Calendar, Clock } from "lucide-react";
 import { cloudinaryLoader } from "@/lib/cdn/cloudinary-loader";
+import { YOUTUBE_CHANNEL_URL } from "@/lib/api/youtube-config";
 import { nextSundayServiceLabel } from "@/lib/lagos-time";
 import type { LiveStreamStatus } from "@/types";
 
@@ -91,7 +92,7 @@ export function LiveStreamSection() {
                 {/* Icon-only, so it needs its own name: without this a screen
                     reader announces nothing but "link". */}
                 <a
-                  href="https://www.youtube.com/@hisdayspring"
+                  href={YOUTUBE_CHANNEL_URL}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Watch Sunday Service on YouTube"
@@ -125,7 +126,7 @@ export function LiveStreamSection() {
             </div>
             <div className="flex justify-center mt-6">
               <a
-                href="https://www.youtube.com/@hisdayspring"
+                href={YOUTUBE_CHANNEL_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-6 py-2.5 bg-error text-on-error rounded-full font-semibold text-sm transition-colors"

@@ -62,8 +62,11 @@ Create a `.env.local` file with the following variables:
 NEXT_PUBLIC_YOUTUBE_API_KEY=your_client_side_key
 
 # YouTube API Server-side (for live stream status - keep secret!)
+# Channel: youtube.com/@Dayspring_Family. The Data API's channelId only
+# accepts the numeric UC… id, not the handle. A handle value here falls back
+# to the built-in id in lib/api/youtube-config.ts.
 YOUTUBE_API_KEY=your_server_side_key
-YOUTUBE_CHANNEL_ID=@hisdayspring
+YOUTUBE_CHANNEL_ID=UCsK_cum0IKbuQ75Va8ty0CA
 
 # Server-side payment secrets (never expose these to the browser)
 # `sk_sandbox_...` routes to sandbox-api.bachs.io, `sk_live_...` to

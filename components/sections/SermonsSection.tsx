@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import { Play, ArrowRight } from "lucide-react";
 import { fetchSermons } from "@/lib/api/youtube";
+import { YOUTUBE_CHANNEL_URL } from "@/lib/api/youtube-config";
 import { Modal } from "@/components/ui";
 import { LAGOS_TIME_ZONE } from "@/lib/lagos-time";
 import type { YouTubeVideo, LiveStreamStatus } from "@/types";
@@ -103,7 +104,7 @@ export function SermonsSection() {
             <div className="h-1 w-24 bg-gradient-to-r from-primary to-primary-container mt-3 md:mt-4 rounded-full" />
           </div>
           <a
-            href="https://www.youtube.com/@hisdayspring"
+            href={YOUTUBE_CHANNEL_URL}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex min-h-[44px] items-center gap-2 text-sm font-medium text-on-surface-variant transition-colors hover:text-primary md:text-base"

@@ -6,6 +6,7 @@ import { Footer } from "@/components/layout/Footer";
 import { WhatsAppFloat } from "@/components/layout/WhatsAppFloat";
 import { CookieConsent } from "@/components/utility/CookieConsent";
 import { Analytics } from "@vercel/analytics/react";
+import { YOUTUBE_CHANNEL_URL } from "@/lib/api/youtube-config";
 
 // Self-hosted fonts (app/fonts/). The Google Fonts provider downloads from
 // fonts.gstatic.com at build time, which Pxxl's gVisor build sandbox cannot
@@ -132,10 +133,12 @@ export default function RootLayout({
       },
     ],
     worshipTime: "Sundays 8:00am & 10:30am",
+    // Church profiles only — @hisdayspring on Facebook/Instagram are the radio
+    // accounts, and the old YouTube handle no longer exists.
     sameAs: [
-      "https://facebook.com/hisdayspring",
-      "https://instagram.com/hisdayspring",
-      "https://youtube.com/@hisdayspring",
+      "https://www.facebook.com/people/Hisdayspring-Evangelical-Ministries-Intl-Dayspring/61563639119953/",
+      "https://www.instagram.com/hisdayspring_family/",
+      YOUTUBE_CHANNEL_URL,
     ],
   };
 

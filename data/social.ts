@@ -4,6 +4,7 @@
  */
 
 import type { SocialLink } from "@/types";
+import { YOUTUBE_CHANNEL_URL } from "@/lib/api/youtube-config";
 
 export const socialLinks: SocialLink[] = [
   {
@@ -13,7 +14,7 @@ export const socialLinks: SocialLink[] = [
   },
   {
     platform: "youtube",
-    url: "https://www.youtube.com/@hisdayspring",
+    url: YOUTUBE_CHANNEL_URL,
     label: "Hisdayspring Ministries",
   },
   {

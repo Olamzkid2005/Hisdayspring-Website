@@ -5,7 +5,7 @@
 
 import type { YouTubeVideo } from "@/types";
 import { config } from "@/lib/config";
-import { YOUTUBE_API_BASE, YOUTUBE_CHANNEL_HANDLE } from "./youtube-config";
+import { YOUTUBE_API_BASE, YOUTUBE_CHANNEL_ID } from "./youtube-config";
 
 interface YouTubeSearchResponse {
   items: YouTubeSearchItem[];
@@ -59,7 +59,7 @@ export async function fetchSermons(
   if (apiKey) {
     try {
       // First, search for videos in the channel
-      const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=${YOUTUBE_CHANNEL_HANDLE}&part=snippet&order=date&type=video&maxResults=${maxResults}`;
+      const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=${YOUTUBE_CHANNEL_ID}&part=snippet&order=date&type=video&maxResults=${maxResults}`;
 
       const response = await fetchWithRetry(searchUrl, 3);
 

@@ -8,7 +8,7 @@
  */
 
 import type { LiveStreamStatus } from "@/types";
-import { YOUTUBE_API_BASE, YOUTUBE_CHANNEL_HANDLE } from "./youtube-config";
+import { YOUTUBE_API_BASE, YOUTUBE_CHANNEL_ID } from "./youtube-config";
 
 export interface LiveStreamDetails extends LiveStreamStatus {
   description?: string;
@@ -61,17 +61,22 @@ export async function fetchChannelLiveStream(options: {
   apiKey?: string;
   channelId?: string;
 }): Promise<LiveStreamLookup> {
-  const { apiKey, channelId = YOUTUBE_CHANNEL_HANDLE } = options;
+  const { apiKey, channelId = YOUTUBE_CHANNEL_ID } = options;
+
+  // Deployments may still hold the retired @hisdayspring handle in
+  // YOUTUBE_CHANNEL_ID, and the Data API rejects handles for `channelId`.
+  // Anything that is not a UC… id falls back to the canonical channel.
+  const resolvedChannelId = /^UC[\w-]{22}$/.test(channelId)
+    ? channelId
+    : YOUTUBE_CHANNEL_ID;
 
   if (!apiKey) {
     return { ok: true, isLive: false, reason: "not-configured" };
   }
 
   try {
-    // Search for live streams from the channel.
-    // Note: channelId=@hisdayspring is the handle-based form this site has
-    // always used; changing it needs the numeric UC… channel id.
-    const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=${channelId}&part=snippet,id&eventType=live&type=video`;
+    // Search for live streams from the church's channel.
+    const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=${resolvedChannelId}&part=snippet,id&eventType=live&type=video`;
     const response = await fetch(searchUrl, {
       next: { revalidate: 60 },
     });

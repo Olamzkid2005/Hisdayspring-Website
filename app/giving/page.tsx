@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { GiveSection } from "@/components/sections/GiveSection";
 import GivingClient from "./GivingClient";
 
 export const metadata: Metadata = {
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function GivingPage() {
-  return <GivingClient />;
+  return (
+    <>
+      <GiveSection variant="giving" />
+      <GivingClient />
+    </>
+  );
 }

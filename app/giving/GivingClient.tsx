@@ -491,7 +491,10 @@ export default function GivingClient() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="lg:col-span-3"
           >
-            <div className="bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl p-8 md:p-10 shadow-sm border border-outline-variant/20">
+            <div
+              id="donation-form"
+              className="scroll-mt-28 bg-surface-container-lowest/95 backdrop-blur-md rounded-3xl p-8 md:p-10 shadow-sm border border-outline-variant/20"
+            >
               {/* Purpose Selection */}
               <div className="mb-8">
                 <p className="block text-sm font-semibold text-on-surface mb-3">
@@ -811,7 +814,10 @@ export default function GivingClient() {
                 form column) — two different sets of details on one screen is
                 the fastest way to send a gift to the wrong account. */}
             {!isPastoralGiving && (
-            <div className="bg-surface-container-lowest rounded-3xl p-8 shadow-sm border border-outline-variant/20">
+            <div
+              id="bank-details"
+              className="scroll-mt-28 bg-surface-container-lowest rounded-3xl p-8 shadow-sm border border-outline-variant/20"
+            >
               <h2 className="font-headline text-xl font-bold text-on-surface mb-6">
                 Bank Transfer Details
               </h2>

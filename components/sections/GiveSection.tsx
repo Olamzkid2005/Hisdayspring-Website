@@ -15,7 +15,16 @@ import Link from "next/link";
 import { bankAccounts, formatBankDetails } from "@/data/donations";
 import { useCopyToClipboard } from "@/hooks";
 
-export function GiveSection() {
+interface GiveSectionProps {
+  /**
+   * `giving` places the panel above the donation form. That page already shows
+   * the bank accounts in its own card, so the inline grid is left off there and
+   * both buttons jump to the relevant part of the page instead of linking to it.
+   */
+  variant?: "home" | "giving";
+}
+
+export function GiveSection({ variant = "home" }: GiveSectionProps) {
   const ref = useRef<HTMLElement>(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const { copiedKey, copy } = useCopyToClipboard();
@@ -24,6 +33,12 @@ export function GiveSection() {
   // "Bank Transfer Details" button expands them in place instead of sending
   // people to the giving page. Collapsed by default to keep the section short.
   const [showBank, setShowBank] = useState(false);
+  const onGivingPage = variant === "giving";
+
+  const primaryActionClasses =
+    "inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-4 md:px-14 md:py-5 rounded-full bg-secondary text-on-secondary font-headline font-bold text-lg md:text-xl hover:brightness-110 transition-all shadow-xl shadow-black/20";
+  const secondaryActionClasses =
+    "inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border-2 border-on-primary/30 text-on-primary font-headline font-bold text-base";
 
   const copyText = async (text: string, key: string) => {
     const copied = await copy(text, key);
@@ -55,30 +70,43 @@ export function GiveSection() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center items-center mb-5 md:mb-6">
-              <Link
-                href="/giving"
-                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-10 py-4 md:px-14 md:py-5 rounded-full bg-secondary text-on-secondary font-headline font-bold text-lg md:text-xl hover:brightness-110 transition-all shadow-xl shadow-black/20"
-              >
-                Give Now
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-              <button
-                type="button"
-                onClick={() => setShowBank((value) => !value)}
-                aria-expanded={showBank}
-                aria-controls="give-bank-details"
-                className="md:hidden inline-flex items-center justify-center gap-2 w-full px-8 py-4 rounded-full border-2 border-on-primary/30 text-on-primary font-headline font-bold text-base hover:bg-white/10 transition-all"
-              >
-                <Building2 className="w-5 h-5" />
-                {showBank ? "Hide bank details" : "Bank Transfer Details"}
-              </button>
-              <Link
-                href="/giving"
-                className="hidden md:inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border-2 border-on-primary/30 text-on-primary font-headline font-bold text-base md:text-lg hover:bg-white/10 transition-all"
-              >
-                <Building2 className="w-5 h-5" />
-                Bank Transfer Details
-              </Link>
+              {onGivingPage ? (
+                <a href="#donation-form" className={primaryActionClasses}>
+                  Give Now
+                  <ArrowRight className="w-5 h-5" />
+                </a>
+              ) : (
+                <Link href="/giving" className={primaryActionClasses}>
+                  Give Now
+                  <ArrowRight className="w-5 h-5" />
+                </Link>
+              )}
+              {onGivingPage ? (
+                <a href="#bank-details" className={secondaryActionClasses}>
+                  <Building2 className="w-5 h-5" />
+                  Bank Transfer Details
+                </a>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setShowBank((value) => !value)}
+                    aria-expanded={showBank}
+                    aria-controls="give-bank-details"
+                    className="md:hidden inline-flex items-center justify-center gap-2 w-full px-8 py-4 rounded-full border-2 border-on-primary/30 text-on-primary font-headline font-bold text-base hover:bg-white/10 transition-all"
+                  >
+                    <Building2 className="w-5 h-5" />
+                    {showBank ? "Hide bank details" : "Bank Transfer Details"}
+                  </button>
+                  <Link
+                    href="/giving"
+                    className="hidden md:inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full border-2 border-on-primary/30 text-on-primary font-headline font-bold text-base md:text-lg hover:bg-white/10 transition-all"
+                  >
+                    <Building2 className="w-5 h-5" />
+                    Bank Transfer Details
+                  </Link>
+                </>
+              )}
             </div>
 
             <p className="inline-flex items-center gap-2 text-on-primary/70 text-sm">
@@ -88,6 +116,7 @@ export function GiveSection() {
 
             {/* Direct transfers, so nobody has to open the giving page just to
                 read an account number off the screen. */}
+            {!onGivingPage && (
             <div
               id="give-bank-details"
               className={`${showBank ? "" : "hidden"} md:block mt-8 pt-6 md:mt-10 md:pt-8 border-t border-on-primary/20 text-left`}
@@ -164,6 +193,7 @@ export function GiveSection() {
                 </p>
               )}
             </div>
+            )}
           </div>
         </motion.div>
       </div>

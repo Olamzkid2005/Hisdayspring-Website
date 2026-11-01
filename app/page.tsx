@@ -6,7 +6,6 @@ import {
   SermonsSection,
   MinistriesSection,
   EventsSection,
-  GiveSection,
   GallerySection,
   SocialSection,
   ContactSection,
@@ -22,7 +21,6 @@ export default function Home() {
       <SermonsSection />
       <MinistriesSection />
       <EventsSection />
-      <GiveSection />
       <GallerySection />
       <SocialSection />
       <ContactSection />

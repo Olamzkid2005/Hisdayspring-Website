@@ -12,6 +12,7 @@ import type { ComponentType } from "react";
 import { render, screen } from "@testing-library/react";
 import { axe, toHaveNoViolations } from "jest-axe";
 import BooksPage from "@/app/books/page";
+import GivingPage from "@/app/giving/page";
 import RadioPage from "@/app/radio/page";
 import LivePage from "@/app/live/page";
 import TestimonialsPage from "@/app/testimonials/page";
@@ -52,6 +53,7 @@ function stubFetch(payload: unknown) {
 
 const pages: Array<[string, ComponentType]> = [
   ["/books", BooksPage],
+  ["/giving", GivingPage],
   ["/radio", RadioPage],
   ["/testimonials", TestimonialsPage],
   ["/welfare", WelfarePage],

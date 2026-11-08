@@ -224,7 +224,9 @@ func renderScene(_ context: CGContext, scene: Scene, time: Double, opacity: CGFl
         context.addLine(to: CGPoint(x: 550, y: 600))
         context.strokePath()
         drawText(context, "EXPLORE THE NEW WEBSITE", centerX: 360, baselineY: 525 - lift, size: 18, fill: muted, tracking: 2.4)
-        drawText(context, "hisdayspring.org", centerX: 360, baselineY: 450 - lift, size: 40, fill: ivory)
+        // The canonical host. 34pt rather than 40 so the longer name keeps a
+        // safe margin on both sides of the 720px frame.
+        drawText(context, "www.hisdayspringfamily.org", centerX: 360, baselineY: 450 - lift, size: 34, fill: ivory)
         drawText(context, "A PLACE TO BELONG.", centerX: 360, baselineY: 165, size: 18, fill: gold, tracking: 3)
 
     default:

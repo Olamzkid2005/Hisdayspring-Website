@@ -179,7 +179,7 @@ not cover, unauthenticated probes of every payment endpoint, `npm audit
 | Low | Apex and `www` both return 200 with no redirect. | Pick www (used by canonicals) and redirect the apex at the host. |
 | Low | Contact data only lists the Ipaja headquarters, while pastor data names Island Church and Ikorodu branches. | Add the branch addresses or link them from the pastors page. |
 | Low | Sitemap `lastModified` is build time for every URL. | Search engines see everything change on every deploy; use real content dates. |
-| Low | `DEPLOYMENT.md` still describes the old domain; test fixtures still use it as an arbitrary origin. | Docs drift, not runtime behaviour. Update when the deployment guide is next touched. |
+| Low | `DEPLOYMENT.md` still describes the old domain; test fixtures still use it as an arbitrary origin. | **Resolved 8 Nov 2026** for the docs (README, DEPLOYMENT, research notes, `.env.example`). Test fixtures keep the old host only as an arbitrary origin string. |
 | Info | The Visant UI gate was run over `app` + `components`: 3 token findings and 21 chrome-noise findings; copy lint was skipped because it looks under `~/.claude/skills`. | Not fixed in this pass; run the gate per route before a visual redesign. |
 
 ## Operational checklist for the Pxxl deploy
@@ -193,3 +193,41 @@ not cover, unauthenticated probes of every payment endpoint, `npm audit
    one-year `s-maxage`.
 5. Spot-check `/giving`, `/live` and one ministry page in a private window
    (canonical host, YouTube links, OG image).
+
+---
+
+# Documentation sync — 8 November 2026
+
+The Pxxl deploy of `b84a3fe` landed after the audit, and the live site was
+re-checked while the docs were updated.
+
+## Live verification
+
+- `https://www.hisdayspringfamily.org/` → 200 with
+  `<link rel="canonical" href="https://www.hisdayspringfamily.org"/>`.
+- Pxxl HTML is still served with `Cache-Control: s-maxage=31536000` and
+  `x-nextjs-cache: HIT`; a purge is required after each deploy.
+- **Correction to the audit above:** at audit time `hisdayspring.org` answered
+  406. It now answers 200 with the legacy WordPress site (Apache, Qservers).
+  Either way it is not this app, but it is not dead — and it still hosts the
+  church mailbox, so its `A`/`MX` records must not be repointed at Pxxl.
+- The YouTube channel remains `@Dayspring_Family`
+  (`UCsK_cum0IKbuQ75Va8ty0CA`); `@hisdayspring` still 404s.
+
+## Docs updated
+
+| File | Change |
+|---|---|
+| `README.md` | Rewritten: Next.js 16 / React 19 stack, real route list, both URL env vars, accurate project structure, Pxxl deployment (removed the Vercel/static-export instructions), scripts, docs index. |
+| `DEPLOYMENT.md` | Rewritten around `www.hisdayspringfamily.org`: live state, Pxxl env (`SITE_URL` vs build-time `NEXT_PUBLIC_SITE_URL`), domain/DNS with the legacy domain left untouched, webhook URL, cache purging, checklist, rollback, corrected dependency status. |
+| `CONTENT_RESEARCH_NOTES.md` | Refresh status; source/identity split from the legacy site; real Sunday/midweek times, branch list, giving details, events and gallery; content-gap table updated. |
+| `.env.example` | Fixed the stale `YOUTUBE_CHANNEL_ID=@hisdayspring`; added `SITE_URL`, `NEXT_PUBLIC_SITE_URL` and the sandbox guard. |
+| `public/llms.txt` | Added the terms page to the page list. |
+| `AUDIT.md` | This section; the docs-drift finding above marked resolved. |
+
+## Still open
+
+Everything in **Open findings** stands unless stated above. The two that
+matter most before the next payment release: the 3 production dependency
+advisories (including the critical Next range) and the year-long HTML cache on
+date-dependent content.

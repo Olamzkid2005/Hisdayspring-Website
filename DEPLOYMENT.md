@@ -1,18 +1,22 @@
 # Deployment Guide — Hisdayspring Website
 
-Production deployment to **Pxxl** with the custom domain **hisdayspring.org**.
+Production deployment to **Pxxl** at **https://www.hisdayspringfamily.org**.
 
-Current state: Pxxl is **live** at `https://hisdayspring-website.pxxlspace.cv`
-(commit `ce495c8`) with sandbox Bachs keys, and both checkout endpoints plus the
-webhook signature check are verified there. Vercel serves the same commit at
-`https://hisdayspring.vercel.app` as the test mirror. The domain
-`hisdayspring.org` still points to `45.43.14.156` (Qservers) — pointing it to
-Pxxl **replaces** that site. Make sure the old site has nothing you still need
-before continuing.
+Current state (checked 8 November 2026):
 
-Tip: verify the full checkout flow on the Pxxl URL before the cutover, then
-swap in the `sk_live_...` keys (section 3 + 5). Zero code changes either way —
-the key prefix picks the API environment.
+- Pxxl builds `main` automatically and serves the production domain. The
+  project's own URL is still `https://hisdayspring-website.pxxlspace.cv`.
+- `www.hisdayspringfamily.org` is canonical. The apex
+  `hisdayspringfamily.org` also answers 200 with no redirect (open follow-up).
+- `hisdayspring.org` is **not** this site. It is the old WordPress
+  installation on Qservers (`45.43.14.156`) and it still runs the church
+  mailbox. `www.hisdayspring.org` 301s to that apex. Leave that zone alone —
+  see §4.
+- The former Vercel mirror (`hisdayspring.vercel.app`) is retired.
+
+Tip: test checkout on the preview host before swapping in live Bachs keys, then
+set `sk_live_...`. Zero code changes — the key prefix picks the API
+environment.
 
 ---
 
@@ -22,7 +26,7 @@ Pxxl builds from GitHub. Nothing ships until `main` is up to date.
 
 ```bash
 git add -A
-git commit -m "feat: production payments (Bachs), pastoral giving, spec compliance, tests"
+git commit -m "feat: describe the change"
 git push origin main
 ```
 
@@ -33,17 +37,22 @@ git push origin main
 Official flow per docs.pxxl.app (`Dashboard > Deploy Project`):
 
 1. Sign in at **pxxl.app** → **Dashboard → Deploy Project**
-   (or Projects → Add New → Deploy from GitHub)
-2. Connect GitHub if asked, find **Olamzkid2005/Hisdayspring-Website**, click **Import**
+   (or Projects → Add New → Deploy from GitHub).
+2. Connect GitHub if asked, find **Olamzkid2005/Hisdayspring-Website**, click
+   **Import**.
 3. Configure the project:
+
    | Field | Value |
    |---|---|
-   | Project Domain | `hisdayspring-website` → gives `hisdayspring-website.pxxlspace.cv` |
+   | Project Domain | `hisdayspring-website` → `hisdayspring-website.pxxlspace.cv` (preview) |
+   | Custom domain | `www.hisdayspringfamily.org` (production, §4) |
    | Port Number | **3000** (`next start` reads `PORT`; Pxxl also injects `PORT` and `EXPOSE_PORT`) |
    | GitHub Branch | `main` |
-4. **Environment Variables — add BEFORE clicking Deploy** (see section 3).
-   The container will start but payments/live APIs return 503 without them.
+
+4. **Environment Variables — add BEFORE clicking Deploy** (see §3). The
+   container starts without them, but payments and live status return 503.
 5. **Additional Build Settings** (auto-detect should handle this; verify):
+
    | Setting | Value |
    |---|---|
    | Install command | `npm ci` |
@@ -51,36 +60,52 @@ Official flow per docs.pxxl.app (`Dashboard > Deploy Project`):
    | Start command | `npm start` |
    | Runtime version | Node 26 (locked by Pxxl — the `node-npm:26` buildpack pins it) |
    | Package manager | npm |
+
 6. **Server and Scaling**: the default tier is fine — images are served from
    the Cloudinary CDN, not the app. Enable **Build cache**.
 7. **Advanced Options**:
    - Auto-deploy on push: **enable** (deploys every push to `main`)
-   - Preview environments: enable (for testing future branches)
-   - Blue-green deployment: enable if your plan supports it (zero-downtime releases)
+   - Preview environments: enable if you want branch previews
+   - Blue-green deployment: enable if your plan supports it
 8. Click **Deploy Project**, watch **Project → Deployments** and
    **Project → Live Logs** until the build finishes.
-9. Verify: `https://hisdayspring-website.pxxlspace.cv` loads the homepage.
+9. Verify the preview host, then the production domain:
+
+   ```bash
+   curl -sI https://www.hisdayspringfamily.org | head -1          # 200
+   curl -s https://www.hisdayspringfamily.org | grep -o '<link rel="canonical"[^>]*>'
+   # <link rel="canonical" href="https://www.hisdayspringfamily.org"/>
+   ```
 
 ### Redeploying — and the env-var trap
 
 Two things bite here, both learned the hard way:
 
-- **Changing an env var does nothing until you rebuild.** Pxxl applies
-  variables while it builds the image, so after adding or editing one, open
-  **Overview → Redeploy** and wait for the build to go green.
+- **Changing a build-time env var does nothing until you rebuild.** Pxxl
+  applies variables while it builds the image, so after adding or editing one,
+  open **Overview → Redeploy** and wait for the build to go green. `SITE_URL` is
+  read at request time, but `NEXT_PUBLIC_SITE_URL` (and therefore canonicals,
+  sitemap, robots and JSON-LD) is fixed at build time.
 - **A variable is only read if the deployed commit reads it.** Compare the
   commit on the Overview card against `git log --oneline -1` before debugging a
-  "still broken" deploy: a fix that is pushed but not deployed looks exactly
-  like a fix that does not work.
+  "still broken" deploy.
 
-To redeploy: **Overview → Redeploy → Deploy `<commit>`** (the dialog defaults to
-the latest commit on `main`). A clean build takes ~2.5 minutes and the runtime
-rolls over with no downtime.
+To redeploy: **Overview → Redeploy → Deploy `<commit>`**. A clean build takes
+~2.5 minutes and the runtime rolls over with no downtime.
+
+After every deploy, **purge the HTML cache**. The site is served with
+`Cache-Control: s-maxage=31536000`, so a stale copy can survive a release:
+
+```bash
+curl -sI https://www.hisdayspringfamily.org | grep -i cache-control
+# cache-control: s-maxage=31536000
+# purge via Pxxl's cache control, or redeploy with a fresh route generation
+```
 
 Sanity-check the payment endpoints after every deploy:
 
 ```bash
-BASE=https://hisdayspring-website.pxxlspace.cv
+BASE=https://www.hisdayspringfamily.org
 
 curl -s -X POST $BASE/api/payments/bachs/initialize \
   -H 'Content-Type: application/json' \
@@ -91,9 +116,10 @@ curl -s -X POST $BASE/api/payments/bachs/book-order/initialize \
   -d '{"name":"Test","email":"test@example.com","phone":"+2348077829444","paymentMethod":"card-payment","fulfillment":"pickup","items":[{"bookId":"100-days-devotional","quantity":1}]}'
 ```
 
-Both must return **200** with a `chk_...` id and a `sandbox-checkout.bachs.io`
-URL (`checkout.bachs.io` once live keys are in). A **502** means `SITE_URL` is
-missing or wrong, or the deployed commit predates the fix.
+Both must return **200** with a `chk_...` id and a
+`sandbox-checkout.bachs.io` URL (`checkout.bachs.io` once live keys are in).
+A **502** means `SITE_URL` is missing or wrong, or the deployed commit predates
+the fix.
 
 ---
 
@@ -101,90 +127,100 @@ missing or wrong, or the deployed commit predates the fix.
 
 Add these in the Environment Variables panel **before deploying**.
 
-| Variable | Where to get it | Required |
+| Variable | Value / where to get it | Required |
 |---|---|---|
-| `SITE_URL` | The public site origin **with scheme**, e.g. `https://hisdayspring.org` (or the Pxxl URL pre-cutover). Build into the redirect URLs Bachs is sent — behind Pxxl's proxy the request URL is the internal container address, and Bachs rejects localhost success URLs with a 502. **Required on Pxxl.** | yes |
-| `BACHS_SECRET_KEY` | Bachs dashboard → Developer Portal → API keys. `sk_live_...` for production, `sk_sandbox_...` for sandbox | yes (donations) |
-| `BACHS_WEBHOOK_SECRET` | Bachs Developer Portal → Webhooks → your endpoint's signing secret | yes (webhooks) |
-| `YOUTUBE_API_KEY` | Google Cloud Console → YouTube Data API v3 credential | no (live page degrades gracefully) |
-| `YOUTUBE_CHANNEL_ID` | Your YouTube channel ID | no |
-| `NEXT_PUBLIC_WHATSAPP_NUMBER` | `+2348077829444` | no (has default) |
-| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | Cloudinary cloud name — `hurqcssn` (baked in as default; only set to override) | no |
+| `SITE_URL` | `https://www.hisdayspringfamily.org` — the public origin **with scheme**, read at runtime for Bachs `success_url`/`cancel_url` and receipt links. Behind Pxxl's proxy `request.url` is the internal container address, and Bachs rejects a non-public success URL with a 502. | yes |
+| `NEXT_PUBLIC_SITE_URL` | Same origin, or leave unset (the default in `lib/site.ts` is already correct). Read at **build time** for canonicals, sitemap, robots and JSON-LD. Set it only when a preview build must point at itself. | no |
+| `BACHS_SECRET_KEY` | Bachs dashboard → Developer Portal → API keys. `sk_live_...` for production, `sk_sandbox_...` for sandbox. | yes (donations) |
+| `BACHS_WEBHOOK_SECRET` | Bachs Developer Portal → Webhooks → the production endpoint's signing secret. | yes (webhooks) |
+| `YOUTUBE_API_KEY` | Google Cloud Console → YouTube Data API v3 credential. `/live` degrades gracefully without it. | no |
+| `YOUTUBE_CHANNEL_ID` | `UCsK_cum0IKbuQ75Va8ty0CA`. A handle (`@Dayspring_Family`) is rejected by the API; the code falls back to this id, but set it correctly. | no |
+| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Cloud Console; map embed on the contact section. | no |
+| `NEXT_PUBLIC_WHATSAPP_NUMBER` | `+2348077829444` (has a default). | no |
+| `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` | `hurqcssn` is baked in as the default; set only to override. | no |
+
+Leave `BACHS_API_BASE_URL` and `ALLOW_SANDBOX_PAYMENTS_IN_PRODUCTION` unset in
+production; both exist for local/sandbox work. `CLOUDINARY_API_KEY` and
+`CLOUDINARY_API_SECRET` are only used by the upload scripts, not by the running
+site.
 
 Rules:
-- Never use `NEXT_PUBLIC_` for secrets — anything with that prefix is exposed
-  to the browser bundle.
+
+- Never use `NEXT_PUBLIC_` for secrets — anything with that prefix is inlined
+  into the browser bundle.
 - Rotate keys if they were ever committed or shared.
+- Live and sandbox Bachs destinations have **different** signing secrets. Pair
+  a live secret key with a live signing secret in the same deploy, or every
+  delivery is rejected with 401.
 
 ---
 
-## 4. Point the domain (www.hisdayspring.org)
+## 4. Domains and DNS
 
-Pxxl hosts globally with managed SSL; your DNS just needs to point at it.
+Two separate domains, deliberately:
 
-1. In the Pxxl dashboard, open the project → **Domains** → add both:
-   - `hisdayspring.org`
-   - `www.hisdayspring.org`
-   - Pxxl shows its A-record IP and/or CNAME target — copy those values.
-2. Log in to the **Qservers client area**
-   (<https://process.qservers.net/clientarea.php>) → **Domains → My Domains** →
-   open the dropdown beside `hisdayspring.org` → **Domain DNS Manager**.
+| Domain | Points at | Serves |
+|---|---|---|
+| `www.hisdayspringfamily.org` | Pxxl (`193.181.208.160`, via `www` CNAME → apex) | this Next.js site, canonical |
+| `hisdayspringfamily.org` | same Pxxl edge | the same site, non-canonical (open follow-up) |
+| `hisdayspring.org` | Qservers `45.43.14.156` | the old WordPress site **and the church mailbox** |
+| `www.hisdayspring.org` | CNAME to `hisdayspring.org` (301) | the old WordPress site |
 
-   Do **not** change the nameservers (`ns3.qservers.net`, `ns4.qservers.net`,
-   `ns3.qserverscloud.com`, `ns4.qserverscloud.com`) — edit the records only.
+DNS for `hisdayspringfamily.org` is managed at `ns1/ns2.dyna-ns.net`; records:
 
-   Set the two mail rows **first** (see the warning below), then the website
-   rows:
+```
+A      @     193.181.208.160        (Pxxl — confirm in the Domains panel)
+CNAME  www   hisdayspringfamily.org
+```
 
-   | Type | Name | Value | TTL | Notes |
-   |---|---|---|---|---|
-   | MX | `@` | `1.qservers.net` | 300 | priority `0` — keeps email alive |
-   | CNAME | `mail` | `1.qservers.net` | 300 | keeps `mail.hisdayspring.org` working |
-   | A | `@` | **Pxxl's IPv4** (from the Domains panel) | 300 | replaces `45.43.14.156` |
-   | CNAME | `www` | Pxxl's CNAME target (e.g. `hisdayspring-website.pxxlspace.cv`) | 300 | |
+### Do not repoint the old domain
 
-   Leave `webmail`, `cpanel`, the SPF `TXT` and `_dmarc` alone. A short TTL
-   (300) through the cutover makes a rollback take minutes instead of hours.
+`hisdayspring.org` still resolves to the Qservers box, whose zone is:
 
-   **Why the mail rows must change first.** The zone at the last audit was:
+```
+MX    0  hisdayspring.org.     <- mail follows the apex A record
+A       45.43.14.156           <- same host runs the website and Exim
+CNAME   mail -> hisdayspring.org
+```
 
-   ```
-   MX    0 hisdayspring.org.        <- mail follows the apex A record
-   A     45.43.14.156               <- Qservers box, also runs Exim 1.qservers.net
-   CNAME mail -> hisdayspring.org   <- also follows the apex
-   ```
+Moving the apex A record to Pxxl would send `@hisdayspring.org` mail to a host
+with no mail service, silently killing the church inbox. If the church ever
+wants the old domain redirected here, migrate mail first:
 
-   The mail server and the old website are the **same host**, and MX points at
-   the apex rather than at the mail host. Repointing `A @` at Pxxl would send
-   `@hisdayspring.org` mail to a server with no mail service, so the church's
-   inbox would silently stop receiving. Pin MX and `mail` to `1.qservers.net`,
-   confirm with `dig +short hisdayspring.org MX`, and only then move the
-   website records.
+1. Create the mailbox on a mail provider that is not tied to the web host.
+2. Point `MX` (and `SPF`/`DKIM`/`DMARC`) at it and confirm delivery.
+3. Only then add the domain in Pxxl and point `A @` at Pxxl.
 
-   Optional hardening: the SPF record contains `+a`, which after the cutover
-   would authorise Pxxl's IP to send mail as `hisdayspring.org`. The Qservers
-   host is already covered by `ip4:45.43.14.156` and `+mx`, so dropping `+a` is
-   safe and tidier.
+Until then, leave the entire `hisdayspring.org` zone untouched. It is a
+different website, not a redirect target.
 
-3. Wait for propagation — usually minutes, up to a few hours.
-   Check with:
+### Adding or changing the production domain
+
+1. Pxxl dashboard → project → **Domains** → add `hisdayspringfamily.org` and
+   `www.hisdayspringfamily.org`; copy the A/CNAME values Pxxl shows.
+2. Update the DNS records above (TTL 300 during changes).
+3. Wait for propagation, then confirm both hosts serve HTTPS with a valid
+   certificate:
 
    ```bash
-   dig +short hisdayspring.org A
-   dig +short www.hisdayspring.org CNAME
-   dig +short hisdayspring.org MX     # must be 1.qservers.net, not hisdayspring.org
+   dig +short hisdayspringfamily.org A
+   dig +short www.hisdayspringfamily.org CNAME
+   curl -sI https://www.hisdayspringfamily.org | head -1
    ```
 
-4. SSL certificates are issued automatically by Pxxl once DNS resolves.
-   Both `https://hisdayspring.org` and `https://www.hisdayspring.org` must
-   serve the site over HTTPS.
-5. **After** DNS resolves, update `SITE_URL` to `https://hisdayspring.org` on
-   Pxxl and **redeploy** — otherwise Bachs keeps sending buyers back to the old
-   `…pxxlspace.cv` host. Then re-point the Bachs webhook (section 5) at the new
-   domain.
+4. Update `SITE_URL` (and `NEXT_PUBLIC_SITE_URL` if it was set) and
+   **redeploy** — otherwise Bachs keeps sending buyers to the old host and
+   canonicals keep advertising it.
+5. Re-point the Bachs webhook (§5) and resend one signed test delivery.
+6. Purge the HTML cache.
 
-Note: security headers (including HSTS) activate automatically over HTTPS —
-they are already configured in `next.config.ts`.
+**Open follow-up:** the apex and `www` both answer 200 and neither redirects.
+Pick `www` (what the canonicals use) and add an apex→www redirect at the host
+when Pxxl supports it, or at the DNS/proxy layer.
+
+Security headers (HSTS, `X-Frame-Options`, `X-Content-Type-Options`,
+`Referrer-Policy`, `Permissions-Policy`) are configured in `next.config.ts` and
+activate over HTTPS automatically.
 
 ---
 
@@ -196,67 +232,60 @@ Webhook-verified fulfilment needs this:
 1. Bachs dashboard → **Developer Portal → Webhooks** → **Add destination**:
 
    ```
-   https://hisdayspring.org/api/payments/bachs/webhook
+   https://www.hisdayspringfamily.org/api/payments/bachs/webhook
    ```
 
 2. Subscribe to the **Checkout** and **Payments** events — at minimum
    `collection.succeeded` (the source of truth for fulfilment) and
    `checkout.completed`.
-
-   Until the custom domain is live, point this at whichever host is serving
-   production (right now `https://hisdayspring-website.pxxlspace.cv` — the
-   `hisdayspring.vercel.app` mirror is stale and no longer deployed); switch it
-   to `https://hisdayspring.org` immediately after the DNS cutover.
-
-3. Copy the endpoint's **signing secret** into `BACHS_WEBHOOK_SECRET` (section 3).
-   Live and sandbox destinations have **different** signing secrets, so this has
-   to be swapped in the same deploy as `BACHS_SECRET_KEY` — a live secret key
-   paired with the sandbox signing secret rejects every delivery with a 401.
+3. Copy the endpoint's **signing secret** into `BACHS_WEBHOOK_SECRET` (§3).
    Deliveries are signed with HMAC-SHA256 over `"{timestamp}.{raw_body}"` and
    sent as `X-Bachs-Signature-V2`; the route rejects anything unsigned or older
    than 5 minutes.
 
-Note: the donor's thank-you page is driven by a server-side call to
+The donor's thank-you page is driven by a server-side call to
 `/api/payments/bachs/verify`, not by the webhook, so a misconfigured webhook
 does not break the donor journey — but without it there is no server-side
-record of the payment beyond the Bachs dashboard.
+record of the payment beyond the Bachs dashboard. Nothing is persisted in this
+project: there is no database or queue, so webhook events do not create donor
+receipts, reconciliation records or fulfilment jobs yet.
 
 ### Book ordering (paid online, collected in church)
 
 `/books` has in-site ordering on the same Bachs pipeline: a multi-book cart,
-a **Pick up in church** option (buyer shows the payment reference at the
+a **Pick up in church** option (the buyer shows the payment reference at the
 bookstand) and a **PDF** option (download links shown right after payment).
 The cart is priced server-side from `data/books.ts` — clients send only book
 IDs and quantities.
 
 After paying, Bachs redirects the buyer to `/books/receipt?checkout_id=…` for
-**both** fulfillment modes: pickup orders get their bookstand reference, PDF
-orders their download links. The receipt verifies the payment server-side
-(with retries — Bachs can bounce the buyer back before the checkout session
-settles), clears the book cart, and offers a manual **Check again** for bank
-transfers that reflect late.
+**both** fulfilment modes: pickup orders get their bookstand reference, PDF
+orders their download links. The receipt verifies the payment server-side (with
+retries — Bachs can bounce the buyer back before the checkout session settles),
+clears the book cart, and offers a manual **Check again** for bank transfers
+that reflect late.
 
 Setup and notes:
 
 1. **PDF delivery** uses Cloudinary. Upload each PDF as
-   `books/pdf/<book-id>` (e.g. `books/pdf/made-to-be-whole`) in the
-   **raw** uploads folder of the `hurqcssn` cloud. A title whose PDF is not
-   uploaded yet gets a polite "not available yet" message at download time —
-   no code change needed when the file goes live.
-2. **Staff verification**: at the bookstand, open
-   `/books/verify`, paste the buyer's reference (or their download-link URL),
-   and confirm what was paid before handing over books. It checks the
-   checkout against Bachs' API live — no database.
-3. **Receipts**: every paid order gets a professional receipt at
+   `books/pdf/<book-id>` (e.g. `books/pdf/made-to-be-whole`) in the **raw**
+   uploads folder of the `hurqcssn` cloud. A title whose PDF is not uploaded yet
+   gets a polite "not available yet" message at download time — no code change
+   needed when the file goes live.
+2. **Staff verification**: at the bookstand, open `/books/verify`, paste the
+   buyer's reference (or their download-link URL), and confirm what was paid
+   before handing over books. It checks the checkout against Bachs' API live —
+   no database.
+3. **Receipts**: every paid order gets a receipt at
    `/books/receipt?checkout_id=<id>` — church logo, order lines, total,
    reference and buyer. Shareable straight to WhatsApp, plus native share,
    copy-link, and a print/save-as-PDF view (site chrome hidden via print
-   styles). The receipt URL is stable, so buyers can return to it later.
-3. The Bachs webhook endpoint receives book-order `collection.succeeded`
-   events too; nothing extra to configure.
-4. Download links are per-checkout and re-verified on every request, but
-   anyone holding the link can download — same trust model as any download
-   link sent by email.
+   styles). The URL is stable, so buyers can return to it later.
+4. Download links are per-checkout and re-verified on every request, but anyone
+   holding the link can download — the same trust model as any download link
+   sent by email.
+5. The Bachs webhook receives book-order `collection.succeeded` events too;
+   nothing extra to configure.
 
 ---
 
@@ -267,8 +296,8 @@ The giving page hides the amount/donor form and the card option, and shows the
 pastor's own bank account with copy-to-clipboard buttons instead. Bachs has no
 subaccount concept, so a card gift cannot be routed to an individual — it would
 settle into the church account while the donor believed it reached the pastor.
-Transfer-only is the honest option, and it also means the church pays no
-processing fee on those gifts.
+Transfer-only is the honest option, and the church pays no processing fee on
+those gifts.
 
 ### The pastor's account
 
@@ -284,17 +313,16 @@ export const pastoralGivingAccount: BankAccount = {
 ```
 
 Change the account there, not in the page. The account name is kept exactly as
-the bank prints it so a donor can match it against their transfer
-confirmation.
+the bank prints it so a donor can match it against their transfer confirmation.
 
 ### Sharing the pastor's account
 
-`https://hisdayspring.org/giving?purpose=pastoral-giving` opens the giving page
-with **Pastor & Ministerial Giving** already selected — this is the link to send
-to members over WhatsApp or print in a bulletin. Choosing a purpose on the page
-writes it back into the address bar, so a URL copied from the browser always
-describes what the donor is looking at rather than going stale. Values that are
-not real purposes are ignored.
+`https://www.hisdayspringfamily.org/giving?purpose=pastoral-giving` opens the
+giving page with **Pastor & Ministerial Giving** already selected — this is the
+link to send to members over WhatsApp or print in a bulletin. Choosing a purpose
+on the page writes it back into the address bar, so a URL copied from the
+browser always describes what the donor is looking at rather than going stale.
+Values that are not real purposes are ignored.
 
 Both copy buttons (`Copy account number`, `Copy bank details`) and the
 per-account buttons in the church details card read straight from this data, so
@@ -309,10 +337,8 @@ Bachs account from individual to company), a connected account created and
 onboarded for the pastor, and a checkout naming `transfer_data.destination` —
 all recorded here so the option is not rediscovered from scratch:
 
-1. Apply for the **connect** capability on the Bachs account —
-   https://docs.bachs.io/connect/become-a-platform
-2. Create a connected account for the pastor and onboard it —
-   https://docs.bachs.io/connect/guides/create-an-account
+1. Apply for the **connect** capability — https://docs.bachs.io/connect/become-a-platform
+2. Create a connected account for the pastor and onboard it — https://docs.bachs.io/connect/guides/create-an-account
 3. Add `transfer_data.destination = <acct_...>` plus either `platform_fee` or
    `transfer_data.amount` to the checkout in
    `app/api/payments/bachs/initialize/route.ts`, resolved server-side from the
@@ -325,7 +351,7 @@ See https://docs.bachs.io/connect/split-payments/destination
 
 ### Behaviour today (safe by default)
 
-- Pastoral-giving → no checkout at all; the pastor's account is displayed and
+- Pastoral giving → no checkout at all; the pastor's account is displayed and
   copyable, and the church account card is hidden to prevent wrong-account gifts
 - Every other purpose → church account, always
 - Client-supplied `transfer_data` / `platform_fee` / subaccount codes → ignored
@@ -336,27 +362,31 @@ See https://docs.bachs.io/connect/split-payments/destination
 
 ## 7. Post-launch verification checklist
 
-Run through this after DNS + deploy:
+Run through this after a deploy:
 
 - [ ] Pxxl **Overview shows the latest `main` commit** (`git log --oneline -1`) — a stale commit silently disables every fix
-- [ ] `https://hisdayspring.org` and `https://www.hisdayspring.org` load over HTTPS (no cert warnings)
-- [ ] Both checkout endpoints on the live domain return 200 with a `chk_...` id (commands in section 2)
-- [ ] All nav pages render: `/pastors`, `/giving`, `/books`, `/radio`, `/live`, `/welfare`, `/crusade`, `/testimonials`, `/prayer`, `/privacy`, `/ministries/yofic`
+- [ ] `https://www.hisdayspringfamily.org` loads over HTTPS (no cert warnings), and every page emits `<link rel="canonical" href="https://www.hisdayspringfamily.org…">`
+- [ ] `/sitemap.xml` and `/robots.txt` use the same host; the sitemap lists `/live`, `/prayer`, `/testimonials` and one copy each of `/welfare` and `/crusade`
+- [ ] The HTML cache was purged after the deploy (`Cache-Control: s-maxage=31536000`)
+- [ ] Both checkout endpoints on the live domain return 200 with a `chk_...` id (commands in §2)
+- [ ] All nav pages render: `/pastors`, `/giving`, `/books`, `/radio`, `/live`, `/welfare`, `/crusade`, `/testimonials`, `/prayer`, `/privacy`, `/terms`, `/ministries/yofic`
 - [ ] `/robots.txt`, `/sitemap.xml`, `/llms.txt`, `/.well-known/security.txt`, `/site.webmanifest` all return 200
-- [ ] Browser tab shows the church logo favicon; `curl -I https://hisdayspring.org` shows `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+- [ ] Browser tab shows the church logo favicon; `curl -I https://www.hisdayspringfamily.org` shows `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and **no** `X-Powered-By`
 - [ ] Donate ₦100 via **card** → complete on the Bachs checkout → confirm it appears in the Bachs dashboard
 - [ ] Donate ₦100 via **bank transfer** → complete on the Bachs checkout → same check
 - [ ] Return from checkout → thank-you card shows, and the URL no longer carries `checkout_id`
 - [ ] Hand-edit `?checkout_id=fake` on `/giving` → page reports it could not confirm (never shows a thank-you)
 - [ ] Pick **Pastor & Ministerial Giving** → the online form disappears, the pastor's account (Access/Diamond `0025053293`) shows, and both **Copy** buttons put the right text on the clipboard over HTTPS
-- [ ] Open `/giving?purpose=pastoral-giving` directly → it lands on the pastor's account without any clicking, and the address bar keeps the selection when another purpose is chosen
+- [ ] Open `/giving?purpose=pastoral-giving` directly → it lands on the pastor's account without any clicking
 - [ ] Order a book on `/books` (₦100 min title works) → pay → reference shows → `/books/verify` confirms it at the bookstand
-- [ ] Pick **PDF** fulfillment → download link serves a file after payment; a hand-edited `?checkout_id=fake` link is refused
-- [ ] Bachs webhook: Developer Portal → Webhooks → send a test → 200 response in Pxxl Live Logs
-- [ ] `/live` shows the stream status with the production `YOUTUBE_API_KEY`
+- [ ] Pick **PDF** fulfilment → download link serves a file after payment; a hand-edited `?checkout_id=fake` link is refused
+- [ ] Bachs webhook: Developer Portal → Webhooks → send a test → 200 in Pxxl Live Logs
+- [ ] `/live` shows stream status with the production `YOUTUBE_API_KEY`
+- [ ] Every YouTube link points at `@Dayspring_Family` (the old `@hisdayspring` handle is 404)
 - [ ] Prayer request form opens WhatsApp with the message prefilled
-- [ ] Contact form opens the donor's email client (mailto)
-- [ ] Run a Lighthouse audit against the live domain (see section 8)
+- [ ] Contact form opens the visitor's email client (mailto)
+- [ ] `hisdayspring.org` still serves the old WordPress site and `hello@hisdayspring.org` still receives mail (this deploy must not have touched it)
+- [ ] Run a Lighthouse audit against the live domain (§8)
 
 ---
 
@@ -373,8 +403,7 @@ open ./lighthouse.html
 ```
 
 Requires local Chrome. If the headless run fails with a Chrome interstitial
-error, open `http://localhost:3000` in a normal Chrome window first (accept any
-local-server warning), then rerun the command.
+error, open `http://localhost:3000` in a normal Chrome window first, then rerun.
 
 Targets: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO ≥ 95.
 
@@ -382,34 +411,39 @@ Targets: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO �
 
 ## 9. Known follow-ups (not blockers)
 
-- **3 lint warnings** (`<img>` for YouTube thumbnails, and one unused var in
-  `scripts/upload-images-to-cdn.mjs`) — harmless. `npm run lint` is otherwise
-  clean, and `npm audit` reports **0 vulnerabilities**.
+- **Production dependency advisories.** `npm audit --omit=dev` reports 3
+  (Next 16.3.6 in the critical advisory range 16.0.0–16.4.0, `sharp` high,
+  `source-map-js` high). Upgrade and re-run build/tests before the next payment
+  release. Tracked in [AUDIT.md](AUDIT.md).
+- **3 lint warnings** — `<img>` for YouTube thumbnails in `SermonsSection`
+  (×2) and one unused variable in `scripts/upload-images-to-cdn.mjs`.
+  `npm run lint` exits 0.
 - **Pxxl's dependency scan lists packages that are not ours.** The build log
   flags `tar`, `brace-expansion`, `ip-address`, `undici` and the Alpine trio
-  `openssl`/`libssl3`/`libcrypto3`. Evidence they are not from this repo:
-  `ip-address` appears **nowhere in `package-lock.json`**, and the reported
-  versions (`tar` 7.5.16, `brace-expansion` 5.0.6, `ip-address` 10.2.0,
-  `undici` 6.26.0) match neither our lock nor our installed tree — they line up
-  with the npm bundled inside Pxxl's Node 26 buildpack (npm's own
-  `node_modules` contains the same four packages at adjacent patch versions).
-  The `openssl` findings are the builder image's OS packages. Neither can be
-  fixed from `package.json`; ask Pxxl to refresh their Node/npm buildpack image
-  if a clean scan is required. Our own tree was cleaned in
-  `Drop the unused Vercel CLI and pin patched transitive dependencies`.
-- **Update `public/.well-known/security.txt` `Expires:` field yearly**.
+  `openssl`/`libssl3`/`libcrypto3`. They come from Pxxl's Node 26/npm buildpack
+  and builder image, not from this repo (e.g. `ip-address` appears nowhere in
+  `package-lock.json`, and the reported versions match neither our lock nor our
+  installed tree). Ask Pxxl to refresh their buildpack if a clean scan is
+  required.
+- **Apex and `www` both answer 200.** Pick `www` and redirect the apex at the
+  host (§4).
+- **HTML is cached for a year** (`s-maxage=31536000`) while the homepage
+  filters events by the current date. An event can outlive its end date until
+  the next purge; purge on every deploy and consider a shorter lifetime or ISR.
+- **Cookie consent is not wired to third parties.** Analytics and the YouTube /
+  Maps embeds load before a choice; see AUDIT.md.
+- **Update `public/.well-known/security.txt` `Expires:` yearly** (currently
+  2027-12-31).
 - **`security.txt` contact** — currently `hello@hisdayspring.org`; consider a
-  dedicated `security@hisdayspring.org` later.
+  dedicated `security@hisdayspring.org` later. Email is still hosted on the
+  legacy domain, so this address is intentional.
 - **Cloudinary free tier** — 25 credits/mo ≈ 25 GB transformations + 25 GB
-  bandwidth. Current usage fits comfortably; if the site outgrows it, upgrade
-  or add a custom CDN domain in the Cloudinary dashboard.
-- **Local dev images**: `public/images/` is no longer in git. The site pulls
-  everything from Cloudinary, so no local copies are needed. If you ever need
-  the originals: `~/Downloads/FOR WEBSITE` (camera masters) and
-  `~/Documents/Hisdayspring-Website-git-backup.git` (full pre-migration git
-  mirror). Re-download from Cloudinary or re-run
-  `node scripts/upload-images-to-cdn.mjs` (it skips already-uploaded files via
-  `.cdn-uploads.json`).
+  bandwidth. Current usage fits; upgrade or add a custom CDN domain if it grows.
+- **Local dev images** — `public/images/` is not in git; the site pulls from
+  Cloudinary. Originals: `~/Downloads/FOR WEBSITE` (camera masters) and
+  `~/Documents/Hisdayspring-Website-git-backup.git` (pre-migration mirror).
+  Re-upload with `node scripts/upload-images-to-cdn.mjs` (it skips uploaded
+  files via `.cdn-uploads.json`).
 
 ---
 
@@ -417,6 +451,15 @@ Targets: Performance ≥ 90, Accessibility ≥ 95, Best Practices ≥ 95, SEO �
 
 If a deploy misbehaves:
 
-1. Pxxl Dashboard → Project → **Deployments** → open the previous good deploy → **Redeploy/Rollback**
-2. Domain/DNS problems: revert the Qservers `A @` record to `45.43.14.156` (old host) — propagates in minutes. **Leave MX pointed at `1.qservers.net`** either way; that is what keeps email working
-3. Payment problems: pastoral giving is transfer-only and never touches Bachs, so it keeps working; for a full freeze of the online checkout, remove `BACHS_SECRET_KEY` on Pxxl (donations return a clean 503 message instead of charging)
+1. Pxxl Dashboard → Project → **Deployments** → open the previous good deploy →
+   **Redeploy/Rollback**.
+2. Purge the HTML cache, otherwise visitors keep the bad copy for the
+   year-long `s-maxage`.
+3. Domain/DNS problems: the production domain is separate from the legacy
+   `hisdayspring.org` zone, so there is nothing to revert there — do not touch
+   the old zone's `A`/`MX` records, they keep the old site and the church email
+   alive.
+4. Payment problems: pastoral giving is transfer-only and never touches Bachs,
+   so it keeps working. For a full freeze of online checkout, remove
+   `BACHS_SECRET_KEY` on Pxxl and redeploy — donations return a clean 503
+   instead of charging.

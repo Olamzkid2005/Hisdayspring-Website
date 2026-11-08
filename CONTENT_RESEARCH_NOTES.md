@@ -1,7 +1,15 @@
 # Hisdayspring Ministries International - Content Research Notes
 
+> **Status (8 November 2026):** these are the research notes from the original
+> build, refreshed against the live site. Production is
+> **https://www.hisdayspringfamily.org**. The old `hisdayspring.org` is a
+> separate WordPress installation that still hosts the church mailbox — do not
+> treat its content as this site's source of truth, and do not "fix" links by
+> pointing them there.
+
 ## Source URLs Scraped
-1. Main Website: https://hisdayspring.org/ — BLOCKED (robots.txt / ConnectTimeout)
+1. Main Website: https://www.hisdayspringfamily.org/ — ✅ SUCCESS (this site)
+   1b. Legacy WordPress: https://hisdayspring.org/ — separate site, still online; blocked at scrape time, now reachable
 2. Pastor's Website: https://pastorblessing.com/about-pastor-blessing-olamijulo/ — ✅ SUCCESS
 3. Pastor's Shop: https://pastorblessing.com/shop/ — ✅ SUCCESS (full book list with prices)
 4. BOMS Page: https://pastorblessing.com/blessing-ola-mentoring-school/ — ✅ SUCCESS
@@ -17,11 +25,11 @@
 - **Full Official Name**: Hisdayspring Evangelical Ministries International
 - **Short Name**: HISDAYSPRING
 - **Tagline**: "Raising holy, healthy and wealthy people"
-- **Contact Email**: hello@hisdayspring.org
+- **Contact Email**: hello@hisdayspring.org (mailbox still hosted on the legacy domain)
 - **Contact Phone**: +234 906 619 2155
 - **Pastor's Contact**: mail@pastorblessing.com
-- **Website**: https://hisdayspring.org/
-- **Branches**: Ipaja, Lagos State + Ikeja, Lagos State
+- **Website**: https://www.hisdayspringfamily.org/
+- **Branches**: Ipaja (headquarters), Island Church, Ikorodu — all Lagos State
 
 ---
 
@@ -174,45 +182,60 @@ All books authored by Pastor Blessing Olamijulo. Purchase via pastorblessing.com
 
 ---
 
-## EVENTS (PLACEHOLDER — site showed no upcoming events)
+## EVENTS (REAL — source of truth: `data/events.ts`)
 
-Current status on website: "THERE IS NO UPCOMING EVENT NOW!"
+The placeholder event list has been replaced with events transcribed from the
+printed handbills (September–November 2026): Young & Yielded 2.0, the Abuja
+Prophetic Gathering, 7 Nights of Increase, Greater Works Ministers & Leaders
+Conference, November Mega Thanksgiving, Upper Room Prayer Link Season 58, and
+Light Convention UK. Finished events move to `pastEvents`.
+
+New events are added only after date, time and location are confirmed. Entries
+are filtered by Lagos date, so an event disappears the day after it ends.
 
 ### Event Categories Known (REAL)
 - Discovery for Youths and Singles events
 - Women Program events
 - Special Events (including Weddings)
 
-### Placeholder Sample Events (clearly marked as placeholder)
-- [PLACEHOLDER] Annual Discovery for Youth & Singles Conference
-- [PLACEHOLDER] The Jewels Breakfast Meeting (Monthly)
-- [PLACEHOLDER] BOMS New Intake Registration
-- [PLACEHOLDER] Healing From Heaven Crusade
-- [PLACEHOLDER] Midyear Thanksgiving Service
+---
+
+## SERVICE TIMES (REAL — source of truth: `data/services.ts`)
+
+- **Sunday** — 8:00 AM, 10:00 AM & 12:00 NOON
+  - 1st Sunday: Thanksgiving · 3rd Sunday: Friends & Family · Last Sunday: Super Sunday/Communion
+- **Tuesday — HOR (Hour of Revelation)** — 8:00 AM
+- **Wednesday — Word Study** — 5:30 PM
+- **Men's Breakfast Club** — every 2nd Saturday, 8:00 AM
+- **The Jewels** — every 4th Saturday, 9:00 AM (women 18–45, single & married)
+- **Friendship Care** — small-group fellowship in homes, Sundays 5:00 PM
+
+Note: the earlier placeholder schedule (7:00/9:30 Sunday, 6:00 PM Wednesday,
+Friday YOFIC) was invented and has been removed from the site.
 
 ---
 
-## SERVICE TIMES (PLACEHOLDER — not found on scraped pages)
+## BRANCH ADDRESSES (PARTIAL — only HQ published)
+- **Headquarters — Ipaja**: Plot 200, 21 Road, Beside Faith Academy, Gate Bus Stop, Gowon Estate, Ipaja, Lagos 100278
+- **Island Church**: street address not published — church to provide
+- **Ikorodu**: street address not published — church to provide
 
-Based on typical Nigerian Pentecostal church schedule:
-- [PLACEHOLDER] Sunday First Service — 7:00 AM – 9:00 AM (Both branches)
-- [PLACEHOLDER] Sunday Second Service — 9:30 AM – 11:30 AM (Both branches)
-- [PLACEHOLDER] Midweek Service (Wednesday) — 6:00 PM – 8:00 PM (Both branches)
-- [PLACEHOLDER] YOFIC Youth Service (Friday) — 5:00 PM – 7:00 PM (Ipaja)
-- [PLACEHOLDER] Women's Program — Monthly (TBC)
-
----
-
-## BRANCH ADDRESSES (PLACEHOLDER — specific addresses not published)
-- [PLACEHOLDER] Ipaja Branch: [Street Address], Ipaja, Lagos State, Nigeria
-- [PLACEHOLDER] Ikeja Branch: [Street Address], Ikeja, Lagos State, Nigeria
+`data/contact.ts` carries the HQ only; the pastors page names the other two
+branches without addresses.
 
 ---
 
-## GIVING / BANK DETAILS (PLACEHOLDER — not found on scraped pages)
-- [PLACEHOLDER] Bank Name: [e.g. GTBank / First Bank / Access Bank]
-- [PLACEHOLDER] Account Number: [10-digit NUBAN]
-- [PLACEHOLDER] Account Name: Hisdayspring Evangelical Ministries International
+## GIVING / BANK DETAILS (REAL — source of truth: `data/donations.ts`)
+
+- **Online**: Bachs hosted checkout (card and bank transfer), minimum ₦100.
+- **Church accounts**: GTBank `0499179248` and Access (Diamond Bank)
+  `0054510585`, both in the name *Hisdayspring Evangelical Ministry
+  International*.
+- **Pastor & ministerial giving**: transfer-only to Access (Diamond Bank)
+  `0025053293`, name *BLESSING PHILIP OLAMIJULO*. Never routed through
+  checkout — see `DEPLOYMENT.md` §6.
+
+Do not duplicate these numbers in copy; the giving page reads the data file.
 
 ---
 
@@ -222,9 +245,14 @@ No testimonials were found on any scraped page. Use 6–8 realistic placeholder 
 
 ---
 
-## GALLERY PHOTOS (PLACEHOLDER)
+## GALLERY PHOTOS (REAL)
 
-No photos extracted. Use royalty-free Unsplash/Picsum images as placeholders organized into categories: Sunday Services, Youth Events, Women's Program, BOMS, Special Events. All placeholders must include a visible note: "Replace with actual church photos."
+The gallery now uses church photography (Sunday services, prayer meetings, youth
+events, special events, crusade, welfare, BOMS), served from Cloudinary.
+`data/gallery.ts` is auto-generated by `scripts/generate-gallery.mjs`; category
+labels and event names are assigned from the folder structure. A handful of
+Unsplash images remain in individual ministry pages (`data/ministries.ts`
+galleries) and can be replaced with real photos as they are supplied.
 
 ---
 
@@ -249,16 +277,34 @@ No photos extracted. Use royalty-free Unsplash/Picsum images as placeholders org
 | Books list + prices | ✅ Real (12 books) | Link to pastorblessing.com |
 | Radio embed | ✅ Real | Use Zeno.fm iframe |
 | Social media URLs | ✅ Real | Use as-is |
-| Vision statement | ⚠️ Placeholder | Mark clearly |
-| Service times | ⚠️ Placeholder | Church to confirm |
-| Branch addresses | ⚠️ Placeholder | Church to provide |
-| Bank details | ⚠️ Placeholder | Church to provide |
-| Events | ⚠️ Placeholder | Church to update |
-| Testimonials | ⚠️ Placeholder | Church to provide |
-| Gallery photos | ⚠️ Placeholder | Church to provide |
-| YouTube Channel ID | ⚠️ Unknown | Church to provide from YouTube Studio |
+| Vision statement | ⚠️ Placeholder | Church to confirm or replace |
+| Service times | ✅ Real | `data/services.ts` |
+| Branch addresses | ⚠️ HQ only | Island Church and Ikorodu addresses needed |
+| Bank details | ✅ Real | `data/donations.ts` |
+| Events | ✅ Real (rolling) | Update from confirmed handbills |
+| Testimonials | ⚠️ Placeholder | Church to provide real testimonies |
+| Gallery photos | ✅ Real | `data/gallery.ts`, generated from the CDN folder |
+| YouTube Channel ID | ✅ Real | `UCsK_cum0IKbuQ75Va8ty0CA` |
 
 ---
 
-## Next Steps for Task 5 (Data Files)
-Use this research to populate data files with real content where available, and use contextually appropriate placeholders for missing information. All placeholders should be clearly marked and realistic for a Nigerian Pentecostal church context.
+## How this research maps to the code today
+
+The original build task is complete. Real content is in `data/`; the items
+still marked placeholder above are the only ones the church still needs to
+supply:
+
+| Content | File |
+|---|---|
+| Identity, mission, about | `data/about.ts` |
+| Pastors and ministers | `data/workforce.ts` |
+| Service times | `data/services.ts` |
+| Events | `data/events.ts` |
+| Ministries | `data/ministries.ts` |
+| Books and prices | `data/books.ts` |
+| Giving | `data/donations.ts` |
+| Contact and HQ address | `data/contact.ts` |
+| Socials | `data/social.ts` |
+| Gallery | `data/gallery.ts` |
+| Testimonials | `data/testimonials.ts` |
+| Legal | `data/privacy.ts`, `data/terms.ts` |

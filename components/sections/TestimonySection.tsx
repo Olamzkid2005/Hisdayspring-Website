@@ -176,7 +176,7 @@ export function TestimonySection() {
             Share your testimony
           </h2>
           <p className="text-sm md:text-base text-on-surface-variant max-w-xl mx-auto">
-            Tell us what God has done. It opens in WhatsApp, ready to send.
+            Tell us what God has done.
           </p>
           <a
             href="#testimonials"
@@ -312,7 +312,7 @@ export function TestimonySection() {
                   .join(" ") || undefined
               }
               placeholder="What did God do? Where were you, what changed, and how can we pray with you?"
-              className={`w-full bg-surface-container-low border-b-2 border-transparent focus:border-secondary outline-none p-4 rounded-lg transition-all duration-200 resize-y placeholder:text-on-surface-variant/50 ${
+              className={`w-full bg-surface-container-low border-b-2 border-transparent focus:border-secondary outline-none p-4 rounded-lg transition-all duration-200 resize-y placeholder:text-on-surface-variant/80 ${
                 errors.testimony ? "border-error focus:border-error" : ""
               }`}
             />

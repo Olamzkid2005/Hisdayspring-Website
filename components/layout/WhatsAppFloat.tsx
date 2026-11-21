@@ -23,14 +23,15 @@ export function WhatsAppFloat() {
         damping: 20,
         delay: 1,
       }}
-      className="fixed bottom-6 right-6 z-40 group"
+      className="fixed bottom-5 right-4 md:bottom-6 md:right-6 z-40 group"
     >
-      {/* Pulse ring */}
-      <span className="absolute inset-0 rounded-full bg-secondary-container animate-ping opacity-20" />
+      {/* Pulse ring. Desktop only: at phone widths the ring scales past the
+          viewport edge and the button covers a third of a testimonial card. */}
+      <span className="hidden md:block absolute inset-0 rounded-full bg-secondary-container animate-ping opacity-20" />
 
       {/* Button */}
-      <div className="relative w-14 h-14 rounded-full bg-secondary-container hover:bg-secondary flex items-center justify-center shadow-lg shadow-secondary-container/30 group-hover:shadow-secondary-container/50 transition-all duration-300 cursor-pointer">
-        <MessageCircle className="w-7 h-7 text-on-secondary-container" />
+      <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-full bg-secondary-container hover:bg-secondary flex items-center justify-center shadow-lg shadow-secondary-container/30 group-hover:shadow-secondary-container/50 transition-all duration-300 cursor-pointer">
+        <MessageCircle className="w-6 h-6 md:w-7 md:h-7 text-on-secondary-container" />
 
         {/* Tooltip */}
         <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">

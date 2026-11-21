@@ -17,8 +17,13 @@ function Avatar({ name }: { name: string }) {
 function CardLight({ testimonial }: { testimonial: typeof testimonials[0] }) {
   return (
     <div className="bg-surface-container-lowest p-4 sm:p-8 rounded-xl shadow-sm relative">
-      <Quote className="absolute top-4 left-4 w-10 h-10 text-primary opacity-20" />
-      <p className="text-lg text-on-surface mb-6 leading-relaxed pl-2 pt-4">
+      {/* Decorative only, and small enough on phones that it cannot sit on top
+          of the opening words of the quote. */}
+      <Quote
+        aria-hidden="true"
+        className="absolute top-3 right-3 w-7 h-7 text-primary opacity-10 pointer-events-none"
+      />
+      <p className="relative text-lg text-on-surface mb-6 leading-relaxed">
         &ldquo;{testimonial.testimony}&rdquo;
       </p>
       <div className="flex items-center gap-3">

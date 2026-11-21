@@ -6,6 +6,7 @@
  */
 
 import type { Event } from "@/types";
+import { lagosToday } from "@/lib/lagos-time";
 
 /**
  * Confirmed upcoming events, transcribed from the printed handbills
@@ -109,7 +110,91 @@ const scheduledEvents: Event[] = [
     category: "special",
     isFeatured: true,
   },
+  {
+    id: "light-convention-2026-12-17",
+    title: "Light Convention 2026: Exceeding Multiplication",
+    date: "2026-12-17",
+    time: "9:00 AM & 5:30 PM",
+    location: "Plot 200, 21 Road, Beside Faith Academy, Gate Bus Stop, Gowon Estate, Lagos",
+    description:
+      "Four days under the theme Exceeding Multiplication. Hosts: Pastor Blessing Olamijulo and Pastor Adebamigbe Olamijulo, with Pst Yemi Davids, Apostle Wole Oladiyun, Rev. Andrew Bolaji Oyinlola, Evang. Tope Alabi, Min. Ebuka Songs and Min. Tolamise. Welfare for 1000 people. Convention merchandise: T-shirt ₦12,000, hoodie ₦15,000, sweatshirt ₦15,000, face cap ₦5,000, jersey ₦10,000.",
+    imageUrl: "/images/events/light-convention-2026.jpeg",
+    category: "special",
+    isFeatured: true,
+    dates: [
+      { date: "2026-12-17", time: "9:00 AM & 5:30 PM" },
+      { date: "2026-12-18", time: "9:00 AM & 5:30 PM" },
+      { date: "2026-12-19", time: "9:00 AM" },
+      { date: "2026-12-20", time: "8:00 AM, 10:00 AM & 12:00 NOON" },
+    ],
+  },
+  {
+    id: "youth-singles-summit-2026-12-19",
+    title: "Youth & Singles Convention Summit: Arise",
+    date: "2026-12-19",
+    time: "9:00 AM prompt",
+    location: "Plot 200, 21 Road, Beside Faith Academy, Gate Bus Stop, Gowon Estate, Lagos",
+    description:
+      "Theme: Arise. The youth and singles day of the convention, with Min. Tolamise, Min. Ebuka Songs, Steve Hills, Moskey, Pst. Blessing Olamijulo and Pst. Dare Fasaye.",
+    imageUrl: "/images/events/youth-singles-summit-2026.jpeg",
+    category: "youth",
+    isFeatured: true,
+  },
+  {
+    id: "crossover-crusade-2026-12-31",
+    title: "Special Crossover Crusade: Night of Exceeding Multiplication",
+    date: "2026-12-31",
+    time: "8:00 PM",
+    location: "Abesan Mini Stadium, Abesan Estate, Lagos",
+    description:
+      "Crossing into the new year under the theme Night of Exceeding Multiplication. With Adeyinka Alaseyori, Titilayo Euba, Minister Olajide and Yetunde Obanla. Host: Pastor Blessing Olamijulo. Free medical checks and welfare for 3000 people.",
+    imageUrl: "/images/events/crossover-crusade-2026.jpeg",
+    category: "special",
+    isFeatured: true,
+  },
 ];
+
+/**
+ * A dated notice shown above the event list. Exhibitor booking is not an event
+ * a visitor attends, so it cannot ride in `scheduledEvents`, but it still has to
+ * expire on its own once the convention starts.
+ */
+export interface EventAnnouncement {
+  id: string;
+  title: string;
+  body: string;
+  dates: string;
+  price?: string;
+  note?: string;
+  contacts: { name: string; phone: string }[];
+  imageUrl: string;
+  /** Last Lagos date (inclusive) the notice may appear. */
+  until: string;
+}
+
+export const EVENT_ANNOUNCEMENTS: EventAnnouncement[] = [
+  {
+    id: "light-convention-2026-exhibitors",
+    title: "Call for exhibitors: Light Convention 2026",
+    body: "Book a space at the convention exhibition. Booths are open across the three convention days.",
+    dates: "Dec 17, 18 & 19",
+    price: "₦25,000 per space",
+    note: "Payment validates reservation.",
+    imageUrl: "/images/events/light-convention-exhibitors.jpeg",
+    contacts: [
+      { name: "Tobi", phone: "+2347061556798" },
+      { name: "Funke", phone: "+2347062398890" },
+      { name: "Nike", phone: "+2348084488395" },
+    ],
+    until: "2026-12-19",
+  },
+];
+
+export function getActiveAnnouncements(
+  today: string = lagosToday()
+): EventAnnouncement[] {
+  return EVENT_ANNOUNCEMENTS.filter((announcement) => today <= announcement.until);
+}
 
 export const pastEvents: Event[] = [
   {

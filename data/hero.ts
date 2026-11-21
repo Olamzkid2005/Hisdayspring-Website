@@ -43,7 +43,7 @@ export const FEATURED_HERO_SLIDES: FeaturedHeroSlide[] = [
     // Wide convention handbill, pinned until the last day of the convention.
     // It is a flyer rather than a photograph, so it sits behind the site
     // heading the same way the thanksgiving handbill did.
-    image: "/images/Convention Hero.jpeg",
+    image: "/images/events/light-convention-2026-hero.jpeg",
     alt: "Light Convention 2026 flyer, Exceeding Multiplication, December 17 to 20",
     caption: "Dec 17-20 · 9 AM & 5:30 PM",
     until: "2026-12-20",

@@ -108,7 +108,7 @@ describe("buildHeroSlides", () => {
   it("keeps the convention handbill up for the whole convention", () => {
     const convention = (day: string) =>
       getFeaturedHeroSlides(day).some((slide) =>
-        slide.image.includes("Convention Hero")
+        slide.image.includes("light-convention-2026-hero")
       );
 
     expect(convention("2026-11-21")).toBe(true);

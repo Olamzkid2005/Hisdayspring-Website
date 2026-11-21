@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
-import { Clock, CalendarPlus, X, Expand, Check } from "lucide-react";
-import { getUpcomingEvents } from "@/data/events";
+import { Clock, CalendarPlus, X, Expand, Check, Megaphone, Phone } from "lucide-react";
+import { getActiveAnnouncements, getUpcomingEvents } from "@/data/events";
 import { Badge, ReadMore, type BadgeTone } from "@/components/ui";
 import { formatEventDate } from "@/lib/event-dates";
 import { downloadEventIcs } from "@/lib/calendar";
@@ -152,6 +152,7 @@ export function EventsSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [lightboxEvent, setLightboxEvent] = useState<Event | null>(null);
   const upcomingEvents = getUpcomingEvents();
+  const announcements = getActiveAnnouncements();
 
   useEffect(() => {
     if (!lightboxEvent) return;
@@ -184,6 +185,63 @@ export function EventsSection() {
       </motion.div>
 
       <div className="max-w-4xl mx-auto px-4 md:px-8 space-y-3 md:space-y-6">
+        {/* Announcements sit above the list: a booking notice is not an event a
+            visitor attends, and it has to read before they scroll past. */}
+        {announcements.map((announcement) => (
+          <div
+            key={announcement.id}
+            className="rounded-2xl bg-secondary-container text-on-secondary-container p-4 md:p-6 shadow-sm"
+          >
+            <div className="flex items-start gap-3 md:gap-4">
+              <span className="shrink-0 rounded-full bg-on-secondary-container/10 p-2.5">
+                <Megaphone
+                  className="w-5 h-5 md:w-6 md:h-6"
+                  aria-hidden="true"
+                />
+              </span>
+
+              <div className="min-w-0">
+                <p className="text-xs font-bold uppercase tracking-wider opacity-80">
+                  {announcement.dates}
+                  {announcement.price ? `, ${announcement.price}` : ""}
+                </p>
+                <h3 className="font-headline text-lg md:text-xl font-bold mt-1">
+                  {announcement.title}
+                </h3>
+                <p className="text-sm md:text-base mt-1">
+                  {announcement.body}
+                </p>
+
+                <ul className="mt-3 flex flex-wrap gap-2">
+                  {announcement.contacts.map((contact) => (
+                    <li key={contact.phone}>
+                      <a
+                        href={`tel:${contact.phone}`}
+                        className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-surface-container-lowest px-4 text-sm font-bold text-on-surface"
+                      >
+                        <Phone className="w-4 h-4" aria-hidden="true" />
+                        {contact.name}
+                        <span className="font-normal text-on-surface-variant">
+                          {contact.phone.replace(
+                            /^\+234(\d{3})(\d{3})(\d{4})$/,
+                            "0$1 $2 $3"
+                          )}
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+
+                {announcement.note && (
+                  <p className="text-xs mt-2 opacity-80">
+                    {announcement.note}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+
         {upcomingEvents.length > 0 ? (
           upcomingEvents.map((event) => (
             <EventItem key={event.id} event={event} onImageClick={setLightboxEvent} />

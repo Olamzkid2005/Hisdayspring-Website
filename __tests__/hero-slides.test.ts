@@ -93,9 +93,27 @@ describe("buildHeroSlides", () => {
   });
 
   it("drops a featured handbill after its final day", () => {
-    expect(getFeaturedHeroSlides("2026-10-31")).toHaveLength(1);
-    expect(getFeaturedHeroSlides("2026-11-01")).toHaveLength(1);
-    expect(getFeaturedHeroSlides("2026-11-02")).toHaveLength(0);
+    // Asserted per handbill, not by count: several can be live at once, and a
+    // count would pass for the wrong reason once one window overlaps another.
+    const thanksgiving = (day: string) =>
+      getFeaturedHeroSlides(day).some((slide) =>
+        slide.image.includes("november-mega-thanksgiving")
+      );
+
+    expect(thanksgiving("2026-10-31")).toBe(true);
+    expect(thanksgiving("2026-11-01")).toBe(true);
+    expect(thanksgiving("2026-11-02")).toBe(false);
+  });
+
+  it("keeps the convention handbill up for the whole convention", () => {
+    const convention = (day: string) =>
+      getFeaturedHeroSlides(day).some((slide) =>
+        slide.image.includes("Convention Hero")
+      );
+
+    expect(convention("2026-11-21")).toBe(true);
+    expect(convention("2026-12-20")).toBe(true);
+    expect(convention("2026-12-21")).toBe(false);
   });
 
   it("still spools undated gallery photos when nothing carries a date", () => {

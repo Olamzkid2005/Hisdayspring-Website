@@ -113,14 +113,36 @@ function pickGallerySlides(
   return pickNewest(available, count);
 }
 
+/**
+ * "2026-11-15" -> "15 November 2026". Formatted by hand from the stored date
+ * rather than through Intl, so the output does not shift with the runtime's
+ * locale or timezone.
+ */
+function spokenDate(iso: string): string {
+  const [year, month, day] = iso.split("-").map(Number);
+  const months = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
+  if (!year || !month || !day || !months[month - 1]) return "";
+  return `${day} ${months[month - 1]} ${year}`;
+}
+
 function heroSlideFrom(photo: GalleryPhoto): HeroSlide {
+  // Gallery captions are camera filenames ("U3A7207", "DSC 0358"); the event
+  // name is what the photo actually shows to a screen reader. Recent batches
+  // all share one event name, so the date is what keeps eleven slides from
+  // announcing themselves identically.
+  const date = photo.date ? spokenDate(photo.date) : "";
+  const subject = photo.eventName || "Hisdayspring Ministries";
   return {
     image: photo.imageUrl,
-    // Gallery captions are camera filenames ("U3A7207", "DSC 0358"); the event
-    // name is what the photo actually shows to a screen reader.
-    alt: photo.eventName
-      ? `${photo.eventName} at Hisdayspring Ministries`
-      : "Hisdayspring Ministries",
+    alt:
+      photo.eventName && date
+        ? `${photo.eventName} on ${date} at Hisdayspring Ministries`
+        : photo.eventName
+          ? `${photo.eventName} at Hisdayspring Ministries`
+          : "Hisdayspring Ministries",
   };
 }
 

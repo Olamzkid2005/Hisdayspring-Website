@@ -1,6 +1,6 @@
 /**
  * Books and resources data
- * Matched to actual book cover images in /images/books/ (Cloudinary)
+ * Cover art is served from Cloudinary, same as every other image here.
  */
 
 import type { Book } from "@/types";

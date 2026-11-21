@@ -12,6 +12,7 @@ export { SocialSection } from "./SocialSection";
 export { LiveStreamSection } from "./LiveStreamSection";
 export { PrayerSection } from "./PrayerSection";
 export { TestimonialsSection } from "./TestimonialsSection";
+export { TestimonySection } from "./TestimonySection";
 export { RadioSection } from "./RadioSection";
 export { BooksSection } from "./BooksSection";
 export { WorkforceSection } from "./WorkforceSection";

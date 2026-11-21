@@ -14,6 +14,18 @@ const nextConfig: NextConfig = {
     // /public/images files when NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME is unset.
     loaderFile: "./lib/cdn/cloudinary-loader.ts",
   },
+  async redirects() {
+    return [
+      // Testimonies and the testimony form are one page. /testify was printed
+      // under an early QR draft, so it must keep resolving, and the obvious
+      // near-misses should land on the wall instead of a 404.
+      { source: "/testify", destination: "/testimonials", permanent: true },
+      { source: "/testimonies", destination: "/testimonials", permanent: true },
+      { source: "/testimony", destination: "/testimonials", permanent: true },
+      { source: "/share-testimony", destination: "/testimonials", permanent: true },
+      { source: "/submit-testimony", destination: "/testimonials", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

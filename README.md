@@ -24,7 +24,7 @@ donations/books are paid through Bachs.
 | `/live` | YouTube live status and the latest service |
 | `/radio` | Hisdayspring Radio stream (Zeno.fm) |
 | `/prayer` | Prayer request form that opens WhatsApp |
-| `/testimonials` | Church testimonies |
+| `/testimonials` | Share a testimony (form first), then the published wall — the church QR code target. `/testify` and other near-misses 301 here |
 | `/ministries/[slug]` | Ministry detail pages (YOFIC, Discovery, Jewels, BOMS, …) |
 | `/welfare`, `/crusade` | Dedicated ministry pages; their `/ministries/...` copies canonicalise here |
 | `/privacy`, `/terms` | Legal pages |
@@ -196,7 +196,8 @@ All copy is in `data/`; no component edits needed for routine updates.
 | Pastors and ministers | `data/workforce.ts` |
 | Social links | `data/social.ts` |
 | Gallery | `data/gallery.ts` (generated — see `scripts/generate-gallery.mjs`) |
-| Testimonials | `data/testimonials.ts` |
+| Testimonials (published) | `data/testimonials.ts` |
+| Testimony form line, branches, length limits | `data/testimony.ts` |
 | Privacy / terms | `data/privacy.ts`, `data/terms.ts` |
 | About / vision | `data/about.ts` |
 

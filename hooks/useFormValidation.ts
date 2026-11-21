@@ -139,8 +139,20 @@ export function useFormValidation<T extends FieldConfig>(
     []
   );
 
+  /**
+   * Programmatic setter for controls that do not emit a change event the hook
+   * can read (`<select>` and radio groups call this).
+   *
+   * It clears that field's error for the same reason `handleChange` does:
+   * answering a field is the moment the error stops being true. Without this,
+   * picking a radio left "please choose…" on screen until the next submit.
+   */
   const setFieldValue = useCallback((field: keyof T, value: string) => {
     setValues((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => {
+      const name = field as string;
+      return prev[name] ? { ...prev, [name]: undefined } : prev;
+    });
   }, []);
 
   const handleSubmit = useCallback(

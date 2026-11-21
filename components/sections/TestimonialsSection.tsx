@@ -66,7 +66,11 @@ export function TestimonialsSection() {
   const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
-    <section id="testimonials" ref={ref} className="bg-surface-container-high py-16 md:py-24">
+    <section
+      id="testimonials"
+      ref={ref}
+      className="bg-surface-container-low py-16 md:py-24 scroll-mt-24"
+    >
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -74,9 +78,9 @@ export function TestimonialsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h1 className="font-headline text-3xl md:text-5xl font-bold text-on-surface mb-4">
+          <h2 className="font-headline text-3xl md:text-5xl font-bold text-on-surface mb-4">
             Divine Encounters
-          </h1>
+          </h2>
           <p className="text-on-surface-variant max-w-2xl mx-auto text-base md:text-lg leading-relaxed">
             Hear from members of our community about how God has transformed their lives
             through His Power and Grace.

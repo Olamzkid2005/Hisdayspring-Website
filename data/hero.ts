@@ -13,6 +13,18 @@ export interface HeroSlide {
   image: string;
   alt: string;
   caption?: string;
+  /**
+   * How the slide fills the hero. Photographs are cropped to fill (`cover`);
+   * a handbill carries dates and a venue in its margins, so cropping it can
+   * throw the event away. Defaults to `cover`.
+   */
+  fit?: "cover" | "contain";
+  /**
+   * Portrait artwork for phones. A 2:1 handbill contained in a phone hero is a
+   * 195px strip, and cropped to fill it loses three quarters of its width, so
+   * handbills ship a tall version instead of one image stretched to fit both.
+   */
+  mobileImage?: string;
 }
 
 interface FeaturedHeroSlide extends HeroSlide {
@@ -46,6 +58,8 @@ export const FEATURED_HERO_SLIDES: FeaturedHeroSlide[] = [
     image: "/images/events/light-convention-2026-hero.jpeg",
     alt: "Light Convention 2026 flyer, Exceeding Multiplication, December 17 to 20",
     caption: "Dec 17-20 · 9 AM & 5:30 PM",
+    fit: "contain",
+    mobileImage: "/images/events/light-convention-2026.jpeg",
     until: "2026-12-20",
   },
 ];
@@ -58,6 +72,10 @@ export function getFeaturedHeroSlides(
       image: slide.image,
       alt: slide.alt,
       caption: slide.caption,
+      // Copied explicitly: every field left out here is dropped on the way to
+      // the carousel, which is how the handbill first arrived without its fit.
+      fit: slide.fit,
+      mobileImage: slide.mobileImage,
     })
   );
 }

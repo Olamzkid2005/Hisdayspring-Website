@@ -27,6 +27,7 @@ export function HeroCarousel({
   onPainted,
 }: HeroCarouselProps) {
   const current = slides[currentIndex];
+  const isHandbill = current?.fit === "contain";
 
   return (
     <div className="absolute inset-0 bg-surface-container-low">
@@ -53,20 +54,50 @@ export function HeroCarousel({
           transition={{ duration: 0.8, ease: "easeInOut" }}
           className="absolute inset-0"
         >
+          {/* A handbill cannot be cropped to fill: on a phone, `cover` kept
+              only 23% of its width and cut the venue and times off, while
+              `contain` on one wide image left a 195px strip. So the handbill
+              ships a portrait version too, shown whole on its own dark stage. */}
+          {isHandbill && (
+            <div className="absolute inset-0 bg-on-surface" aria-hidden />
+          )}
+          {isHandbill && current.mobileImage && (
+            <Image
+              src={current.mobileImage}
+              alt={current.alt}
+              fill
+              sizes="100vw"
+              className="w-full h-full object-contain md:hidden"
+            />
+          )}
           <Image
             src={current.image}
-            alt={current.alt}
+            alt={isHandbill && current.mobileImage ? "" : current.alt}
+            aria-hidden={isHandbill && Boolean(current.mobileImage) ? true : undefined}
             fill
             sizes="100vw"
             // The opening slide is the LCP image, so it must not be lazy.
             priority={currentIndex === 0}
             onLoad={() => onPainted(currentIndex)}
-            className="w-full h-full object-cover object-center"
+            className={
+              isHandbill
+                ? `w-full h-full object-contain${current.mobileImage ? " hidden md:block" : ""}`
+                : "w-full h-full object-cover object-center"
+            }
           />
         </motion.div>
       </AnimatePresence>
 
-      <div className="absolute inset-0 bg-gradient-to-b from-on-surface/40 to-on-surface/80" />
+      {/* Photos get a heavy wash so white text sits on them cleanly. A handbill
+          is already dark artwork with its own type, so the wash is lighter at
+          the top and only firms up where the heading lands. */}
+      <div
+        className={
+          isHandbill
+            ? "absolute inset-0 bg-gradient-to-b from-on-surface/10 via-on-surface/35 to-on-surface/80"
+            : "absolute inset-0 bg-gradient-to-b from-on-surface/40 to-on-surface/80"
+        }
+      />
       <div
         className="absolute inset-0"
         style={{

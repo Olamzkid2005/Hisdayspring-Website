@@ -131,3 +131,16 @@ describe("buildHeroSlides", () => {
     );
   });
 });
+
+describe("handbill slides", () => {
+  it("carries every field through to the carousel, including fit", () => {
+    const handbill = getFeaturedHeroSlides("2026-11-21").find((slide) =>
+      slide.image.includes("light-convention-2026-hero")
+    );
+
+    expect(handbill).toBeDefined();
+    // Dropping a field in this mapping is invisible until it fails in the
+    // browser, so the fit is asserted where it is handed over.
+    expect(handbill?.fit).toBe("contain");
+  });
+});

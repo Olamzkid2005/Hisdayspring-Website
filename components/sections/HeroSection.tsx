@@ -41,10 +41,16 @@ export function HeroSection() {
     }
   };
 
+  // A handbill fills the frame with its own headline, so the site heading drops
+  // to the lower third where the overlay is darkest, leaving the artwork clear.
+  const showingHandbill = heroSlides[currentImage]?.fit === "contain";
+
   return (
     <section
       id="home"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      className={`relative min-h-screen flex justify-center overflow-hidden ${
+        showingHandbill ? "items-end pb-14 md:pb-16" : "items-center"
+      }`}
     >
       <HeroCarousel
         slides={heroSlides}

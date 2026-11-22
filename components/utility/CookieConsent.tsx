@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Cookie } from "lucide-react";
+import { Cookie } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui";
 import type { CookieConsent } from "@/types";
@@ -89,80 +89,60 @@ export function CookieConsent() {
       {showBanner && (
         <motion.div
           ref={bannerRef}
-          initial={{ y: 100, opacity: 0 }}
+          initial={{ y: 80, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          exit={{ y: 100, opacity: 0 }}
+          exit={{ y: 80, opacity: 0 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
-          className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
+          role="region"
+          aria-labelledby="cookie-consent-title"
+          className="fixed inset-x-0 bottom-0 z-50 px-3 pb-3 md:px-6 md:pb-5"
         >
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden">
-            {/* Tighter padding on phones: the card used to cover ~half a 844px screen. */}
-            <div className="p-4 md:p-8">
-              <div className="flex items-start gap-3 md:gap-4">
-                <div className="hidden sm:flex flex-shrink-0 w-12 h-12 rounded-full bg-secondary-container items-center justify-center">
-                  <Cookie className="w-6 h-6 text-secondary" />
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-serif font-bold text-base md:text-lg text-on-surface">
-                      We value your privacy
-                    </h3>
-                    <button
-                      onClick={handleDecline}
-                      className="p-1 text-on-surface-variant hover:text-on-surface transition-colors rounded-lg hover:bg-surface-container-low"
-                      aria-label="Close cookie banner"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
-                  </div>
-                  {/* Phones get a single line; the full explanation returns from md
-                      up. The banner used to cover ~half an 844px screen. */}
-                  <p className="md:hidden text-on-surface-variant text-sm leading-relaxed mb-3">
-                    We use cookies to improve your experience.{" "}
-                    <Link href="/privacy" className="text-secondary hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </p>
-                  <p className="hidden md:block text-on-surface-variant text-sm leading-relaxed mb-3 md:mb-4">
-                    We use cookies to enhance your browsing experience, serve personalized
-                    content, and analyze our traffic. By clicking &quot;Accept&quot;, you consent
-                    to our use of cookies. You can manage your preferences or learn more
-                    about our cookie use in our{" "}
-                    <Link
-                      href="/privacy"
-                      className="text-secondary hover:underline"
-                    >
-                      Privacy Policy
-                    </Link>
-                    .
-                  </p>
-                  {/* One row with short labels on phones, stacked full labels from
-                      md up. aria-label keeps the accessible name stable and still
-                      contains the visible word (WCAG 2.5.3). */}
-                  <div className="flex flex-row sm:gap-3 gap-2">
-                    <Button
-                      variant="primary"
-                      size="md"
-                      onClick={handleAccept}
-                      aria-label="Accept all cookies"
-                      className="flex-1"
-                    >
-                      <span className="md:hidden">Accept</span>
-                      <span className="hidden md:inline">Accept All Cookies</span>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="md"
-                      onClick={handleDecline}
-                      aria-label="Decline non-essential cookies"
-                      className="flex-1"
-                    >
-                      <span className="md:hidden">Decline</span>
-                      <span className="hidden md:inline">Decline Non-Essential</span>
-                    </Button>
-                  </div>
-                </div>
-              </div>
+          {/* One bar: a short line of text and two buttons, stacked on phones
+              and in a single row from sm up. The previous panel was a centred
+              card half a phone screen tall, which buried whatever was under it. */}
+          <div className="mx-auto flex max-w-3xl flex-col gap-2 rounded-xl border border-black/5 bg-white px-3 py-2.5 shadow-lg sm:flex-row sm:items-center sm:gap-4 sm:px-4 sm:py-3">
+            <h3 id="cookie-consent-title" className="sr-only">
+              We value your privacy
+            </h3>
+            <Cookie
+              className="hidden h-5 w-5 shrink-0 text-secondary sm:block"
+              aria-hidden
+            />
+            <p className="min-w-0 flex-1 text-xs leading-snug text-on-surface-variant sm:text-sm">
+              {/* Beside two buttons, the long sentence wrapped to three lines on
+                  a 390px phone. Stacked above them, the short one stays on one. */}
+              <span className="sm:hidden">We use cookies. </span>
+              <span className="hidden sm:inline">
+                We use cookies to improve your experience.{" "}
+              </span>
+              <Link
+                href="/privacy"
+                className="font-medium text-secondary hover:underline"
+              >
+                Privacy Policy
+              </Link>
+            </p>
+            {/* Short labels at every width: the accessible names below carry
+                the full intent, and still contain the visible word (WCAG 2.5.3). */}
+            <div className="flex shrink-0 items-center gap-2">
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleAccept}
+                aria-label="Accept all cookies"
+                className="flex-1 sm:flex-none"
+              >
+                Accept
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDecline}
+                aria-label="Decline non-essential cookies"
+                className="flex-1 sm:flex-none"
+              >
+                Decline
+              </Button>
             </div>
           </div>
         </motion.div>

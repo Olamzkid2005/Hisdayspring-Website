@@ -5,12 +5,19 @@ jest.mock("@/components/ui", () => ({
   Button: ({
     children,
     onClick,
+    variant,
+    size,
+    ...rest
   }: {
     children: React.ReactNode;
     onClick?: () => void;
-  }) => {
+    variant?: string;
+    size?: string;
+  } & Record<string, unknown>) => {
     const { createElement } = require("react");
-    return createElement("button", { onClick }, children);
+    // aria-label is forwarded, the way the real Button does, because that is
+    // what gives the short visual label its full accessible name.
+    return createElement("button", { onClick, ...rest }, children);
   },
 }));
 

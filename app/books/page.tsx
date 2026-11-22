@@ -8,8 +8,8 @@ import { PDF_DELIVERY_ENABLED } from "@/data/books";
 export const metadata: Metadata = {
   title: "Books",
   description: PDF_DELIVERY_ENABLED
-    ? "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online, pick up in church or download PDF copies."
-    : "Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe Olamijulo — order online and pick up in church.",
+    ? "Books and devotionals by Pastor Blessing and Pastor Adebamigbe Olamijulo — order online, pick up in church or download PDF copies."
+    : "Books and devotionals by Pastor Blessing and Pastor Adebamigbe Olamijulo — order online and pick up in church.",
   alternates: { canonical: "/books" },
 };
 
@@ -41,7 +41,7 @@ export default function BooksPage() {
             Books &amp; Resources
           </h1>
           <p className="text-white/80 text-base md:text-lg mt-4 max-w-2xl leading-relaxed">
-            Books and devotionals by Pastor Blessing and Pastor (Mrs) Adebamigbe
+            Books and devotionals by Pastor Blessing and Pastor Adebamigbe
             Olamijulo — order online and pick up in church.
             {PDF_DELIVERY_ENABLED && " PDF copies are available for instant download."}
           </p>

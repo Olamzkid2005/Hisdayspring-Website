@@ -83,9 +83,9 @@ export const ministries: Ministry[] = [
     id: "jewels",
     name: "The Jewels Women's Program",
     description:
-      "Led by Pastor (Mrs) Adebamigbe Olamijulo, this monthly breakfast meeting impacts young ladies ages 18–45, helping women fulfill their destinies and maximize their potentials.",
+      "Led by Pastor Adebamigbe Olamijulo, this monthly breakfast meeting impacts young ladies ages 18–45, helping women fulfill their destinies and maximize their potentials.",
     longDescription:
-      "The Jewels Women's Program, also known as The Jewels & Winning Women Breakfast Meeting, is led by Pastor (Mrs) Adebamigbe Olamijulo. It is a monthly gathering that impacts young ladies aged 18–45 — both single and married — helping them fulfill their destinies and maximize their potentials. Every 4th Saturday of the month, women gather over breakfast for a powerful time of the Word, prayer, mentorship, and sisterhood, walking away strengthened and equipped to win in every area of life.",
+      "The Jewels Women's Program, also known as The Jewels & Winning Women Breakfast Meeting, is led by Pastor Adebamigbe Olamijulo. It is a monthly gathering that impacts young ladies aged 18–45 — both single and married — helping them fulfill their destinies and maximize their potentials. Every 4th Saturday of the month, women gather over breakfast for a powerful time of the Word, prayer, mentorship, and sisterhood, walking away strengthened and equipped to win in every area of life.",
     highlights: [
       "Monthly breakfast meetings — every 4th Saturday, 8:00 AM",
       "Destiny-focused teachings and practical mentoring",

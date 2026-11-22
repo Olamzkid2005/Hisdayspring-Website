@@ -16,7 +16,7 @@ const leadMessage = {
 };
 
 const residentMessage = {
-  name: "Pastor (Mrs) Adebamigbe Olamijulo",
+  name: "Pastor Adebamigbe Olamijulo",
   title: "Resident Pastor",
   greeting:
     "It is with great joy that I welcome you to Hisdayspring — a place where you will find love, warmth, and a community that truly cares. From the moment you walk through our doors, you are family. We believe that every person matters to God and to us.",
@@ -74,7 +74,7 @@ export function PastorSection() {
                 // ?v= is the Cloudinary asset version — bump it whenever this
                 // photo is replaced in place, else browsers serve the old file.
                 src="/images/pastors/Lead-Pastors-Olamijulo.jpg?v=1790436687"
-                alt="Pastor Blessing Olamijulo, General Overseer and Lead Pastor, and Pastor (Mrs) Adebamigbe Olamijulo, Resident Pastor"
+                alt="Pastor Blessing Olamijulo, General Overseer and Lead Pastor, and Pastor Adebamigbe Olamijulo, Resident Pastor"
                 fill
                 // The desktop (xl+) frame is square, so the image is scaled to
                 // its height and the sides are cropped away: it needs to arrive

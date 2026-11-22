@@ -1,4 +1,4 @@
-import { buildHeroSlides } from "@/lib/hero-slides";
+import { buildHeroSlides, buildHomeHeroSlides, nextHeroIndex } from "@/lib/hero-slides";
 import { FIRST_HERO_SLIDE, HERO_SLIDE_COUNT, getFeaturedHeroSlides } from "@/data/hero";
 import { galleryPhotos } from "@/data/gallery";
 import type { GalleryPhoto } from "@/types";
@@ -142,5 +142,62 @@ describe("handbill slides", () => {
     // Dropping a field in this mapping is invisible until it fails in the
     // browser, so the fit is asserted where it is handed over.
     expect(handbill?.fit).toBe("contain");
+  });
+});
+
+describe("nextHeroIndex", () => {
+  it("walks every slide in order before repeating", () => {
+    const length = HERO_SLIDE_COUNT;
+    const seen: number[] = [0];
+    let index = 0;
+    for (let step = 0; step < length - 1; step++) {
+      index = nextHeroIndex(index, length);
+      seen.push(index);
+    }
+
+    // Every slot shown exactly once, in order, with no jump and no repeat.
+    expect(seen).toEqual([...Array(length).keys()]);
+  });
+
+  it("wraps back to the first slide", () => {
+    expect(nextHeroIndex(HERO_SLIDE_COUNT - 1, HERO_SLIDE_COUNT)).toBe(0);
+  });
+
+  it("never stalls on the slide already showing", () => {
+    for (let current = 0; current < HERO_SLIDE_COUNT; current++) {
+      expect(nextHeroIndex(current, HERO_SLIDE_COUNT)).not.toBe(current);
+    }
+  });
+
+  it("is a no-op when there is nothing to advance to", () => {
+    expect(nextHeroIndex(0, 1)).toBe(0);
+    expect(nextHeroIndex(0, 0)).toBe(0);
+  });
+});
+
+describe("the home carousel", () => {
+  const slides = buildHomeHeroSlides("2026-11-21");
+
+  it("shows a different photo in every slot", () => {
+    const images = slides.map((slide) => slide.image);
+
+    // Duplicated slots read as a hero that only has two or three pictures.
+    expect(new Set(images).size).toBe(images.length);
+  });
+
+  it("reaches the pinned convention handbill as it advances", () => {
+    const handbill = slides.findIndex((slide) =>
+      slide.image.includes("light-convention-2026-hero")
+    );
+    expect(handbill).toBeGreaterThan(0);
+
+    // Sequential advance has to arrive at it, not jump past it.
+    let index = 0;
+    const visited = new Set<number>();
+    for (let step = 0; step < slides.length; step++) {
+      visited.add(index);
+      index = nextHeroIndex(index, slides.length);
+    }
+    expect(visited.has(handbill)).toBe(true);
   });
 });

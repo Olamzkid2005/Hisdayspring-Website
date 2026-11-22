@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, CalendarDays, ChevronDown, PlayCircle } from "lucide-react";
 import { Badge } from "@/components/ui";
-import { buildHomeHeroSlides } from "@/lib/hero-slides";
+import { buildHomeHeroSlides, nextHeroIndex } from "@/lib/hero-slides";
 import { HeroCarousel } from "./hero/HeroCarousel";
 
 export function HeroSection() {
@@ -16,21 +16,16 @@ export function HeroSection() {
   // container and the hero looks empty for however long the image takes.
   const [paintedImage, setPaintedImage] = useState(0);
 
-  // Auto-advance every 8s to a random slide that is not the one already up.
-  // A plain uniform pick landed on the current index about once every twelve
-  // ticks, and because the picture is keyed on the index nothing re-rendered —
-  // so the carousel silently stalled for 8 seconds. Offsetting by 1..n-1 over
-  // the remaining slides keeps it unpredictable but always a change.
+  // Advance to the next slide every 8s. The timer is keyed on the current
+  // index, so a manual tap also gets a full 8 seconds rather than being
+  // replaced a moment later by a tick that was already in flight.
   useEffect(() => {
     if (heroSlides.length < 2) return;
-    const interval = setInterval(() => {
-      setCurrentImage((current) => {
-        const offset = 1 + Math.floor(Math.random() * (heroSlides.length - 1));
-        return (current + offset) % heroSlides.length;
-      });
+    const timer = setTimeout(() => {
+      setCurrentImage((current) => nextHeroIndex(current, heroSlides.length));
     }, 8000);
-    return () => clearInterval(interval);
-  }, [heroSlides.length]);
+    return () => clearTimeout(timer);
+  }, [currentImage, heroSlides.length]);
 
   const caption = heroSlides[currentImage]?.caption;
 

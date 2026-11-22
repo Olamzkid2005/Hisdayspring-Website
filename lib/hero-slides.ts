@@ -166,6 +166,21 @@ export function buildHeroSlides(
   ];
 }
 
+/**
+ * The next slide for the auto-advance: always the one after the current, so
+ * every slide, and every pinned handbill in it, comes up in turn.
+ *
+ * This was a random offset for a while, to dodge a stall where a uniform pick
+ * landed on the current index and nothing re-rendered. The randomness cost far
+ * more than it bought: with twelve slides the order jumped 0, 11, 8, 2, most
+ * photos were never shown at all and the featured handbill at index 1 was
+ * skipped roughly eleven times out of twelve. Advancing by one cannot stall.
+ */
+export function nextHeroIndex(current: number, length: number): number {
+  if (length < 2) return 0;
+  return (current + 1) % length;
+}
+
 /** The carousel the homepage renders, including any date-windowed handbills. */
 export function buildHomeHeroSlides(today: string = lagosToday()): HeroSlide[] {
   return buildHeroSlides(

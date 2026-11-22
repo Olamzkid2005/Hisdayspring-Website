@@ -12,6 +12,9 @@ import type { YouTubeVideo, LiveStreamStatus } from "@/types";
 /** Matches the route's fifteen-minute cache so both refresh on one rhythm. */
 const SERMON_REFRESH_MS = 15 * 60 * 1000;
 
+/** Ignore a return-to-tab refetch this soon after the last one. */
+const MIN_REFRESH_GAP_MS = 60 * 1000;
+
 function formatDuration(duration: string): string {
   const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!match) return duration;
@@ -35,6 +38,18 @@ function formatDate(dateString: string): string {
     year: "numeric",
     timeZone: LAGOS_TIME_ZONE,
   });
+}
+
+/**
+ * Channel titles read like "KINGDOM HARVEST | SUNDAY (2ND) SERVICE |
+ * 22/11/2026." The trailing separator is left behind when the last part is
+ * dropped, and in a two-line clamp it shows up as a dangling "|" on its own.
+ */
+function cleanSermonTitle(title: string): string {
+  return title
+    .replace(/\s+/g, " ")
+    .replace(/\s*[|·•\-–—:]\s*$/, "")
+    .trim();
 }
 
 function formatViewCount(viewCount: string): string {
@@ -62,8 +77,10 @@ export function SermonsSection() {
   // when someone comes back to the tab.
   useEffect(() => {
     let cancelled = false;
+    let lastLoadedAt = 0;
 
     const loadSermons = async () => {
+      lastLoadedAt = Date.now();
       try {
         const videos = await fetchSermons(6);
         if (!cancelled) setSermons(videos);
@@ -75,7 +92,11 @@ export function SermonsSection() {
     };
 
     const refreshWhenVisible = () => {
-      if (document.visibilityState === "visible") loadSermons();
+      // Coming back to the tab should not always mean a request: flicking
+      // between tabs would otherwise fire one per switch.
+      if (document.visibilityState !== "visible") return;
+      if (Date.now() - lastLoadedAt < MIN_REFRESH_GAP_MS) return;
+      loadSermons();
     };
 
     loadSermons();
@@ -196,7 +217,7 @@ export function SermonsSection() {
                 className="md:col-span-2"
               >
                 <div
-                  className="relative h-[200px] md:h-[450px] rounded-xl overflow-hidden group cursor-pointer bg-surface-container-highest"
+                  className="relative aspect-video w-full overflow-hidden rounded-xl group cursor-pointer bg-surface-container-highest md:aspect-[2/1]"
                   onClick={() => setSelectedVideo(featured)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
@@ -206,7 +227,7 @@ export function SermonsSection() {
                   }}
                   role="button"
                   tabIndex={0}
-                  aria-label={`Play sermon: ${featured.title}`}
+                  aria-label={`Play sermon: ${cleanSermonTitle(featured.title)}`}
                 >
                   <img
                     src={featured.thumbnailUrl}
@@ -218,18 +239,18 @@ export function SermonsSection() {
                       event.currentTarget.style.visibility = "hidden";
                     }}
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8">
-                    <span className="inline-block px-3 py-1 bg-primary text-on-primary rounded-full text-xs font-semibold mb-3">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent" />
+                  <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6">
+                    <span className="inline-block px-2.5 py-1 bg-primary text-on-primary rounded-full text-[11px] font-semibold uppercase tracking-wide mb-2">
                       Latest Message
                     </span>
-                    <h3 className="font-headline text-xl md:text-3xl text-white mb-2 line-clamp-2">
-                      {featured.title}
+                    <h3 className="font-headline text-base md:text-xl leading-snug text-white mb-1.5 line-clamp-2">
+                      {cleanSermonTitle(featured.title)}
                     </h3>
-                    <p className="text-white/70 text-sm">
+                    <p className="text-white/85 text-xs md:text-sm">
                       {formatDate(featured.publishedAt)}
                       {featured.viewCount && (
-                        <span className="ml-2">· {formatViewCount(featured.viewCount)} views</span>
+                        <span>, {formatViewCount(featured.viewCount)} views</span>
                       )}
                     </p>
                   </div>
@@ -274,7 +295,7 @@ export function SermonsSection() {
                   </div>
                   <div className="min-w-0">
                     <h4 className="font-headline text-sm text-on-surface font-semibold line-clamp-2 mb-1 transition-colors group-hover:text-primary">
-                      {video.title}
+                      {cleanSermonTitle(video.title)}
                     </h4>
                     <p className="text-on-surface-variant text-xs">
                       {formatDate(video.publishedAt)}
@@ -290,7 +311,7 @@ export function SermonsSection() {
       <Modal
         isOpen={!!selectedVideo}
         onClose={() => setSelectedVideo(null)}
-        title={selectedVideo?.title || ""}
+        title={selectedVideo ? cleanSermonTitle(selectedVideo.title) : ""}
         size="xl"
       >
         {selectedVideo && (

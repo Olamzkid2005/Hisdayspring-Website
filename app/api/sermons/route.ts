@@ -17,7 +17,7 @@ import {
 // the shared constant. The test asserts the two stay equal.
 export const revalidate = 900;
 
-export const MAX_RESULTS = 6;
+const MAX_RESULTS = 6;
 
 export async function GET() {
   try {
@@ -25,9 +25,12 @@ export async function GET() {
     return NextResponse.json({ videos, source: "feed" });
   } catch (error) {
     console.error("YouTube feed lookup failed", error);
+    // A failure must not be cached: Next would otherwise let the edge hold this
+    // 502 for the full revalidate window and hide a feed that recovered a
+    // minute later.
     return NextResponse.json(
       { videos: [], message: "Could not read the YouTube channel feed" },
-      { status: 502 }
+      { status: 502, headers: { "Cache-Control": "no-store" } }
     );
   }
 }

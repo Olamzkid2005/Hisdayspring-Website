@@ -38,6 +38,7 @@ interface YouTubeVideoResponse {
 }
 
 interface YouTubeVideoItem {
+  id: string;
   contentDetails: {
     duration: string;
   };
@@ -49,83 +50,92 @@ interface YouTubeVideoItem {
 /**
  * Fetch recent sermons from YouTube channel.
  *
- * The channel feed comes first: it needs no key, so the list stays current on a
- * deployment that was never given one. The Data API is only a richer fallback
- * (it adds durations) for when a key is configured, and the hardcoded list is
- * the last resort if both fail.
+ * The Data API is used when a key is configured, because it is the only source
+ * that carries a duration. Without a key the channel feed is used, which needs
+ * no key and is why the list keeps itself current on a deployment that was
+ * never given one. The bundled list is the last resort if both fail.
  */
 export async function fetchSermons(
   maxResults: number = 6
 ): Promise<YouTubeVideo[]> {
-  const fromFeed = await fetchSermonsFromFeed(maxResults);
-  if (fromFeed.length > 0) return fromFeed;
-
   const apiKey = config.youtubeApiKeyPublic;
 
   if (apiKey) {
-    try {
-      // First, search for videos in the channel
-      const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=${YOUTUBE_CHANNEL_ID}&part=snippet&order=date&type=video&maxResults=${maxResults}`;
-
-      const response = await fetchWithRetry(searchUrl, 3);
-
-      if (!response.ok) {
-        throw new Error(`YouTube API error: ${response.status}`);
-      }
-
-      const searchData: YouTubeSearchResponse = await response.json();
-
-      if (!searchData.items || searchData.items.length === 0) {
-        return getPlaceholderSermons();
-      }
-
-      // Get video details (duration, view count)
-      const videoIds = searchData.items
-        .map((item) => item.id.videoId)
-        .filter(Boolean)
-        .join(",");
-
-      const videoUrl = `${YOUTUBE_API_BASE}/videos?key=${apiKey}&id=${videoIds}&part=contentDetails,statistics`;
-
-      let videoData: YouTubeVideoResponse = { items: [] };
-      try {
-        const videoResponse = await fetch(videoUrl);
-        if (videoResponse.ok) {
-          videoData = await videoResponse.json();
-        }
-      } catch {
-        // Continue without video details
-      }
-
-      // Map to our type
-      const videos: YouTubeVideo[] = searchData.items.map((item) => {
-        const videoDetails = videoData.items.find(
-          (v) => v.contentDetails
-        );
-
-        return {
-          id: item.id.videoId || "",
-          videoId: item.id.videoId || "",
-          title: item.snippet.title,
-          description: item.snippet.description,
-          thumbnailUrl: item.snippet.thumbnails.high?.url ||
-            item.snippet.thumbnails.medium?.url ||
-            item.snippet.thumbnails.default?.url,
-          publishedAt: item.snippet.publishedAt,
-          duration: videoDetails?.contentDetails.duration,
-          viewCount: videoDetails?.statistics.viewCount,
-        };
-      });
-
-      return videos;
-    } catch (error) {
-      console.error("Error fetching sermons:", error);
-      return getPlaceholderSermons();
-    }
+    const fromApi = await fetchSermonsFromApi(apiKey, maxResults);
+    if (fromApi.length > 0) return fromApi;
   }
 
-  console.warn("YouTube API key not configured. Using placeholder data with real YouTube thumbnails.");
+  const fromFeed = await fetchSermonsFromFeed(maxResults);
+  if (fromFeed.length > 0) return fromFeed;
+
   return getPlaceholderSermons();
+}
+
+/**
+ * The Data API path: two upstream calls, the second for durations and views.
+ * Returns an empty list on any failure so the caller can fall back.
+ */
+async function fetchSermonsFromApi(
+  apiKey: string,
+  maxResults: number
+): Promise<YouTubeVideo[]> {
+  try {
+    const searchUrl = `${YOUTUBE_API_BASE}/search?key=${apiKey}&channelId=${YOUTUBE_CHANNEL_ID}&part=snippet&order=date&type=video&maxResults=${maxResults}`;
+
+    const response = await fetchWithRetry(searchUrl, 2);
+
+    if (!response.ok) {
+      throw new Error(`YouTube API error: ${response.status}`);
+    }
+
+    const searchData: YouTubeSearchResponse = await response.json();
+    if (!searchData.items || searchData.items.length === 0) return [];
+
+    const videoIds = searchData.items
+      .map((item) => item.id.videoId)
+      .filter(Boolean)
+      .join(",");
+
+    const videoUrl = `${YOUTUBE_API_BASE}/videos?key=${apiKey}&id=${videoIds}&part=contentDetails,statistics`;
+
+    let videoData: YouTubeVideoResponse = { items: [] };
+    try {
+      const videoResponse = await fetch(videoUrl);
+      if (videoResponse.ok) {
+        videoData = await videoResponse.json();
+      }
+    } catch {
+      // Continue without video details
+    }
+
+    // Details are matched by id. Taking the first item that had details gave
+    // every sermon the first video's duration and view count.
+    const detailsById = new Map(
+      (videoData.items ?? []).map((item) => [item.id, item])
+    );
+
+    return searchData.items.map((item) => {
+      const videoId = item.id.videoId || "";
+      const details = detailsById.get(videoId);
+
+      return {
+        id: videoId,
+        videoId,
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnailUrl:
+          item.snippet.thumbnails.high?.url ||
+          item.snippet.thumbnails.medium?.url ||
+          item.snippet.thumbnails.default?.url,
+        publishedAt: item.snippet.publishedAt,
+        duration: details?.contentDetails?.duration,
+        viewCount: details?.statistics?.viewCount,
+      };
+    });
+  } catch (error) {
+    console.error("Error fetching sermons from the YouTube API:", error);
+    return [];
+  }
 }
 
 /**
@@ -149,7 +159,11 @@ async function fetchSermonsFromFeed(
 }
 
 /**
- * Retry a fetch with exponential backoff
+ * Retry a fetch with a short backoff.
+ *
+ * Two attempts, 400ms and 800ms apart. The visitor is looking at a skeleton
+ * while this runs, and the feed behind it can answer immediately, so a long
+ * backoff only delays a fallback that was going to work.
  */
 async function fetchWithRetry(
   url: string,
@@ -166,9 +180,8 @@ async function fetchWithRetry(
       throw new Error(`HTTP ${response.status}`);
     } catch (error) {
       lastError = error as Error;
-      // Exponential backoff: 1s, 2s, 4s
       await new Promise((resolve) =>
-        setTimeout(resolve, Math.pow(2, i) * 1000)
+        setTimeout(resolve, 400 * Math.pow(2, i))
       );
     }
   }

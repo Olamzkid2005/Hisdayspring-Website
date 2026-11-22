@@ -8,6 +8,9 @@ import { buildHomeHeroSlides, nextHeroIndex } from "@/lib/hero-slides";
 import { HeroCarousel } from "./hero/HeroCarousel";
 
 export function HeroSection() {
+  // The handbill window is evaluated when this renders. The carousel only ever
+  // renders the slide that is up, so a browser hydrating cached HTML still picks
+  // its own list, and the flyer expires on the date it is meant to.
   const [heroSlides] = useState(() => buildHomeHeroSlides());
   const [currentImage, setCurrentImage] = useState(0);
   // Index of the last slide whose photo actually decoded. It is painted as a

@@ -9,6 +9,9 @@ import { Modal } from "@/components/ui";
 import { LAGOS_TIME_ZONE } from "@/lib/lagos-time";
 import type { YouTubeVideo, LiveStreamStatus } from "@/types";
 
+/** Matches the route's fifteen-minute cache so both refresh on one rhythm. */
+const SERMON_REFRESH_MS = 15 * 60 * 1000;
+
 function formatDuration(duration: string): string {
   const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
   if (!match) return duration;
@@ -53,18 +56,37 @@ export function SermonsSection() {
   const [selectedVideo, setSelectedVideo] = useState<YouTubeVideo | null>(null);
   const [liveStatus, setLiveStatus] = useState<LiveStreamStatus | null>(null);
 
+  // The list has to stay current on its own: a sermon goes up on a Sunday
+  // evening and nobody redeploys the site. The route caches the feed for
+  // fifteen minutes, so this asks again on the same cadence, and immediately
+  // when someone comes back to the tab.
   useEffect(() => {
+    let cancelled = false;
+
     const loadSermons = async () => {
       try {
         const videos = await fetchSermons(6);
-        setSermons(videos);
+        if (!cancelled) setSermons(videos);
       } catch (error) {
         console.error("Error loading sermons:", error);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
+
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") loadSermons();
+    };
+
     loadSermons();
+    const interval = setInterval(loadSermons, SERMON_REFRESH_MS);
+    document.addEventListener("visibilitychange", refreshWhenVisible);
+
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", refreshWhenVisible);
+    };
   }, []);
 
   useEffect(() => {
